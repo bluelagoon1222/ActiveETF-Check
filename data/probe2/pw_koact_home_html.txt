@@ -1,0 +1,869 @@
+<!DOCTYPE html><html lang="ko" id="top-of-site" class="" style="--uw: 12.8px; --uh: 7.2px; --w: 12.8; --h: 7.2; --l-wrap-width: 1280px;"><head>
+	
+
+
+
+<!-- <script>
+	var lang			= "ko";
+	var langUri         = "";
+	var resourceDomain	= "/assets";
+</script> -->
+
+	
+
+  	
+	
+
+
+
+
+
+
+
+<script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-KNSZHRG9M8&amp;cx=c&amp;_slc=1"></script><script src="https://connect.facebook.net/signals/config/1284837725872558?v=2.9.393&amp;r=stable&amp;domain=www.samsungactive.co.kr&amp;hme=118644ce20ff837cfc6c6ee441987e9e11b8b9fb8ec6bc04b15a3c516441ba07&amp;ex_m=115%2C226%2C166%2C26%2C80%2C81%2C158%2C76%2C75%2C11%2C176%2C100%2C20%2C150%2C138%2C45%2C83%2C88%2C146%2C171%2C178%2C31%2C17%2C30%2C18%2C32%2C33%2C34%2C36%2C54%2C159%2C85%2C123%2C22%2C24%2C50%2C46%2C48%2C47%2C93%2C102%2C106%2C121%2C157%2C160%2C52%2C122%2C28%2C25%2C130%2C77%2C42%2C162%2C161%2C163%2C154%2C152%2C29%2C41%2C65%2C120%2C173%2C78%2C21%2C125%2C91%2C74%2C23%2C95%2C96%2C127%2C94%2C148%2C147%2C151%2C107%2C172%2C175%2C40%2C55%2C124%2C53%2C8%2C4%2C5%2C7%2C6%2C3%2C101%2C112%2C179%2C193%2C240%2C82%2C254%2C253%2C252%2C14%2C27%2C39%2C61%2C114%2C67%2C10%2C71%2C108%2C109%2C110%2C116%2C141%2C37%2C35%2C143%2C144%2C145%2C140%2C139%2C167%2C84%2C170%2C168%2C169%2C56%2C66%2C134%2C19%2C174%2C51%2C303%2C304%2C305%2C302%2C318%2C340%2C233%2C222%2C68%2C223%2C221%2C343%2C334%2C58%2C234%2C118%2C142%2C90%2C132%2C60%2C131%2C137%2C136%2C64%2C72%2C70%2C164%2C86%2C87%2C126%2C43%2C38%2C59%2C62%2C111%2C177%2C1%2C135%2C16%2C133%2C12%2C2%2C63%2C103%2C15%2C73%2C69%2C129%2C99%2C98%2C181%2C182%2C104%2C105%2C9%2C113%2C180%2C57%2C155%2C97%2C89%2C79%2C128%2C117%2C49%2C156%2C0%2C92%2C149%2C153%2C165%2C44%2C119%2C13%2C183" async=""></script><script async="" src="https://connect.facebook.net/en_US/fbevents.js"></script><script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=AW-17337210301&amp;cx=c&amp;gtm=4e6921"></script><script async="" src="https://www.googletagmanager.com/gtm.js?id=GTM-5SR695B"></script><script src="/assets/sns/kakao.min.js"></script>
+<script src="/assets/sns/sns.js"></script>
+<script>
+	const sns = new Sns('6e34a757331dff5182c5ac77ed6ececc');
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>삼성액티브자산운용</title>
+<link rel="canonical" href="https://www.samsungactive.co.kr/">
+
+<meta name="keyword" content="삼성액티브자산운용 공식홈페이지, 펀드상품 소개, 펀드 가입 안내.">
+<meta name="description" content="삼성액티브자산운용 공식홈페이지입니다.">
+
+
+<meta property="og:title" content="삼성액티브자산운용">
+<meta property="og:description" content="삼성액티브자산운용 공식홈페이지입니다.">
+<meta property="og:keyword" content="삼성액티브자산운용 공식홈페이지, 펀드상품 소개, 펀드 가입 안내.">
+<meta property="og:url" content="https://www.samsungactive.co.kr/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://www.samsungactive.co.kr/assets/media/share.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="631">
+
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="삼성액티브자산운용">
+<meta name="twitter:description" content="삼성액티브자산운용 공식홈페이지입니다.">
+<meta name="twitter:image" content="https://www.samsungactive.co.kr/assets/media/share.jpg">
+
+
+<meta name="naver-site-verification" content="724601b690b467da107739ccd90c34f8c3a5316c">
+
+<link rel="icon" href="/assets/icons/favicon.svg">
+<link rel="shortcut icon" href="/assets/icons/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/icons/favicon.svg">
+
+<link rel="stylesheet" href="/assets/css/gemein.css?v=20260904084555">
+<link rel="stylesheet" href="/assets/css/index.css?v=20260904084555">
+
+
+
+
+<script>
+	const siteLang = "kr";
+	var isLogin = false;
+	var isKo = 'true';
+	var isProd = true;
+</script>
+
+
+<!-- Google tag (gtag.js) --> 
+
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5SR695B');</script>
+<!-- End Google Tag Manager -->
+
+<!-- Google tag (gtag.js) -->
+
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-13T6523CE2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-13T6523CE2');
+</script>
+
+
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-RYFYXH6438"></script> 
+<script>   
+	window.dataLayer = window.dataLayer || [];   
+	function gtag(){dataLayer.push(arguments);}   
+	gtag('js', new Date());   
+	gtag('config', 'G-RYFYXH6438'); 
+</script>
+
+<script type="application/ld+json" charset="utf-8">
+	{
+		"@context": "https://schema.org",
+		"@graph": [
+		  {
+			"@type": "Organization",
+			"name": "삼성액티브자산운용",
+			"alternateName": "KOACT",
+			"url": "https://www.samsungactive.co.kr",
+			"sameAs": [       "https://blog.naver.com/koactetf",
+			  "https://pf.kakao.com/_UCxnTn",
+			  "https://www.youtube.com/channel/UCFk0iswBhC3BfruIbbjqpGg"
+			]
+		  },
+		  {
+			"@type": "Brand",
+			"name": "KOACT",
+			"alternateName": "코액트",
+			"url": "https://www.samsungactive.co.kr/koact"
+		  }
+		]
+	  }
+</script>
+
+<!-- NAVER 공통 SCRIPT -->
+<script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script><script type="text/javascript" async="" src="https://ssl.pstatic.net/melona/libs/gfp-nac-module/synchronizer.js"></script>
+<script type="text/javascript">
+if (!wcs_add) var wcs_add={};
+wcs_add["wa"] = "s_3e01c267852a";
+if(window.wcs) {
+        wcs.inflow("https://www.samsungactive.co.kr");
+}
+wcs_do();
+</script>
+
+<script src="/assets/log/tracking.js"></script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	document.querySelectorAll('.copy_url_image').forEach(dom => {
+		dom.addEventListener('click', function() {
+			const url = dom.getAttribute("data-url");
+	  if(url){
+	    window.navigator.clipboard.writeText(url)
+			  .then(() => alert("클립보드에 복사되었습니다!"));
+	  }
+		})
+	})
+});
+</script>		
+<script type="text/javascript" async="" src="https://googleads.g.doubleclick.net/pagead/viewthroughconversion/16639380788/?random=1788606122549&amp;cv=11&amp;fst=1788606122549&amp;bg=ffffff&amp;guid=ON&amp;async=1&amp;en=gtag.config&amp;gtm=45je6921v9178091726za200zd9178091726xec&amp;gcd=13l3l3l3l1l1&amp;dma=0&amp;tag_exp=115938465~115938468~117776796~118897920~118897930~120213116~120385423~120469145~120469153&amp;u_w=1280&amp;u_h=720&amp;url=https%3A%2F%2Fwww.samsungactive.co.kr%2F&amp;rcb=16&amp;frm=0&amp;tiba=%EC%82%BC%EC%84%B1%EC%95%A1%ED%8B%B0%EB%B8%8C%EC%9E%90%EC%82%B0%EC%9A%B4%EC%9A%A9&amp;hn=www.googleadservices.com&amp;npa=0&amp;pscdl=noapi&amp;auid=1298456387.1788606123&amp;uaa=x86&amp;uab=64&amp;uafvl=Not%253DA%253FBrand%3B99.0.0.0%7CHeadlessChrome%3B151.0.7922.34%7CChromium%3B151.0.7922.34&amp;uamb=0&amp;uam=&amp;uap=Windows&amp;uapv=10.0&amp;uaw=0&amp;data=event%3Dgtag.config&amp;ept=9&amp;rfmt=3&amp;fmt=4"></script><script type="text/javascript" async="" src="https://googleads.g.doubleclick.net/pagead/viewthroughconversion/17337210301/?random=1788606122825&amp;cv=11&amp;fst=1788606122825&amp;bg=ffffff&amp;guid=ON&amp;async=1&amp;en=gtag.config&amp;gtm=45be6921v9228129869z8830522102za20gzb830522102zd830522102xec&amp;gcd=13l3l3l3l1l1&amp;dma=0&amp;tag_exp=115616985~115938465~115938469~117776796~118897920~118897930~120213116~120385422~120469145~120469153&amp;u_w=1280&amp;u_h=720&amp;url=https%3A%2F%2Fwww.samsungactive.co.kr%2F&amp;rcb=14&amp;frm=0&amp;tiba=%EC%82%BC%EC%84%B1%EC%95%A1%ED%8B%B0%EB%B8%8C%EC%9E%90%EC%82%B0%EC%9A%B4%EC%9A%A9&amp;hn=www.googleadservices.com&amp;npa=0&amp;pscdl=noapi&amp;auid=1298456387.1788606123&amp;uaa=x86&amp;uab=64&amp;uafvl=Not%253DA%253FBrand%3B99.0.0.0%7CHeadlessChrome%3B151.0.7922.34%7CChromium%3B151.0.7922.34&amp;uamb=0&amp;uam=&amp;uap=Windows&amp;uapv=10.0&amp;uaw=0&amp;data=event%3Dgtag.config&amp;ept=9&amp;rfmt=3&amp;fmt=4"></script></head>
+<body class="pre-active show" style="" data-scroll-fixed="">
+  
+    
+<div class="preloader preloader--fund show">
+	<canvas class="transition" height="1080" width="1920"></canvas>
+</div>
+    
+
+
+  
+	<!-- Google Tag Manager (noscript) -->
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5SR695B"
+	height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<!-- End Google Tag Manager (noscript) -->
+	
+	<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0; position:fixed; left:-99999px; top:-99999px;width:10px;height:10px;">
+		<defs>
+			<linearGradient id="color-stroke-up" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="100%" stop-color="#F75D5F" stop-opacity="1"></stop>
+			</linearGradient>
+			<linearGradient id="color-uv-up" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="0%" stop-color="#FE6C6C" stop-opacity="1"></stop>
+				<stop offset="100%" stop-color="rgba(254, 70, 75, 0)" stop-opacity="0"></stop>
+			</linearGradient>
+			<linearGradient id="color-stroke-down" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="100%" stop-color="#3183FE" stop-opacity="1"></stop>
+			</linearGradient>
+			<linearGradient id="color-uv-down" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="0%" stop-color="rgba(21, 115, 254, 0.6)" stop-opacity="1"></stop>
+				<stop offset="100%" stop-color="rgba(21, 115, 254, 0)" stop-opacity="0"></stop>
+			</linearGradient>
+			<linearGradient id="color-stroke-" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="100%" stop-color="#F75D5F" stop-opacity="1"></stop>
+			</linearGradient>
+			<linearGradient id="color-uv-" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="0%" stop-color="#FE6C6C" stop-opacity="1"></stop>
+				<stop offset="100%" stop-color="rgba(254, 70, 75, 0)" stop-opacity="0"></stop>
+			</linearGradient>
+		</defs>
+	</svg>
+	<header id="header" class="header is-fund">
+		<div class="header__wrap">
+			<div class="header__left">
+				<h1 class="home">
+					<a href="/" class="logo-fund __ga-inited" data-logo-type="ko" data-ga-label="gnb_home">
+						<img src="/assets/icons/logo/logo.svg" alt="">
+					</a>
+
+
+					<span class="a11y">삼성액티브자산운용</span>
+				</h1>
+
+				<button type="button" class="menu__back" onclick="window.history.back()">
+					<span class="a11y">뒤로가기</span>
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M10.75 3L2 11.75M2 11.75L10.75 20.5M2 11.75H21.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+					</svg>
+				</button>
+			</div>
+
+			<div class="gnb"><ul class="d1-list"><li class="d1-item">
+    <a href="/about/ourway.do" class="d1-link">회사소개</a><ul class="d2-wrap"><li class="d2-item">
+        			<a href="/about/ourway.do" style="" class="d2-link __ga-inited" data-ga-label="gnb_about_ourway">Our Way</a></li><li class="d2-item">
+        			<a href="/about/ourteam.do" style="" class="d2-link __ga-inited" data-ga-label="gnb_about_ourteam">Our Team</a></li><li class="d2-item">
+        			<a href="/about/esg.do" style="" class="d2-link __ga-inited" data-ga-label="gnb_about_esg">ESG 경영</a></li></ul></li><li class="d1-item">
+    <a href="/etf/list.do" class="d1-link">ETF 상품</a><ul class="d2-wrap"><li class="d2-item">
+        			<a href="/etf/list.do" style="" class="d2-link __ga-inited" data-ga-label="gnb_etf_list">KoAct 찾기</a></li></ul></li><li class="d1-item">
+    <a href="/fund/list.do" class="d1-link">펀드 상품</a><ul class="d2-wrap"><li class="d2-item">
+        			<a href="/fund/list.do" style="" class="d2-link __ga-inited" data-ga-label="gnb_fund_fundlist">펀드 찾기</a></li><li class="d2-item">
+        			<a href="/fund/list.do?styles=100" style="" class="d2-link __ga-inited" data-ga-label="gnb_fund_growth">성장형 펀드</a></li><li class="d2-item">
+        			<a href="/fund/list.do?styles=200" style="" class="d2-link __ga-inited" data-ga-label="gnb_fund_smalldividend">중소형/배당 펀드</a></li><li class="d2-item">
+        			<a href="/fund/list.do?styles=300" style="" class="d2-link __ga-inited" data-ga-label="gnb_fund_style">스타일 펀드</a></li><li class="d2-item">
+        			<a href="/fund/list.do?styles=400" style="" class="d2-link __ga-inited" data-ga-label="fund_list_assetallocation">자산배분형 펀드</a></li><li class="d2-item">
+        			<a href="/fund/fundseller.do" style="" class="d2-link __ga-inited" data-ga-label="gnb_fund_fundseller">펀드판매사 안내</a></li></ul></li><li class="d1-item">
+    <a href="/insight/koactinsight/list.do?seq=0" class="d1-link">투자정보</a><ul class="d2-wrap"><li class="d2-item">
+        			<a href="/insight/koactinsight/list.do?seq=0" style="" class="d2-link __ga-inited" data-ga-label="gnb_insight_koactinsight">인사이트</a></li><li class="d2-item">
+        			<a href="/insight/koactmedia/list.do?seq=0" style="" class="d2-link __ga-inited" data-ga-label="gnb_insight_koactmedia">미디어룸</a></li><li class="d2-item">
+        			<a href="/insight/koactguidebook.do" style="" class="d2-link __ga-inited" data-ga-label="gnb_insight_koactguidebook">투자가이드북</a></li></ul></li><li class="d1-item">
+    <a href="/lounge/announcement.do" class="d1-link">고객라운지</a><ul class="d2-wrap"><li class="d2-item">
+        			<a href="/lounge/event.do" style="" class="d2-link __ga-inited" data-ga-label="gnb_lounge_event">이벤트</a></li><li class="d2-item">
+        			<a href="/lounge/announcement.do" style="" class="d2-link __ga-inited" data-ga-label="gnb_lounge_announcement">공시안내</a></li><li class="d2-item">
+        			<a href="/lounge/notice.do?category=ALL" style="" class="d2-link __ga-inited" data-ga-label="gnb_lounge_notice">공지사항</a></li><li class="d2-item">
+        			<a href="/lounge/faq.do" style="" class="d2-link __ga-inited" data-ga-label="gnb_lounge_faq">자주 묻는 질문</a></li><li class="d2-item">
+        			<a href="/lounge/guide.do" style="" class="d2-link __ga-inited" data-ga-label="gnb_lounge_guide">펀드 가입 안내</a></li><li class="d2-item">
+        			<a href="/lounge/stewardship.do" style="" class="d2-link __ga-inited" data-ga-label="gnb_lounge_stewardship">스튜어드십코드</a></li></ul></li></ul></div>
+
+			<div class="menu">
+			    
+                    <a href="/etf/distribution.do" class="distribution-btn btn btn-m btn-gray">
+                       <span>ETF분배금 현황</span>
+                    </a>
+                
+				<div class="dropdown-switch ready">
+					<div class="rounder">
+					  <div class="inner">
+						<button type="button" class="select-btn __ga-inited" data-ga-label="gnb_language"><span>KR</span></button>
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+<path d="M14 7L9 12L14 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+						<div class="dropdown-box">
+						  <button type="button" data-ga-label="gnb_language" class="lang __ga-inited"><span>EN</span></button>
+						</div>
+					  </div>
+					</div>
+				</div>
+
+				<button type="button" class="menu__search __ga-inited" data-ga-label="allmenu_search">
+					<span class="a11y">검색</span>
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M16 16L22 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+						<circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></circle>
+					</svg>
+				</button>
+				<button type="button" class="menu__hamburger __ga-inited" data-ga-label="gnb_allmenu">
+					<span class="anim" data-lottie="/assets/lottie/menu.json"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 36 36" width="36" height="36" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; transform: translate3d(0px, 0px, 0px); content-visibility: visible;"><defs><clipPath id="__lottie_element_3"><rect width="36" height="36" x="0" y="0"></rect></clipPath></defs><g clip-path="url(#__lottie_element_3)"><g transform="matrix(1,0,0,1,0,0)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path stroke-linecap="round" stroke-linejoin="miter" fill-opacity="0" stroke-miterlimit="10" stroke="currentColor" stroke-opacity="1" stroke-width="1.5" d=" M8.75,24.75 C8.75,24.75 27.25,24.75 27.25,24.75"></path></g></g><g transform="matrix(1,0,0,1,0,0)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path stroke-linecap="round" stroke-linejoin="miter" fill-opacity="0" stroke-miterlimit="10" stroke="currentColor" stroke-opacity="1" stroke-width="1.5" d=" M8.75,18 C8.75,18 27.25,18 27.25,18"></path></g></g><g transform="matrix(1,0,0,1,0,0)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path stroke-linecap="round" stroke-linejoin="miter" fill-opacity="0" stroke-miterlimit="10" stroke="currentColor" stroke-opacity="1" stroke-width="1.5" d=" M8.75,11.25 C8.75,11.25 27.25,11.25 27.25,11.25"></path></g></g></g></svg></span>
+					<span class="a11y">메뉴</span>
+				</button>
+
+			</div>
+		</div>
+		<div class="header__search">
+			<div class="header-search-top">
+				<div class="__left">
+					<h1 class="home">
+						<a href="/" class="logo-fund __ga-inited" data-logo-type="ko" data-ga-label="gnb_home">
+							<img src="/assets/icons/logo/logo.svg" alt="">
+						</a>
+	
+						<span class="a11y">삼성액티브자산운용</span>
+					</h1>
+				</div>
+				<div class="__right">
+					<button type="button" class="close-btn">
+						<svg xmlns="http://www.w3.org/2000/svg" id="delete-XL" width="24" height="24" viewBox="0 0 24 24">
+  <rect id="Rectangle_145" data-name="Rectangle 145" width="24" height="24" fill="none"></rect>
+  <path id="Vector" d="M19.8,0H0" transform="translate(5 5) rotate(45)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+  <path id="Vector-2" data-name="Vector" d="M19.8,0H0" transform="translate(19 5) rotate(135)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+</svg>
+					</button>
+				</div>
+			</div>
+			<div class="search-wrap">
+				<form action="/search.do" class="headline-5">
+					<div class="search-wide header-searching">
+						<label for="input-2" class="a11y">search</label>
+						<input class="input-block" name="searchText" id="input-2" type="text" autocomplete="off" placeholder="바이오헬스케어를 검색해 보세요">
+						<button type="submit" class="search-btn" disabled="">
+							<svg xmlns="http://www.w3.org/2000/svg" id="search-l" width="24" height="24" viewBox="0 0 24 24">
+  <rect id="Rectangle_144" data-name="Rectangle 144" width="24" height="24" fill="none"></rect>
+  <path id="Vector" d="M0,0,6,6" transform="translate(16 16)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+  <circle id="Vector-2" data-name="Vector" cx="8" cy="8" r="8" transform="translate(2 2)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></circle>
+</svg>
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="header__dimed --gnb"></div>
+		<div class="header__dimed --search"></div>
+
+		<div class="sitemap">
+			<div class="header__wrap">
+				<div class="header__left">
+					<div class="sitemap-home">
+						<a href="/" class="logo-desktop logo-fund sitemap__home __ga-inited" data-logo-type="ko" data-ga-label="gnb_toggle">
+							<img src="/assets/icons/logo/logo.svg" alt="">
+						</a>
+						<a href="/" class="logo-mobile sitemap__home __ga-inited" data-ga-label="gnb_toggle">
+							<svg xmlns="http://www.w3.org/2000/svg" id="home" width="24" height="24" viewBox="0 0 24 24">
+  <path id="Vector" d="M18.831,7.412V19.385H3.323V7.412M0,10.262,11.077,0,22.154,10.262" transform="translate(0.923 1.846)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+</svg>
+						</a>
+						<span class="a11y">삼성액티브자산운용</span>
+					</div>
+				</div>
+
+				<div class="menu">
+					<div class="dropdown-switch dropdown-switch--xs ready">
+						<div class="rounder">
+							<div class="inner">
+								<button type="button" class="select-btn __ga-inited" data-ga-label="gnb_language"><span>KR</span></button>
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+<path d="M14 7L9 12L14 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+								<div class="dropdown-box">
+									<button type="button" data-ga-label="gnb_language" class="lang __ga-inited"><span>EN</span></button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<button type="button" class="menu__search __ga-inited" data-ga-label="allmenu_search">
+						<span class="a11y">검색</span>
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<g clip-path="url(#clip0_45_495)">
+								<path d="M16 16L22 22" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+								<circle cx="10" cy="10" r="8" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></circle>
+							</g>
+							<defs>
+								<clipPath id="clip0_45_495">
+									<rect width="24" height="24" fill="white"></rect>
+								</clipPath>
+							</defs>
+						</svg>
+					</button>
+					<button type="button" class="menu__hamburger menu__hamburger--close __ga-inited" data-ga-label="gnb_allmenu">
+						<span class="anim" data-lottie="/assets/lottie/menu.json"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 36 36" width="36" height="36" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; transform: translate3d(0px, 0px, 0px); content-visibility: visible;"><defs><clipPath id="__lottie_element_13"><rect width="36" height="36" x="0" y="0"></rect></clipPath></defs><g clip-path="url(#__lottie_element_13)"><g transform="matrix(1,0,0,1,0,0)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path stroke-linecap="round" stroke-linejoin="miter" fill-opacity="0" stroke-miterlimit="10" stroke="currentColor" stroke-opacity="1" stroke-width="1.5" d=" M8.75,24.75 C8.75,24.75 27.25,24.75 27.25,24.75"></path></g></g><g transform="matrix(1,0,0,1,0,0)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path stroke-linecap="round" stroke-linejoin="miter" fill-opacity="0" stroke-miterlimit="10" stroke="currentColor" stroke-opacity="1" stroke-width="1.5" d=" M8.75,18 C8.75,18 27.25,18 27.25,18"></path></g></g><g transform="matrix(1,0,0,1,0,0)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path stroke-linecap="round" stroke-linejoin="miter" fill-opacity="0" stroke-miterlimit="10" stroke="currentColor" stroke-opacity="1" stroke-width="1.5" d=" M8.75,11.25 C8.75,11.25 27.25,11.25 27.25,11.25"></path></g></g></g></svg></span>
+						<span class="a11y">메뉴 닫기</span>
+					</button>
+				</div>
+
+			</div>
+
+			<div class="sitemap__wrap">
+			  <div class="sitemap__head" style="opacity: 0;">
+          <div class="distribution-wrap">
+            <a href="/etf/distribution.do" class="distribution-btn btn btn-s btn-fixed br-5">
+              <span>ETF분배금 현황</span>
+            </a>
+          </div>
+        </div>
+
+				<div class="sitemap__inner">
+					<div class="sitemap__body"><ul class="sitemap__d1"><li class="sitemap__d1-item" style="translate: none; rotate: none; scale: none; transform: translate(0%, 10%); opacity: 0; visibility: hidden;">    
+    <strong class="sitemap__d1-text">
+      <span>회사소개</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+<path d="M14 7L9 12L14 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+    </strong><ul class="sitemap__d2" style="height: 0px;"><li class="sitemap__d2-item">
+        <a href="/about/ourway.do" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_about_ourway">Our Way </a></li><li class="sitemap__d2-item">
+        <a href="/about/ourteam.do" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_about_ourteam">Our Team </a></li><li class="sitemap__d2-item">
+        <a href="/about/esg.do" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_about_esg">ESG 경영 </a></li></ul></li><li class="sitemap__d1-item" style="translate: none; rotate: none; scale: none; transform: translate(0%, 10%); opacity: 0; visibility: hidden;">    
+    <strong class="sitemap__d1-text">
+      <span>ETF 상품</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+<path d="M14 7L9 12L14 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+    </strong><ul class="sitemap__d2" style="height: 0px;"><li class="sitemap__d2-item">
+        <a href="/etf/list.do" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_etf_list">KoAct 찾기 </a></li></ul></li><li class="sitemap__d1-item" style="translate: none; rotate: none; scale: none; transform: translate(0%, 10%); opacity: 0; visibility: hidden;">    
+    <strong class="sitemap__d1-text">
+      <span>펀드 상품</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+<path d="M14 7L9 12L14 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+    </strong><ul class="sitemap__d2" style="height: 0px;"><li class="sitemap__d2-item">
+        <a href="/fund/list.do" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_fund_fundlist">펀드 찾기 </a></li><li class="sitemap__d2-item">
+        <a href="/fund/list.do?styles=100" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_fund_growth">성장형 펀드 </a></li><li class="sitemap__d2-item">
+        <a href="/fund/list.do?styles=200" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_fund_smalldividend">중소형/배당 펀드 </a></li><li class="sitemap__d2-item">
+        <a href="/fund/list.do?styles=300" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_fund_style">스타일 펀드 </a></li><li class="sitemap__d2-item">
+        <a href="/fund/list.do?styles=400" style="" class="sitemap__d2-link __ga-inited" data-ga-label="fund_list_assetallocation">자산배분형 펀드 </a></li><li class="sitemap__d2-item">
+        <a href="/fund/fundseller.do" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_fund_fundseller">펀드판매사 안내 </a></li></ul></li><li class="sitemap__d1-item" style="translate: none; rotate: none; scale: none; transform: translate(0%, 10%); opacity: 0; visibility: hidden;">    
+    <strong class="sitemap__d1-text">
+      <span>투자정보</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+<path d="M14 7L9 12L14 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+    </strong><ul class="sitemap__d2" style="height: 0px;"><li class="sitemap__d2-item">
+        <a href="/insight/koactinsight/list.do?seq=0" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_insight_koactinsight">인사이트 </a></li><li class="sitemap__d2-item">
+        <a href="/insight/koactmedia/list.do?seq=0" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_insight_koactmedia">미디어룸 </a></li><li class="sitemap__d2-item">
+        <a href="/insight/koactguidebook.do" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_insight_koactguidebook">투자가이드북 </a></li></ul></li><li class="sitemap__d1-item" style="translate: none; rotate: none; scale: none; transform: translate(0%, 10%); opacity: 0; visibility: hidden;">    
+    <strong class="sitemap__d1-text">
+      <span>고객라운지</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+<path d="M14 7L9 12L14 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+    </strong><ul class="sitemap__d2" style="height: 0px;"><li class="sitemap__d2-item">
+        <a href="/lounge/event.do" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_lounge_event">이벤트 </a></li><li class="sitemap__d2-item">
+        <a href="/lounge/announcement.do" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_lounge_announcement">공시안내 </a></li><ul class="sitemap__d3"><li class="sitemap__d3-item">
+            <a href="/lounge/announcement.do?seq=0" class="sitemap__d3-link">경영공시</a>
+            </li><li class="sitemap__d3-item">
+            <a href="/lounge/announcement.do?seq=1" class="sitemap__d3-link">펀드공시</a>
+            </li><li class="sitemap__d3-item">
+            <a href="/lounge/announcement.do?seq=2" class="sitemap__d3-link">연금저축펀드공시</a>
+            </li></ul><li class="sitemap__d2-item">
+        <a href="/lounge/notice.do?category=ALL" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_lounge_notice">공지사항 </a></li><li class="sitemap__d2-item">
+        <a href="/lounge/faq.do" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_lounge_faq">자주 묻는 질문 </a></li><li class="sitemap__d2-item">
+        <a href="/lounge/guide.do" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_lounge_guide">펀드 가입 안내 </a></li><li class="sitemap__d2-item">
+        <a href="/lounge/stewardship.do" style="" class="sitemap__d2-link __ga-inited" data-ga-label="gnb_lounge_stewardship">스튜어드십코드 </a></li></ul></li></ul></div>
+				</div>
+			</div>
+		</div>
+	</header><button class="top-btn hide"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M19 12L5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+				<path d="M11 18L5 12L11 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+				</svg></button>
+  <main class="main index">
+
+    
+
+<script>
+//	window.DOES		= window.DOES		|| {};
+//	window.DOES.kv	= window.DOES.kv	|| {};
+
+	
+	window.WEB_mainBanners = [
+		
+			{
+				gridType	: {
+					type		: 'D',
+					sizeList	: [ 4,2,2 ]
+				},
+				contList	: [
+					
+						{
+							roti		: false,
+							video		: false,
+							image		: true,
+							imgPath		: "",
+							imgNm		: "",
+							filePath	: "/upload/main/banner/20260721",
+							fileNm		: "182747447.png",
+							caption		: "신규상장(7/28)",
+							title		: "월배당의 새로운 기준, 배당에 알파를 추구하다",
+							subTitle	: "KoAct 고배당액티브 ETF",
+							link		: "/etf/view.do?id=2ETFW1",
+							linkBlank	: "_self",
+							bgColor		: "#66a65a",
+							
+								lawNum		: "2026-206",
+								lawStartDt	: "",
+								lawEndDt	: ""
+							
+						},
+					
+						{
+							roti		: false,
+							video		: false,
+							image		: true,
+							imgPath		: "",
+							imgNm		: "",
+							filePath	: "/upload/main/banner/20260727",
+							fileNm		: "165412962.png",
+							caption		: "신규상장(7/14)",
+							title		: "AI 산업의 다음 병목은 네트워크 인프라 : 광통신인프라 & 저궤도위성",
+							subTitle	: "KoAct 광통신&위성네트워크액티브 ETF",
+							link		: "/etf/view.do?id=2ETFV4",
+							linkBlank	: "_self",
+							bgColor		: "#60aef8"
+							
+						},
+					
+						{
+							roti		: false,
+							video		: false,
+							image		: true,
+							imgPath		: "",
+							imgNm		: "",
+							filePath	: "/upload/main/banner/20260727",
+							fileNm		: "165321303.png",
+							caption		: "상품안내",
+							title		: "글로벌 증시 중심에 선 코스피, 이제 선택과 집중 투자로 승부 ",
+							subTitle	: "KoAct 코스피액티브 ETF",
+							link		: "/etf/view.do?id=2ETFV2",
+							linkBlank	: "_self",
+							bgColor		: "#1454fe"
+							
+						}
+					
+				]
+			},
+		
+			{
+				gridType	: {
+					type		: 'F',
+					sizeList	: [ 2,2,2,2 ]
+				},
+				contList	: [
+					
+						{
+							roti		: false,
+							video		: false,
+							image		: true,
+							imgPath		: "",
+							imgNm		: "",
+							filePath	: "/upload/main/banner/20260727",
+							fileNm		: "165506495.png",
+							caption		: "상품안내",
+							title		: "AI 2.0, 피지컬 AI 산업에 보다 빠른 투자를 추구하는 ETF",
+							subTitle	: "KoAct 미국로봇피지컬AI액티브 ETF",
+							link		: "/etf/view.do?id=2ETFU7",
+							linkBlank	: "_self",
+							bgColor		: "#853bd4",
+							
+								lawNum		: "2026-206",
+								lawStartDt	: "",
+								lawEndDt	: ""
+							
+						},
+					
+						{
+							roti		: false,
+							video		: false,
+							image		: true,
+							imgPath		: "",
+							imgNm		: "",
+							filePath	: "/upload/main/banner/20260727",
+							fileNm		: "165551108.png",
+							caption		: "상품안내",
+							title		: "AI가 촉발한 메모리 반도체 수퍼사이클",
+							subTitle	: "KoAct 글로벌AI메모리반도체액티브  ETF",
+							link		: "https://www.samsungactive.co.kr/etf/view.do?id=2ETFU5",
+							linkBlank	: "_self",
+							bgColor		: "#364fc3",
+							
+								lawNum		: "2026-206",
+								lawStartDt	: "",
+								lawEndDt	: ""
+							
+						},
+					
+						{
+							roti		: false,
+							video		: false,
+							image		: true,
+							imgPath		: "",
+							imgNm		: "",
+							filePath	: "/upload/main/banner/20260303",
+							fileNm		: "141410511.png",
+							caption		: "상품안내",
+							title		: "코스닥 주도주와 유망성장산업에 투자하는 액티브 ETF",
+							subTitle	: "KoAct 코스닥액티브 ETF",
+							link		: "https://www.samsungactive.co.kr/etf/view.do?id=2ETFU6",
+							linkBlank	: "_self",
+							bgColor		: "#7d9cdb",
+							
+								lawNum		: "2026-206",
+								lawStartDt	: "",
+								lawEndDt	: ""
+							
+						},
+					
+						{
+							roti		: false,
+							video		: false,
+							image		: true,
+							imgPath		: "",
+							imgNm		: "",
+							filePath	: "/upload/main/banner/20260126",
+							fileNm		: "152048640.png",
+							caption		: "상품안내",
+							title		: "차이나는 바이오, 바이오는 KoAct",
+							subTitle	: "KoAct 차이나바이오헬스케어액티브 ETF",
+							link		: "https://www.samsungactive.co.kr/etf/view.do?id=2ETFT6",
+							linkBlank	: "_self",
+							bgColor		: "#d43134",
+							
+								lawNum		: "2026-206",
+								lawStartDt	: "",
+								lawEndDt	: ""
+							
+						}
+					
+				]
+			}
+		
+	]
+
+	// MOBILE
+	// [NOTE] idx 값 넣어주시면 감사하겠습니다.
+	
+	
+	window.MOBILE_mainBanners = [
+		
+			{
+				gridType	: {
+					sizeList	: [ 2 ]
+				},
+				contList	: [
+					
+						
+						{
+							idx			: 1,
+							roti		: false,
+							video		: false,
+							image		: true,
+							mobPoster	: {
+								filePath	: "",
+								fileNm		: ""
+							},
+							mobFile		: {
+								filePath	: "/upload/main/banner/20260727",
+								fileNm		: "164630993.png"
+							},
+							caption		: "신규상장(7/28)",
+							titleM		: "월배당의 새로운 기준, 배당에 알파를 추구하다",
+							subTitleM	: "KoAct 고배당액티브 ETF",
+							link		: "/etf/view.do?id=2ETFW1",
+							linkBlank	: "_self",
+							bgColor		: "#66a65a",
+							
+								lawNum		: "2026-206",
+								lawStartDt	: "",
+								lawEndDt	: ""
+							
+						}
+					
+				]
+			},
+		
+			{
+				gridType	: {
+					sizeList	: [ 2 ]
+				},
+				contList	: [
+					
+						
+						{
+							idx			: 2,
+							roti		: false,
+							video		: false,
+							image		: true,
+							mobPoster	: {
+								filePath	: "",
+								fileNm		: ""
+							},
+							mobFile		: {
+								filePath	: "/upload/main/banner/20260701",
+								fileNm		: "134839926.png"
+							},
+							caption		: "신규상장(7/14)",
+							titleM		: "AI 산업의 다음 병목은 네트워크 인프라 : 광통신인프라 & 저궤도위성",
+							subTitleM	: "KoAct 광통신&위성네트워크액티브 ETF",
+							link		: "/etf/view.do?id=2ETFV4",
+							linkBlank	: "_self",
+							bgColor		: "#60aef8"
+							
+						}
+					
+				]
+			},
+		
+			{
+				gridType	: {
+					sizeList	: [ 2 ]
+				},
+				contList	: [
+					
+						
+						{
+							idx			: 3,
+							roti		: false,
+							video		: false,
+							image		: true,
+							mobPoster	: {
+								filePath	: "",
+								fileNm		: ""
+							},
+							mobFile		: {
+								filePath	: "/upload/main/banner/20260513",
+								fileNm		: "095350155.png"
+							},
+							caption		: "상품안내",
+							titleM		: "글로벌 증시 중심에 선 코스피, 이제 선택과 집중 투자로 승부 ",
+							subTitleM	: "KoAct 코스피액티브 ETF",
+							link		: "/etf/view.do?id=2ETFV2",
+							linkBlank	: "_self",
+							bgColor		: "#1454fe"
+							
+						}
+					
+				]
+			},
+		
+			{
+				gridType	: {
+					sizeList	: [ 2 ]
+				},
+				contList	: [
+					
+						
+						{
+							idx			: 4,
+							roti		: false,
+							video		: false,
+							image		: true,
+							mobPoster	: {
+								filePath	: "",
+								fileNm		: ""
+							},
+							mobFile		: {
+								filePath	: "/upload/main/banner/20260422",
+								fileNm		: "184100881.png"
+							},
+							caption		: "상품안내",
+							titleM		: "AI 2.0, 피지컬 AI 산업에 보다 빠른 투자를 추구하는 ETF",
+							subTitleM	: "KoAct 미국로봇피지컬AI액티브 ETF",
+							link		: "/etf/view.do?id=2ETFU7",
+							linkBlank	: "_self",
+							bgColor		: "#853bd4",
+							
+								lawNum		: "2026-206",
+								lawStartDt	: "",
+								lawEndDt	: ""
+							
+						}
+					
+				]
+			},
+		
+			{
+				gridType	: {
+					sizeList	: [ 2 ]
+				},
+				contList	: [
+					
+						
+						{
+							idx			: 5,
+							roti		: false,
+							video		: false,
+							image		: true,
+							mobPoster	: {
+								filePath	: "",
+								fileNm		: ""
+							},
+							mobFile		: {
+								filePath	: "/upload/main/banner/20260409",
+								fileNm		: "105056934.png"
+							},
+							caption		: "상품안내",
+							titleM		: "AI가 촉발한 메모리 반도체 수퍼사이클",
+							subTitleM	: "KoAct 글로벌AI메모리반도체액티브  ETF",
+							link		: "https://www.samsungactive.co.kr/etf/view.do?id=2ETFU5",
+							linkBlank	: "_self",
+							bgColor		: "#364fc3",
+							
+								lawNum		: "2026-206",
+								lawStartDt	: "",
+								lawEndDt	: ""
+							
+						}
+					
+				]
+			},
+		
+			{
+				gridType	: {
+					sizeList	: [ 2 ]
+				},
+				contList	: [
+					
+						
+						{
+							idx			: 6,
+							roti		: false,
+							video		: false,
+							image		: true,
+							mobPoster	: {
+								filePath	: "",
+								fileNm		: ""
+							},
+							mobFile		: {
+								filePath	: "/upload/main/banner/20260303",
+								fileNm		: "141411045.png"
+							},
+							caption		: "상품안내",
+							titleM		: "코스닥 주도주와 유망성장산업에 투자하는 액티브 ETF",
+							subTitleM	: "KoAct 코스닥액티브 ETF",
+							link		: "https://www.samsungactive.co.kr/etf/view.do?id=2ETFU6",
+							linkBlank	: "_self",
+							bgColor		: "#7d9cdb",
+							
+								lawNum		: "2026-206",
+								lawStartDt	: "",
+								lawEndDt	: ""
+							
+						}
+					
+				]
+			},
+		
+			{
+				gridType	: {
+					sizeList	: [ 2 ]
+				},
+				contList	: [
+					
+						
+						{
+							idx			: 7,
+							roti		: false,
+							video		: false,
+							image		: true,
+							mobPoster	: {
+								filePath	: "",
+								fileNm		: ""
+							},
+							mobFile		: {
+								filePath	: "/upload/main/banner/20260123",
+								fileNm		: "144322291.png"
+							},
+							caption		: "상품안내",
+							titleM		: "차이나는 바이오, 바이오는 KoAct",
+							subTitleM	: "KoAct 차이나바이오헬스케어액티브 ETF",
+							link		: "https://www.samsungactive.co.kr/etf/view.do?id=2ETFT6",
+							linkBlank	: "_self",
+							bgColor		: "#d43134",
+							
+								lawNum		: "2026-206",
+								lawStartDt	: "",
+								lawEndDt	: ""
+							
+						}
+					
+				]
+			}
+		
+	]
+</script>
+
+
+<!-- web/mobile kv REACT 렌더링 -->
+<div id="key-visual"><section class="kodex-main-section kv-kodex overflow-hidden"><h1 class="a11y">삼성자산운용 FUND 메인</h1><div class="l-wrap"><div class="kv-slider"><div class="swiper swiper-creative swiper-3d swiper-initialized swiper-horizontal swiper-watch-progress"><div class="swiper-wrapper"><div class="swiper-slide swiper-slide-visible swiper-slide-active" data-swiper-slide-index="0" style="width: 414.667px; z-index: 7; transform: translate3d(calc(0px), calc(0px), calc(0px)) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1); opacity: 1;"><div class="cards"><article class="card l" 

@@ -1,0 +1,304 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<title>온라인기업정보 - ETF/ETN</title>
+	<link type="text/css" rel="shortcut icon" href="/favicon.ico">
+	<script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-KEHSJRBTJS&amp;cx=c&amp;gtm=4e6921"></script><script language="javascript" src="/include/domain.js" type="text/javascript"></script>
+	<link href="/v2/include/css?v=q7Pq73b9jj00gmFmOVUSxzXv_5FtLNW9qxkqFwJqh-g1" rel="stylesheet">
+
+	<link href="/v2/include/ETF?v=BiZyXYXVVFnyjoveBGiH4mCYzFvER0sUwNy-YnXFUf81" rel="stylesheet">
+
+	<script src="/v2/ETF/js?v=z4GWew1cV16CHWa_Sr9DuNTIEzw2K1tJt93rz_l9Wpw1"></script>
+
+	<link href="/v2/include/sitecss?v=NO2scjWyURrcKuALmuSFc8_aZjVlTCHcs6O-cPNOjtk1" rel="stylesheet">
+
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-74989022-7"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-74989022-7');
+	</script>
+
+	<script type="text/javascript">
+				
+		$(document).ready(function () {
+			var navUrl = location.href;
+			var url = $.url(navUrl);
+			if (5 == "25") {
+				$('#contentWrap .tab-menu .subMenu .sMenu').text('ETN');
+				$('#etf_path').text('ETN');
+			}
+			else {
+				$('#contentWrap .tab-menu .subMenu .sMenu').text('ETF');
+				$('#etf_path').text('ETF');
+			}
+
+			$('#hidden_cn').val(url.param('cn'));
+			$("#hpopupsearch").click(function () {
+				Main_OpenWindow('../ETF/lookup.aspx', 'm_invest', 460, 420, 0, 0, 0, 0);
+			});
+
+			$("#search").customAutocomplete({
+				source: function (request, response) {
+					//console.log(request.term);
+					$.ajax({
+						url: "../company/autocomplete.aspx",
+						dataType: "Json",
+						data: {
+							searchTyp: 'ETF',
+							searchVal: request.term
+						},
+						success: function (data) {
+							response($.map(data, function (item) {
+								return {
+									label: item.item_nm, //item.item + "(" + item.item_cd + ")",
+									value: item.item_cd,
+									desc: item.item_nm
+								}
+							}));
+						}
+					});
+				}
+                , select: function (event, ui) {
+                	document.location.href = "../ETF/ETF.aspx?cn=" + $('#hidden_cn').val() + "&cmp_cd=" + ui.item.value;
+                	return false;
+                }
+                , autoFocus: true
+			});
+			$('form').submit(function (e) {
+				e.preventDefault();
+				//#search value
+				var search = $(this).serializeArray()[0].value;
+			});
+
+
+			AjaxData.GetNAVData();
+			$("#txtStart,#txtEnd").datepicker({
+				duration: 0,
+				onClose: function (dateText, inst) {
+					setTimeout(function () {
+						if (!inst._keyEvent)
+							AjaxData.GetNAVData();
+					}, 0);
+					//$(this).trigger('blur');
+				}
+			});
+			$("#txtStart").datepicker("option", "defaultDate", '-3m').datepicker("option", "navigationAsDateFormat", true);
+			//            $("#NAV_TYPE input:radio").change(AjaxData.GetNAVData).change(function () {
+			//                $(this).next().addClass('selected').siblings('a').removeClass('selected');
+			//            });
+
+			$("#NAV_TYPE a").click(function (e) {
+				var eId = e.currentTarget.id;
+				$("#NAV_TYPE span").removeClass("selected");
+				switch (eId) {
+					case "aG31":
+						$("#hG3").val("D");
+						$("#aG31").parent().addClass("selected");
+						AjaxData.GetNAVData();
+						break;
+					case "aG32":
+						$("#hG3").val("W");
+						$("#aG32").parent().addClass("selected");
+						AjaxData.GetNAVData();
+						break;
+					case "aG33":
+						$("#hG3").val("M");
+						$("#aG33").parent().addClass("selected");
+						AjaxData.GetNAVData();
+						break;
+				}
+			});
+
+			//Masked Input 적용
+			$("#txtStart").mask("9999-99-99");
+			$("#txtEnd").mask("9999-99-99");
+
+			//의존성 있는 부분 체크해야함
+			//company_autocomplete();
+			Company_addr();
+			$(window).bind('resize', function () {
+				setTimeout(function () {
+					$("#frmCt1").css("width", $("#gHeadCt1").css("width"));
+				}, 100);
+			});
+			$(".viewCT").click(function (e) {
+				Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt1", "ct7", "472150" + ";" + "20260904");
+			});
+			dispalyCT();
+			$("#hrefHome").attr("title", "새창열기:[홈페이지] " + $("#hrefHome").text() + "\n* 클릭 시 " + $('.nm_k').text() + " 홈페이지로 이동합니다.");
+    		
+
+			var maxRow = 9;
+			var curLength = $('#volume_grid_body tr').length;
+			if(curLength < maxRow){
+				while(curLength++ < maxRow){
+					$('#volume_grid_body').append('<tr><th class="title" scope="row">&nbsp;</th><td>&nbsp;</td><td>&nbsp;</td></tr>');
+				}
+			}
+		});
+       
+			function fn_cmpSearch() {
+				if ($("#hiddencmp_cd").val() == '') {
+					jAlert('종목을 선택해 주세요', '메세지');
+					$("#cmpSearch").val("");
+					return;
+				}
+				var cmp_cd = $("#hiddencmp_cd").val();
+				document.location.href = "../ETF/ETF.aspx?cn=" + $('#hidden_cn').val() + "&cmp_cd=" + cmp_cd;
+			}
+			function dispalyCT() {
+				var url = document.URL;
+				if (url.indexOf("client=comp") != -1) {
+					$("#ct1").show();
+				}
+			}
+	</script>
+</head>
+<body oncontextmenu="return false">
+<div class="body-section">
+	<input type="hidden" id="hiddencmp_cd" value="472150">
+	<input type="hidden" id="hidden_cn" value="">
+	<input type="hidden" id="cmp_typ" value="5">
+	<div id="all_contentWrap">
+		<!--all_contentWrap-->
+		<div id="contentWrap">
+			<input type="hidden" id="printZone"><input type="hidden" id="cssZone">
+			<div id="pArea" class="MinWidthContainer">
+			<div id="summary_grid_body"><div class="wrapper-table">      <div class="cmp-table-div">       <table class="cmp-table">        <tbody><tr class="cmp-table-row">         <td class="cmp-table-cell td0101">          <dl>           <dt>            <span class="name">TIGER 배당커버드콜액티브</span>            <a class="cEm" title="[홈페이지] www.tigeretf.com %&gt;" href="http://www.tigeretf.com" target="comPage"><img src="/images/icon_home.gif" hspace="3" align="absmiddle"></a>            <b class="num">472150</b>           </dt>           <dt class="line-left">TIGER DIVIDEND COVERED CALL ACTIVE</dt>           <dt class="line-left">기초지수 : 코스피 200 커버드콜 5% OTM 지수(PR 지수)</dt>          </dl>         </td>        </tr>        <tr class="cmp-table-row">         <td class="cmp-table-cell td0201">          <div>&nbsp;</div>         </td>        </tr>        <tr class="cmp-table-row">         <td class="cmp-table-cell td0301">          <dl>           <dt>운용사: 미래에셋자산운용(주)</dt>                                                                                       <dt class="line-left">총보수: 0.5%</dt>                                                     <dt class="line-left">분류: 국내주식형, 전략지수</dt>          </dl>         </td>        </tr>       </tbody></table>      </div>     </div></div>
+			<div class="tit-empty"></div>
+			<script id="summary_grid_template" type="text/x-jquery-tmpl">
+				<div class="wrapper-table">
+					<div class="cmp-table-div">
+						<table class="cmp-table">
+							<tr class="cmp-table-row">
+								<td class="cmp-table-cell td0101">
+									<dl>
+										<dt>
+											<span class="name">${ CMP_KOR }</span>
+											<a class="cEm" title="[홈페이지] ${ URL } %>" href="http://${ URL }" target="comPage"><img src="/images/icon_home.gif" hspace="3" align="absmiddle"></a>
+											<b class="num">${ CMP_CD }</b>
+										</dt>
+										<dt class="line-left">${ CMP_ENG }</dt>
+										<dt class="line-left">기초지수 : ${ BASE_IDX_NM_KOR}</dt>
+									</dl>
+								</td>
+							</tr>
+							<tr class="cmp-table-row">
+								<td class="cmp-table-cell td0201">
+									<div>&nbsp;</div>
+								</td>
+							</tr>
+							<tr class="cmp-table-row">
+								<td class="cmp-table-cell td0301">
+									<dl>
+										<dt>운용사: ${ISSUE_NM_KOR}</dt>
+                                        {{if CMP_TYP=="25"}} 
+                                            <dt class="line-left">제비용: ${EXPENSES}%</dt> 
+                                        {{else}} 
+                                            <dt class="line-left">총보수: ${FnGuideUtil.Format.currencyTrim(TOT_PAY, '')}%</dt> 
+                                        {{/if}}
+										<dt class="line-left">분류: ${ETF_TYP_SVC_NM}</dt>
+									</dl>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</script>
+			<script type="text/javascript">
+				(function(){
+					var summary_data = {"CMP_KOR":"TIGER 배당커버드콜액티브","URL":"www.tigeretf.com","CMP_CD":"472150","CMP_ENG":"TIGER DIVIDEND COVERED CALL ACTIVE","BASE_IDX_NM_KOR":"코스피 200 커버드콜 5% OTM 지수(PR 지수)","ISSUE_NM_KOR":"미래에셋자산운용(주)","ETF_TYP_SVC_NM":"국내주식형, 전략지수","TOT_PAY":"0.500","CMP_TYP":"5"};
+					$("#summary_grid_template").tmpl(summary_data).appendTo($("#summary_grid_body"));
+				})();
+			</script>
+
+
+				<div class="PageContainer">
+					<div class="PageContentContainer">
+						<div id="wrapper" class="all">
+							<!-- 시세 및 주주현황 -->
+							<div class="fl_le half">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell"><h5><span>시세</span> 및 주주현황</h5></dd>
+										<dd class="header-table-cell unit">
+											<p>[기준:26.09.04]</p>
+										</dd>
+									</dl>
+								</div>
+								<div class="body">
+									<table class="gHead" id="cTB11" summary="기업의 기본적인 시세정보(주가/전일대비/수익률,52주최고/최저,액면가,거래량/거래대금,시가총액,유동주식비율,외국인지분율,52주베타,수익률(1M/3M/6M/1Y))를 제공합니다.">
+										<caption class="blind">시세정보</caption>
+										<colgroup>
+											<col width="160">
+											<col width="*">
+										</colgroup>
+										<tbody id="status_grid_body">
+									<tr>          <th class="txt" scope="row">종가/전일대비/수익률</th>          <td class="num">19,775원 /           <span class="cUp">+325원</span>  /           <span class="cUp">+1.67%</span>           </td>         </tr>         <tr>          <th class="txt" scope="row">52주 최고/최저</th>          <td class="num">28,122원/ 8,907원</td>         </tr>         <tr>          <th class="txt" scope="row">상장주식수</th>          <td class="num">126,150천주</td>         </tr>         <tr>          <th class="txt" scope="row">거래량/거래대금</th>          <td class="num">2,326,911주/ 45,912백만원</td>         </tr>         <tr>          <th class="txt" scope="row">20일평균 거래량/거래대금</th>          <td class="num">3,791,507 주/ 76,265백만원</td>         </tr>         <tr>          <th class="txt" scope="row">시가총액</th>          <td class="num">24,946억원</td>         </tr>         <tr>          <th class="txt" scope="row">52주베타</th>          <td class="num">1.00 </td>         </tr>         <tr>          <th class="txt" scope="row">외국인지분율</th>          <td class="num">0.17%</td>         </tr>         <tr>          <th class="txt" scope="row">수익률<span class="span-sub">(1M/3M/6M/1Y)</span></th>          <td class="num"><span class="cUp">+5.16</span>          / <span class="cDn">-21.85%</span>         / <span class="cUp">+41.56%</span>         / <span class="cUp">+121.53%</span>          </td>         </tr></tbody></table>
+								</div>
+							</div>
+							<script id="status_grid_template" type="text/x-jquery-tmpl">
+								<tr>
+									<th class="txt" scope="row">종가/전일대비/수익률</th>
+									<td class="num">${CLS_PRC}원 / 
+								{{if PRC_CHG>0}} <span class="cUp">+${PRC_CHG}원</span> {{else PRC_CHG==0}} <span class="">${PRC_CHG}원</span> {{else}} <span class="cDn">${PRC_CHG}원</span> {{/if}} / 
+								{{if ADJ_CHG>0}} <span class="cUp">+${ADJ_CHG}%</span> {{else ADJ_CHG==0}} <span class="">${ADJ_CHG}%</span> {{else}} <span class="cDn">${ADJ_CHG}%</span> {{/if}}
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">52주 최고/최저</th>
+									<td class="num">${YR_HIGH}원/ ${YR_LOW}원</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">상장주식수</th>
+									<td class="num">${LIST_STK_CNT}천주</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">거래량/거래대금</th>
+									<td class="num">${trD_QTY}주/ ${trD_AMT}백만원</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">20일평균 거래량/거래대금</th>
+									<td class="num">${AVG_TRD_QTY20} 주/ ${AVG_TRD_AMT20}백만원</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">시가총액</th>
+									<td class="num">${MKT_VAL}억원</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">52주베타</th>
+									<td class="num">${YR_BETA} </td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">외국인지분율</th>
+									<td class="num">${FRG_RT}%</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">수익률<span class="span-sub">(1M/3M/6M/1Y)</span></th>
+									<td class="num">{{if ERN1>0}}<span class="cUp">+${ERN1}</span>{{else}}<span class="cDn">${ERN1}%</span>{{/if}} 
+								/ {{if ERN3>0}}<span class="cUp">+${ERN3}%</span>{{else}}<span class="cDn">${ERN3}%</span>{{/if}}
+								/ {{if ERN6>0}}<span class="cUp">+${ERN6}%</span>{{else}}<span class="cDn">${ERN6}%</span>{{/if}}
+								/ {{if ERN12>0}}<span class="cUp">+${ERN12}%</span>{{else}}<span class="cDn">${ERN12}%</span>{{/if}}
+									</td>
+								</tr>
+							</script>
+							<script type="text/javascript">
+								var status_data = {"CLS_PRC":"19,775","PRC_CHG":"325","ADJ_CHG":"1.67","YR_HIGH":"28,122","YR_LOW":"8,907","LIST_STK_CNT":"126,150","trD_QTY":"2,326,911","trD_AMT":"45,912","MKT_VAL":"24,946","YR_BETA":"1.00","AVG_TRD_QTY20":"3,791,507","AVG_TRD_AMT20":"76,265","FRG_RT":"0.17","ERN1":"5.16","ERN3":"-21.85","ERN6":"41.56","ERN12":"121.53"};
+								if(status_data){
+									$("#status_grid_template").tmpl(status_data).appendTo($("#status_grid_body"));
+								}else{
+									$("#status_grid_body").html("<tr><td colspan='2' style='border:none; height:234px; text-align:center'>데이터가 존재하지 않습니다.</td></tr>");
+								}
+							</script>
+							<!-- 시세 및 주주현황 -->
+
+							<!-- 주가/상대 수익률 추이 차트 -->
+							<div class="fl_ri half">
+								<div class="header-table empty"></div>
+								<div class="body">
+									<div class="gHead">
+										<h6 class="spanCT">주가/상대수익률</h6>
+										<div id="stock_price_relative_chart" class="chart-container full" data-highcharts-chart="0"><div class="highcharts-container" id="highcharts-0" style="position: relative; overflow: hidden; width: 337px; height: 247px; text-align: left; line-height: normal; z-index: 0; font-family: &quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif; font-size: 10px;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="337" height="247"><defs><clipPath id="highcharts-1"><rect rx="0" ry="0" fill="none" x="0" y="0" width="9999" height="247" stroke-width="0.000001"></rect></clipPath><clipPath id="highcharts-2"><rect fill="none" x="0" y="0" width="258" height="182"></rect></clipPath></defs><rect rx="5" ry="5" fill="#FFFFFF" x="0" y="0" width="337" height="247" stroke-width="0.000001"></rect><g class="highcharts-grid" zIndex="1"></g><g class="highcharts-grid" zIndex="1"><path fill="none" d="M 35 171.5 L 293 171.5" stroke="#C0C0C0" stroke-width="1" zIndex="1"></path><path fill="none" d="M 35 134.5 L 293 134.5" stroke="#C0C0C0" stroke-width="1" zIndex="1"></path><path fill="none" d="M 35 98.5 L 293 98.5" stroke="#C0C0C0" stroke-width="1" zIndex="1"></path><path fill="none" d="M 35 61.5 L 293 61.5" stroke="#C0C0C0" stroke-width="1" zIndex="1"></path><path fill="none" d="M 35 25.5 L 293 25.5" stroke="#C0C0C0" stroke-width="1" zIndex="1"></path><path fill="none" d="M 35 207.5 L 293 207.5" stroke="#C0C0C0" stroke-width="1" zIndex="1"></path></g><g class="highcharts-grid" zIndex="1"><path fill="none" d="M 35 171.5 L 293 171.5" stroke="#C0C0C0" stroke-width="1" zIndex="1"></path><path fill="none" d="M 35 134.5 L 293 134.5" stroke="#C0C0C0" stroke-width="1" zIndex="1"></path><path fill="none" d="M 35 98.5 L 293 98.5" stroke="#C0C0C0" stroke-width="1" zIndex="1"></path><path fill="none" d="M 35 61.5 L 293 61.5" stroke="#C0C0C0" stroke-width="1" zIndex="1"></path><path fill="none" d="M 35 25.5 L 293 25.5" stroke="#C0C0C0" stroke-width="1" zIndex="1"></path><path fill="none" d="M 35 207.5 L 293 207.5" stroke="#C0C0C0" stroke-width="1" zIndex="1"></path></g><g class="highcharts-axis" zIndex="2"><path fill="none" d="M 202.5 207 L 202.5 212" stroke="#C0D0E0" stroke-width="1"></path><path fill="none" d="M 287.5 207 L 287.5 212" stroke="#C0D0E0" stroke-width="1"></path><path fill="none" d="M 119.5 207 L 119.5 212" stroke="#C0D0E0" stroke-width="1"></path><path fill="none" d="M 35 207.5 L 293 207.5" stroke="#C0D0E0" stroke-width="1" zIndex="7" visibility="visible"></path></g><g class="highcharts-axis" zIndex="2"><text x="323" y="18" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;color:#000000;font-weight:normal;fill:#000000;" zIndex="7" text-anchor="end" visibility="visible"><tspan x="323">[원]</tspan></text></g><g class="highcharts-axis" zIndex="2"><text x="30" y="18" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;color:#000000;font-weight:normal;fill:#000000;" zIndex="7" text-anchor="end" visibility="visible"><tspan x="30">[%]</tspan></text></g><g class="highcharts-series-group" zIndex="3"><g class="highcharts-series" visibility="visible" zIndex="0.1" transform="translate(35,25)" clip-path="url(#highcharts-2)"><path fill="none" d="M 2.5294117647058822 149.4 L 4.614091790562378 149.2 L 5.308985132514544 148.8 L 6.00387847446671 148.3 L 6.698771816418875 148.2 L 7.39366515837104 147.7 L 9.478345184227537 147.4 L 10.173238526179702 146.9 L 10.868131868131869 147.4 L 11.563025210084033 146.8 L 12.257918552036198 146.9 L 14.342598577892694 146.6 L 15.03749191984486 146.4 L 15.732385261797026 146.4 L 16.42727860374919 146.5 L 17.122171945701357 147.1 L 19.206851971557853 146.8 L 19.90174531351002 146.8 L 20.596638655462183 146.5 L 21.29153199741435 145.6 L 26.850678733031675 144.8 L 28.93535875888817 145.3 L 29.630252100840334 145.5 L 30.3251454427925 144.7 L 31.020038784744667 144.1 L 31.71493212669683 144.1 L 33.79961215255333 143.5 L 34.494505494505496 143.4 L 35.189398836457656 142.9 L 35.88429217840982 143.2 L 36.57918552036199 142.7 L 38.66386554621849 142.2 L 39.35875888817065 142.3 L 40.053652230122815 141.9 L 40.74854557207498 142 L 41.44343891402715 141.7 L 43.52811893988365 141 L 44.22301228183581 141.6 L 44.91790562378797 142.4 L 45.61279896574014 142 L 46.30769230769231 142.3 L 48.3923723335488 141.6 L 49.087265675500966 141.6 L 49.78215901745313 141.3 L 50.4770523594053 141.1 L 51.171945701357465 142.7 L 53.25662572721396 142 L 53.951519069166125 143.3 L 54.64641241111829 143.7 L 55.34130575307046 142.7 L 56.036199095022624 144.4 L 58.12087912087912 144.3 L 58.81577246283128 144.1 L 59.51066580478345 143.2 L 60.20555914673562 143.1 L 60.90045248868778 143.6 L 62.985132514544276 143.7 L 63.68002585649644 143 L 64.37491919844861 142.5 L 65.06981254040078 142.6 L 65.76470588235294 141.9 L 67.84938590820944 141.4 L 68.5442792501616 141.5 L 69.23917259211376 141.5 L 69.93406593406593 141.8 L 70.6289592760181 141.3 L 72.7136393018746 142 L 73.40853264382676 142.9 L 74.10342598577893 142.1 L 74.7983193277311 142.6 L 75.49321266968326 142.3 L 77.57789269553975 141.6 L 78.27278603749191 141.4 L 78.96767937944408 141.3 L 80.35746606334841 140.9 L 82.44214608920491 140.3 L 83.13703943115708 140.1 L 85.22171945701358 139.1 L 87.30639948287006 137.7 L 88.00129282482223 137 L 88.6961861667744 136.8 L 89.39107950872656 136.8 L 90.08597285067873 136.4 L 92.17065287653523 136.1 L 92.8655462184874 135.7 L 93.56043956043956 135.2 L 94.25533290239173 134.7 L 94.9502262443439 134 L 97.03490627020038 133.3 L 97.72979961215255 133.7 L 98.42469295410471 133.4 L 99.11958629605688 132.8 L 99.81447963800905 132.5 L 101.89915966386555 133 L 102.59405300581771 131.6 L 103.28894634776988 130.8 L 103.98383968972203 130.5 L 104.6787330316742 129.9 L 106.7634130575307 132.9 L 107.45830639948286 129.7 L 108.15319974143503 129.1 L 108.8480930833872 130.8 L 109.54298642533936 131.4 L 111.62766645119586 129.4 L 112.32255979314803 129.2 L 113.01745313510018 128.8 L 113.71234647705235 127.5 L 114.40723981900452 127.1 L 118.57659987071752 125.7 L 119.27149321266968 124.5 L 121.35617323852618 124.2 L 122.05106658047833 123.1 L 122.7459599224305 122.1 L 123.44085326438267 120.4 L 124.13574660633483 120.8 L 126.9153199741435 124.9 L 127.61021331609567 131.2 L 128.30510665804783 126.1 L 129 126.2 L 131.0846800258565 129.6 L 131.77957336780867 126.6 L 132.47446670976083 125.5 L 133.169360051713 125.6 L 133.86425339366517 126.7 L 135.94893341952164 125.7 L 136.6438267614738 124.9 L 137.33872010342597 121.7 L 138.03361344537814 123.3 L 138.7285067873303 123.3 L 140.8131868131868 127.2 L 141.50808015513897 125.7 L 142.20297349709114 124.8 L 142.8978668390433 126.9 L 143.59276018099547 127 L 145.67744020685197 129 L 146.37233354880414 131.4 L 147.0672268907563 126.9 L 147.76212023270847 129.3 L 148.45701357466064 127.7 L 150.54169360051714 126.8 L 151.2365869424693 126.2 L 151.93148028442147 122.3 L 152.62637362637363 123.3 L 153.32126696832577 122.5 L 155.40594699418227 122.8 L 156.10084033613444 120.9 L 156.7957336780866 119.4 L 157.49062702003877 118.3 L 158.18552036199094 118.5 L 160.27020038784744 118.4 L 160.9650937297996 116.5 L 161.65998707175177 116.4 L 162.35488041370394 115.7 L 163.0497737556561 115.6 L 165.1344537815126 113.8 L 165.82934712346477 113.3 L 166.52424046541694 113.4 L 167.2191338073691 113.9 L 169.99870717517777 110.6 L 171.38849385908208 105 L 172.08338720103424 104.1 L 172.7782805429864 103.8 L 174.8629605688429 100 L 175.55785391079507 101.4 L 176.25274725274724 99.6 L 176.9476405946994 98.6 L 177.64253393665157 103.1 L 179.72721396250807 102.9 L 180.42210730446024 105.3 L 181.1170006464124 105.9 L 181.81189398836457 99.8 L 182.50678733031674 99.4 L 185.2863606981254 97 L 185.98125404007757 94.7 L 186.67614738202974 95.3 L 187.3710407239819 92.5 L 189.45572074983838 88.3 L 190.15061409179054 88.5 L 191.54040077569488 89.9 L 192.23529411764704 94.7 L 194.31997414350354 102.3 L 195.0148674854557 95.2 L 195.70976082740788 99.4 L 196.40465416936004 99.1 L 197.0995475113122 94.6 L 199.1842275371687 90 L 199.87912087912088 88.1 L 200.57401422107304 85.8 L 201.2689075630252 83.2 L 201.96380090497738 82.7 L 204.04848093083388 81.9 L 204.74337427278604 90.1 L 205.4382676147382 88.6 L 206.13316095669038 82.9 L 206.8280542986425 88.7 L 208.912734324499 89.7 L 209.60762766645118 88.6 L 210.30252100840335 90.7 L 210.9974143503555 98.1 L 211.69230769230768 93.2 L 213.77698771816418 93.8 L 214.47188106011635 98.7 L 215.1667744020685 103.2 L 215.86166774402068 102.4 L 216.55656108597285 100.1 L 218.64124111182934 108.7 L 219.3361344537815 107.6 L 220.03102779573368 102.6 L 220.72592113768584 108.1 L 223.5054945054945 111.1 L 224.20038784744668 108.4 L 224.89528118939882 107.8 L 225.59017453135098 104.7 L 226.28506787330315 109.3 L 228.36974789915965 108.5 L 229.06464124111181 117.1 L 229.75953458306398 121.1 L 230.45442792501615 122.6 L 231.14932126696831 109.9 L 233.23400129282481 114.4 L 233.92889463477698 113.6 L 234.62378797672915 110.6 L 235.3186813186813 114.9 L 236.01357466063348 115.2 L 238.09825468648998 115 L 238.79314802844215 114.3 L 239.4880413703943 111.7 L 240.18293471234648 109.1 L 240.87782805429865 107.1 L 243.65740142210728 108.1 L 244.35229476405945 112.7 L 245.04718810601162 108 L 245.74208144796378 106.6 L 247.82676147382028 109.6 L 248.52165481577245 109 L 249.21654815772462 108.3 L 249.91144149967678 107.3 L 250.60633484162895 108.9 L 252.69101486748545 109 L 253.38590820943762 108.5 L 254.08080155138978 111.3 L 254.77569489334195 111.2 L 255.47058823529412 110" stroke="#216BDE" stroke-width="2" zIndex="1"></path></g><g class="highcharts-markers" visibility="visible" zIndex="0.1" transform="translate(35,25)" clip-path="none"></g><g class="highcharts-series" visibility="visible" zIndex="0.1" transform="translate(35,25)" clip-path="url(#highcharts-2)"><path fill="none" d="M 2.5294117647058822 109.2 L 4.614091790562378 109.3 L 5.308985132514544 109.3 L 6.00387847446671 110.5 L 6.698771816418875 114.8 L 7.39366515837104 114.5 L 9.478345184227537 112 L 10.173238526179702 109.3 L 10.868131868131869 111.5 L 11.563025210084033 110.3 L 12.257918552036198 109 L 14.342598577892694 106.9 L 15.03749191984486 107.3 L 15.732385261797026 104.6 L 16.42727860374919 105 L 17.122171945701357 99.9 L 19.206851971557853 103.5 L 19.90174531351002 102.1 L 20.596638655462183 103.4 L 21.29153199741435 104.1 L 26.850678733031675 100.4 L 28.93535875888817 104.9 L 29.630252100840334 104.4 L 30.3251454427925 108.1 L 31.020038784744667 114.5 L 31.71493212669683 114 L 33.79961215255333 115.6 L 34.494505494505496 114.6 L 35.189398836457656 117.7 L 35.88429217840982 116.2 L 36.57918552036199 124.8 L 38.66386554621849 132.6 L 39.35875888817065 130.3 L 40.053652230122815 134.1 L 40.74854557207498 136.6 L 41.44343891402715 136.3 L 43.52811893988365 143.4 L 44.22301228183581 137.2 L 44.91790562378797 129.9 L 45.61279896574014 126.9 L 46.30769230769231 119.5 L 48.3923723335488 128 L 49.087265675500966 133.7 L 49.78215901745313 135.9 L 50.4770523594053 136.2 L 51.171945701357465 136.8 L 53.25662572721396 137.6 L 53.951519069166125 137 L 54.64641241111829 141 L 55.34130575307046 135.6 L 56.036199095022624 139.1 L 58.12087912087912 136.1 L 58.81577246283128 134.7 L 59.51066580478345 136.9 L 60.20555914673562 139.3 L 60.90045248868778 137.4 L 62.985132514544276 138.5 L 63.68002585649644 138.5 L 64.37491919844861 138.2 L 65.06981254040078 138.4 L 65.76470588235294 138.5 L 67.84938590820944 139.3 L 68.5442792501616 139.2 L 69.23917259211376 137.3 L 69.93406593406593 137.6 L 70.6289592760181 139.3 L 72.7136393018746 138.7 L 73.40853264382676 138.4 L 74.10342598577893 134.7 L 74.7983193277311 131.7 L 75.49321266968326 130.8 L 77.57789269553975 133.2 L 78.27278603749191 132.7 L 78.96767937944408 128.3 L 80.35746606334841 125.9 L 82.44214608920491 130.4 L 83.13703943115708 127 L 85.22171945701358 125.1 L 87.30639948287006 126.2 L 88.00129282482223 126.8 L 88.6961861667744 126.4 L 89.39107950872656 127.1 L 90.08597285067873 126.8 L 92.17065287653523 127.5 L 92.8655462184874 131.4 L 93.56043956043956 128.9 L 94.25533290239173 132.5 L 94.9502262443439 128.7 L 97.03490627020038 127.6 L 97.72979961215255 130.7 L 98.42469295410471 129.1 L 99.11958629605688 126.9 L 99.81447963800905 128.2 L 101.89915966386555 128.9 L 102.59405300581771 128.4 L 103.28894634776988 128.9 L 103.98383968972203 132.7 L 104.6787330316742 124.7 L 106.7634130575307 127.3 L 107.45830639948286 130.3 L 108.15319974143503 133.4 L 108.8480930833872 128.5 L 109.54298642533936 125.9 L 111.62766645119586 128 L 112.32255979314803 124.9 L 113.01745313510018 127.3 L 113.71234647705235 131.9 L 114.40723981900452 124.8 L 118.57659987071752 128.1 L 119.27149321266968 130 L 121.35617323852618 130.2 L 122.05106658047833 132.1 L 122.7459599224305 133.6 L 123.44085326438267 139.2 L 124.13574660633483 136.9 L 126.9153199741435 132.7 L 127.61021331609567 123.5 L 128.30510665804783 121.7 L 129 123 L 131.0846800258565 124 L 131.77957336780867 120.7 L 132.47446670976083 116.6 L 133.169360051713 114.4 L 133.86425339366517 117.3 L 135.94893341952164 112.3 L 136.6438267614738 113.4 L 137.33872010342597 109.7 L 138.03361344537814 108.4 L 138.7285067873303 110.7 L 140.8131868131868 111.9 L 141.50808015513897 112.3 L 142.20297349709114 113 L 142.8978668390433 115.6 L 143.59276018099547 114.3 L 145.67744020685197 118.6 L 146.37233354880414 120.8 L 147.0672268907563 117.6 L 147.76212023270847 116.9 L 148.45701357466064 114.7 L 150.54169360051714 113.4 L 151.2365869424693 111.8 L 151.93148028442147 110.5 L 152.62637362637363 111.4 L 153.32126696832577 111.6 L 155.40594699418227 108.4 L 156.10084033613444 104.8 L 156.7957336780866 102.8 L 157.49062702003877 105.3 L 158.18552036199094 103.8 L 160.27020038784744 105.7 L 160.9650937297996 104.3 L 161.65998707175177 106.5 L 162.35488041370394 104.8 L 163.0497737556561 104.4 L 165.1344537815126 99.9 L 165.82934712346477 97.9 L 166.52424046541694 104.1 L 167.2191338073691 99.3 L 169.99870717517777 101.1 L 171.38849385908208 91.5 L 172.08338720103424 93.2 L 172.7782805429864 91.6 L 174.8629605688429 87.9 L 175.55785391079507 83 L 176.25274725274724 86.5 L 176.9476405946994 89.8 L 177.64253393665157 84.1 L 179.72721396250807 84.8 L 180.42210730446024 83.4 L 181.1170006464124 82.8 L 181.81189398836457 85 L 182.50678733031674 84.5 L 185.2863606981254 81.7 L 185.98125404007757 78.9 L 186.67614738202974 79.5 L 187.3710407239819 82.5 L 189.45572074983838 75.2 L 190.15061409179054 77.6 L 191.54040077569488 74.9 L 192.23529411764704 72.4 L 194.31997414350354 76 L 195.0148674854557 70.8 L 195.70976082740788 72.9 L 196.40465416936004 74.1 L 197.0995475113122 67.7 L 199.1842275371687 67.8 L 199.87912087912088 67.6 L 200.57401422107304 61.6 L 201.2689075630252 58.2 L 201.96380090497738 53.3 L 204.04848093083388 52.1 L 204.74337427278604 36 L 205.4382676147382 49 L 206.13316095669038 43.8 L 206.8280542986425 44.1 L 208.912734324499 51 L 209.60762766645118 49.3 L 210.30252100840335 50.9 L 210.9974143503555 52.6 L 211.69230769230768 51.9 L 213.77698771816418 53.9 L 214.47188106011635 59 L 215.1667744020685 60 L 215.86166774402068 57.1 L 216.55656108597285 53.8 L 218.64124111182934 67.5 L 219.3361344537815 61.3 L 220.03102779573368 57.7 L 220.72592113768584 63 L 223.5054945054945 59.8 L 224.20038784744668 56.9 L 224.89528118939882 56.6 L 225.59017453135098 58 L 226.28506787330315 60.5 L 228.36974789915965 59.6 L 229.06464124111181 66.5 L 229.75953458306398 68.4 L 230.45442792501615 77.7 L 231.14932126696831 56.1 L 233.23400129282481 65.3 L 233.92889463477698 67.6 L 234.62378797672915 64 L 235.3186813186813 75.8 L 236.01357466063348 73.9 L 238.09825468648998 77.4 L 238.79314802844215 74.8 L 239.4880413703943 73.8 L 240.18293471234648 72.7 L 240.87782805429865 70.3 L 243.65740142210728 68.6 L 244.35229476405945 71.1 L 245.04718810601162 65.4 L 245.74208144796378 57.7 L 247.82676147382028 64.2 L 248.52165481577245 63.4 L 249.21654815772462 63.7 L 249.91144149967678 64.3 L 250.60633484162895 67.5 L 252.69101486748545 71.5 L 253.38590820943762 68.7 L 254.08080155138978 67.1 L 254.77569489334195 67.9 L 255.47058823529412 67.6" stroke="#CC3300" stroke-width="2" zIndex="1"></path></g><g class="highcharts-markers" visibility="visible" zIndex="0.1" transform="translate(35,25)" clip-path="none"></g></g><g class="highcharts-legend" zIndex="7" transform="translate(19,220)"><g zIndex="1" clip-path="url(#highcharts-1)"><g><g class="highcharts-legend-item" zIndex="1" transform="translate(8,3)"><path fill="none" d="M 0 11 L 12 11" stroke-width="2" stroke="#CC3300"></path><text x="17" y="15" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:12px;cursor:pointer;color:#3E576F;fill:#3E576F;" text-anchor="start" zIndex="2"><tspan x="17">to KOSPI(좌)</tspan></text></g><g class="highcharts-legend-item" zIndex="1" transform="translate(158,3)"><path fill="none" d="M 0 11 L 12 11" stroke-width="2" stroke="#216BDE"></path><text x="17" y="15" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:12px;cursor:pointer;color:#3E576F;fill:#3E576F;" text-anchor="start" zIndex="2"><tspan x="17">TIGER 배당커버드콜액티브</tspan></text></g></g></g></g><g class="highcharts-axis-labels" zIndex="7"><text x="119.52682611506141" y="221" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="middle"><tspan x="119.52682611506141">26/01/01</tspan></text><text x="202.91402714932127" y="221" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="middle"><tspan x="202.91402714932127">26/05/01</tspan></text><text x="288.3859082094376" y="221" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="middle"><tspan x="288.3859082094376">26/09/01</tspan></text></g><g class="highcharts-axis-labels" zIndex="7"><text x="301" y="213.6" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;width:109px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="start"><tspan x="301">0</tspan></text><text x="301" y="177.2" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;width:109px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="start"><tspan x="301">10,000</tspan></text><text x="301" y="140.79999999999998" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;width:109px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="start"><tspan x="301">20,000</tspan></text><text x="301" y="104.4" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;width:109px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="start"><tspan x="301">30,000</tspan></text><text x="301" y="68" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;width:109px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="start"><tspan x="301">40,000</tspan></text><text x="301" y="31.6" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;width:109px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="start"><tspan x="301">50,000</tspan></text></g><g class="highcharts-axis-labels" zIndex="7"><text x="27" y="213.6" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;width:109px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="end"><tspan x="27">-10.00</tspan></text><text x="27" y="177.2" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;width:109px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="end"><tspan x="27">-5.00</tspan></text><text x="27" y="140.79999999999998" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;width:109px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="end"><tspan x="27">0.00</tspan></text><text x="27" y="104.4" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;width:109px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="end"><tspan x="27">5.00</tspan></text><text x="27" y="68" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;width:109px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="end"><tspan x="27">10.00</tspan></text><text x="27" y="31.6" style="font-family:&quot;맑은 고딕&quot;, Tahoma, &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Verdana, Arial, Helvetica, sans-serif;font-size:11px;width:109px;color:#000;line-height:14px;font-weight:normal;fill:#000;" text-anchor="end"><tspan x="27">15.00</tspan></text></g><g class="highcharts-tooltip" zIndex="8" style="padding:0;white-space:nowrap;" visibility="hidden"><rect rx="5" ry="5" fill="none" x="0" y="0" width="10" height="10" stroke-width="5" fill-opacity="0.85" isShadow="true" stroke="black" stroke-opacity="0.049999999999999996" transform="translate(1, 1)"></rect><rect rx="5" ry="5" fill="none" x="0" y="0" width="10" height="10" stroke-width="3" fill-opacity="0.85" isShadow="true" stroke="black" stroke-opacity="0.09999999999999999" transform="translate(1, 1)"></rect><rect rx="5" ry="5" fill="none" x="0" y="0" width="10" height="10" stroke-width="1" fill-opacity="0.85" isShadow="true" stroke="black" stroke-opacity="0.15" transform="translate(1, 1)"></rect><rect rx="5" ry="5" fill="rgb(255,255,255)" x="0" y="0" width="10" height="10" stroke-width="2" fill-opacity="0.85"></rect></g><g class="highcharts-tracker" zIndex="9"><g visibility="visible" zIndex="1" transform="translate(35,25)" clip-path="url(#highcharts-2)"><path fill="none" d="M -7.470588235294118 149.4 L 2.5294117647058822 149.4 L 4.614091790562378 149.2 L 5.308985132514544 148.8 L 6.00387847446671 148.3 L 6.698771816418875 148.2 L 7.39366515837104 147.7 L 9.478345184227537 147.4 L 10.173238526179702 146.9 L 10.868131868131869 147.4 L 11.563025210084033 146.8 L 12.257918552036198 146.9 L 14.342598577892694 146.6 L 15.03749191984486 146.4 L 15.732385261797026 146.4 L 16.42727860374919 146.5 L 17.122171945701357 147.1 L 19.206851971557853 146.8 L 19.90174531351002 146.8 L 20.596638655462183 146.5 L 21.29153199741435 145.6 L 26.850678733031675 144.8 L 28.93535875888817 145.3 L 29.630252100840334 145.5 L 30.3251454427925 144.7 L 31.020038784744667 144.1 L 31.71493212669683 144.1 L 33.79961215255333 143.5 L 34.494505494505496 143.4 L 35.189398836457656 142.9 L 35.88429217840982 143.2 L 36.57918552036199 142.7 L 38.66386554621849 142.2 L 39.35875888817065 142.3 L 40.053652230122815 141.9 L 40.74854557207498 142 L 41.44343891402715 141.7 L 43.52811893988365 141 L 44.22301228183581 141.6 L 44.91790562378797 142.4 L 45.61279896574014 142 L 46.30769230769231 142.3 L 48.3923723335488 141.6 L 49.087265675500966 141.6 L 49.78215901745313 141.3 L 50.4770523594053 141.1 L 51.171945701357465 142.7 L 53.25662572721396 142 L 53.951519069166125 143.3 L 54.64641241111829 143.7 L 55.34130575307046 142.7 L 56.036199095022624 144.4 L 58.12087912087912 144.3 L 58.81577246283128 144.1 L 59.51066580478345 143.2 L 60.20555914673562 143.1 L 60.90045248868778 143.6 L 62.985132514544276 143.7 L 63.68002585649644 143 L 64.37491919844861 142.5 L 65.06981254040078 142.6 L 65.76470588235294 141.9 L 67.84938590820944 141.4 L 68.5442792501616 141.5 L 69.23917259211376 141.5 L 69.93406593406593 141.8 L 70.6289592760181 141.3 L 72.7136393018746 142 L 73.40853264382676 142.9 L 74.10342598577893 142.1 L 74.7983193277311 142.6 L 75.49321266968326 142.3 L 77.57789269553975 141.6 L 78.27278603749191 141.4 L 78.96767937944408 141.3 L 80.35746606334841 140.9 L 82.44214608920491 140.3 L 83.13703943115708 140.1 L 85.22171945701358 139.1 L 87.30639948287006 137.7 L 88.00129282482223 137 L 88.6961861667744 136.8 L 89.39107950872656 136.8 L 90.08597285067873 136.4 L 92.17065287653523 136.1 L 92.8655462184874 135.7 L 93.56043956043956 135.2 L 94.25533290239173 134.7 L 94.9502262443439 134 L 97.03490627020038 133.3 L 97.72979961215255 133.7 L 98.42469295410471 133.4 L 99.11958629605688 132.8 L 99.8144796380

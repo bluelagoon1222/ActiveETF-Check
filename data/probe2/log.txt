@@ -1,0 +1,34 @@
+naver list ok 1167 domestic active-named: 89
+test code: 472150 ['472150', '445290', '494890']
+naver basic 200 3418
+naver integration 200 8958
+naver etfAnalysis 200 4391
+naver etfComposition 404 4115
+naver etfPortfolio 404 4115
+naver composition 404 4115
+naver portfolio 404 4115
+naver holdings 404 4115
+naver etfHoldings 404 4115
+naver etfConstituents 404 4115
+naver constituents 404 4115
+naver etfAnalysis/portfolio 404 4115
+naver etfCu 404 4115
+GET https://m.stock.naver.com/api/etf/472150/basic 200 6065
+GET https://m.stock.naver.com/api/etf/472150/portfolio 404 4115
+GET https://api.stock.naver.com/etf/472150/basic 409 62
+GET https://api.stock.naver.com/etf/472150/portfolio 404 141
+GET https://navercomp.wisereport.co.kr/v2/ETF/index.aspx?cmp_cd=472150 200 59279
+GET https://navercomp.wisereport.co.kr/v2/ETF/ETFPortfolio.aspx?cmp_cd=472150 200 1130
+GET https://finance.naver.com/item/coinfo.naver?code=472150 200 111295
+GET https://www.etfcheck.co.kr/mobile/etpitem/472150/pdf 200 4459
+GET https://www.etfcheck.co.kr/mobile/api/etp/472150/pdf 200 4459
+GET https://www.etfcheck.co.kr/api/etp/472150/pdf 200 4459
+GET https://www.etfcheck.co.kr/mobile/api/etpitem/472150/pdf 200 4459
+playwright etfcheck_pdf responses: 30 html: 147042
+playwright etfcheck_item responses: 37 html: 142306
+playwright wisereport responses: 3 html: 207233
+playwright naver_m_etf responses: 28 html: 118696
+playwright seibro_etf responses: 32 html: 529972
+playwright kodex_list responses: 28 html: 2181600
+playwright koact_home responses: 55 html: 107938
+playwright timefolio_etf responses: 0 html: 195
