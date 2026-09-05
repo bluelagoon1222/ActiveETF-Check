@@ -636,4 +636,11 @@ if __name__ == "__main__":
         log("FATAL:", repr(e))
         save_json(STATUS_PATH, {"ok": False, "error": repr(e),
                                 "generated_at": dt.datetime.now(KST).strftime("%Y-%m-%d %H:%M KST")}, compact=False)
+        # diagnostics: which data sources are reachable from this runner? -> data/probe.json
+        try:
+            import subprocess
+            subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "probe.py")],
+                           timeout=600, check=False)
+        except Exception as pe:  # noqa
+            log("probe failed:", pe)
         sys.exit(1)
