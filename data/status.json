@@ -1,5 +1,5 @@
 {
  "ok": false,
- "error": "RuntimeError('KRX call failed permanently: bld=dbms/MDC/STAT/standard/MDCSTAT04601 err=HTTP 400')",
- "generated_at": "2026-09-05 20:08 KST"
+ "error": "RuntimeError(\"GET failed https://www.etfcheck.co.kr/user/common/getEtpMast None: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))\")",
+ "generated_at": "2026-09-05 20:26 KST"
 }
