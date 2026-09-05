@@ -1,0 +1,376 @@
+script srcs: 13
+fetched js https://www.etfcheck.co.kr/assets/js/koscom/chart.js 4459
+fetched js https://www.etfcheck.co.kr/assets/js/axios.min.js 12949
+fetched js https://www.etfcheck.co.kr/assets/js/es6-promise.auto.min.js 8780
+fetched js https://www.etfcheck.co.kr/assets/js/data_config.js 1407
+fetched js https://www.etfcheck.co.kr/js/build.js 5323298
+endpoints found: 220
+  EP /api/user/etp/getAllEtfSearchByPdf
+  EP /api/user/etp/getAllEtfSearchByPdfIncAmountTop1
+  EP /api/user/etp/getAllEtfSearchByPdfInfo
+  EP /api/user/etp/getAllEtfSearchByPdfWeightTop1
+  EP /api/user/etp/getEtfPdfRankListWeightAll
+  EP /api/user/etp/getEtnPdfRankListWeightAll
+  EP /etpitem/
+  EP /mobile
+  EP /mobile/eiti/intro
+  EP /mobile/eiti/result/
+  EP /mobile/eiti/result/meta/
+  EP /mobile/news/
+  EP /mobile/report/invest/detail/
+  EP /mobile/report/monthly/
+  EP /mobile/report/weekly/
+  EP /mobile/searchPdf/SIVB
+  EP /mobile/searchPdfResult/
+  EP /stock/etp/getEtfTotalExpenseRatio
+  EP /stock/etp/getEtpInvestorHist
+  EP /stock/etp/getEtpInvestorHistList
+  EP /stock/etp/getEtpRankListInvestor2
+  EP /stock/etp/getIssue52WHigh
+  EP /stock/etp/getIssue52WLow
+  EP /stock/etp/getIssueContinuousFall
+  EP /stock/etp/getIssueContinuousRise
+  EP /stock/etp/get_m095_isu_mem_basic
+  EP /stock/getIntraLongTerm
+  EP /user/common/getEtpCtgLarge
+  EP /user/common/getEtpCtgMap
+  EP /user/common/getEtpCtgMiddle
+  EP /user/common/getEtpMast
+  EP /user/common/getGlobalEtfMast
+  EP /user/common/getJangGubun
+  EP /user/common/getLastBusinessDay
+  EP /user/common/getPapagoTranslation
+  EP /user/cust/getAdIpo
+  EP /user/cust/getAdPopupList
+  EP /user/cust/getbannerInfo
+  EP /user/cust/geteventcontent
+  EP /user/cust/geteventlist
+  EP /user/cust/getfaqcontent
+  EP /user/cust/getfaqlist
+  EP /user/cust/getnoticecontent
+  EP /user/cust/getnoticelist
+  EP /user/eiti/getquestionlist
+  EP /user/eiti/getresult
+  EP /user/eiti/saveanswer
+  EP /user/etp/getAllStockInfo
+  EP /user/etp/getCompareEtfLog
+  EP /user/etp/getDerivativeItemInfo
+  EP /user/etp/getEtfPdfRankListWeight
+  EP /user/etp/getEtfPdfRate
+  EP /user/etp/getEtfRankListWeight
+  EP /user/etp/getEtnPdfRankListWeight
+  EP /user/etp/getEtnRankListWeight
+  EP /user/etp/getEtpAumVariation
+  EP /user/etp/getEtpDesc
+  EP /user/etp/getEtpDiffHistAvg
+  EP /user/etp/getEtpFeeHist
+  EP /user/etp/getEtpInflowByType
+  EP /user/etp/getEtpInflowList
+  EP /user/etp/getEtpInflowTermHist
+  EP /user/etp/getEtpInfoByCtg
+  EP /user/etp/getEtpItemCash
+  EP /user/etp/getEtpItemCashHist
+  EP /user/etp/getEtpItemCashMonthly
+  EP /user/etp/getEtpItemCashYearly
+  EP /user/etp/getEtpItemDiffInfo
+  EP /user/etp/getEtpItemDivOutline
+  EP /user/etp/getEtpItemInfo
+  EP /user/etp/getEtpItemOutline
+  EP /user/etp/getEtpItemOutlineAssetRank
+  EP /user/etp/getEtpItemOutlineAssetRank2
+  EP /user/etp/getEtpItemRecommendList
+  EP /user/etp/getEtpItemTaxBaseHist
+  EP /user/etp/getEtpLatestFee
+  EP /user/etp/getEtpListByCtg
+  EP /user/etp/getEtpMainTIekcerList
+  EP /user/etp/getEtpMajorItemCurrent
+  EP /user/etp/getEtpMajorItemInflow
+  EP /user/etp/getEtpMajorItemSise
+  EP /user/etp/getEtpMajorItemVolume
+  EP /user/etp/getEtpNavDate
+  EP /user/etp/getEtpNavTermHist
+  EP /user/etp/getEtpRankItemCash
+  EP /user/etp/getEtpRankItemCashMonthly
+  EP /user/etp/getEtpRankListAumVariation
+  EP /user/etp/getEtpRankListCash
+  EP /user/etp/getEtpRankListDisparate
+  EP /user/etp/getEtpRankListInflow
+  EP /user/etp/getEtpRankListInflow2
+  EP /user/etp/getEtpRankListInvestor
+  EP /user/etp/getEtpRankListMarketCap
+  EP /user/etp/getEtpRankListVolume
+  EP /user/etp/getEtpRankListYield
+  EP /user/etp/getEtpScreenerLog
+  EP /user/etp/getEtpScreenerMobileList3
+  EP /user/etp/getEtpScreenerMobileListPdfSector
+  EP /user/etp/getEtpSector
+  EP /user/etp/getEtpTermHist
+  EP /user/etp/getEtpVolumeByTime
+  EP /user/etp/getEtpYieldList
+  EP /user/etp/getFxInfo
+  EP /user/etp/getGlobalEtfDiffHist
+  EP /user/etp/getGlobalEtfDiffHistAvg
+  EP /user/etp/getGlobalEtfFeeHist
+  EP /user/etp/getGlobalEtfInflowList
+  EP /user/etp/getGlobalEtfInflowTermHist
+  EP /user/etp/getGlobalEtfInfoByCtg
+  EP /user/etp/getGlobalEtfItemAnnualCash
+  EP /user/etp/getGlobalEtfItemCashFreq
+  EP /user/etp/getGlobalEtfItemCashHist
+  EP /user/etp/getGlobalEtfItemCashMonthly
+  EP /user/etp/getGlobalEtfItemCashRefi
+  EP /user/etp/getGlobalEtfItemCashYearly
+  EP /user/etp/getGlobalEtfItemDivOutline
+  EP /user/etp/getGlobalEtfItemInfo
+  EP /user/etp/getGlobalEtfItemOutlineAssetRank
+  EP /user/etp/getGlobalEtfItemOutlineAssetRank2
+  EP /user/etp/getGlobalEtfItemRecommendList
+  EP /user/etp/getGlobalEtfListByCtg
+  EP /user/etp/getGlobalEtfListWeight
+  EP /user/etp/getGlobalEtfPdf
+  EP /user/etp/getGlobalEtfPdfDetail
+  EP /user/etp/getGlobalEtfRankItemCash
+  EP /user/etp/getGlobalEtfRankItemCashMonthly
+  EP /user/etp/getGlobalEtfRankListAumVariation
+  EP /user/etp/getGlobalEtfRankListCash
+  EP /user/etp/getGlobalEtfRankListDisparate
+  EP /user/etp/getGlobalEtfRankListDiv
+  EP /user/etp/getGlobalEtfRankListInflow
+  EP /user/etp/getGlobalEtfRankListMarketCap
+  EP /user/etp/getGlobalEtfRankListVolume
+  EP /user/etp/getGlobalEtfRankListYield
+  EP /user/etp/getGlobalEtfTermHist
+  EP /user/etp/getGlobalEtfTriHist
+  EP /user/etp/getGlobalEtfYieldList
+  EP /user/etp/getGlobalIssueEtp
+  EP /user/etp/getGlobalIssueNewItem
+  EP /user/etp/getGlobalIssueRecentDiv
+  EP /user/etp/getIssueEtp
+  EP /user/etp/getIssueNewItem
+  EP /user/etp/getIssueRecentDiv
+  EP /user/etp/getKospiItemInfo
+  EP /user/etp/getLatestMonthlyReport
+  EP /user/etp/getLatestWeeklyReport
+  EP /user/etp/getMarketCapRank
+  EP /user/etp/getMonthlyReportAsset
+  EP /user/etp/getMonthlyReportBasic
+  EP /user/etp/getMonthlyReportCompany
+  EP /user/etp/getMonthlyReportHotItem
+  EP /user/etp/getMonthlyReportHotTheme
+  EP /user/etp/getMonthlyReportInvestor
+  EP /user/etp/getMonthlyReportInvestorRank
+  EP /user/etp/getMonthlyReportList
+  EP /user/etp/getMonthlyReportList2
+  EP /user/etp/getMonthlyReportList3
+  EP /user/etp/getMonthlyReportNew
+  EP /user/etp/getMonthlyReportUpdown
+  EP /user/etp/getScaleCtgName
+  EP /user/etp/getSearchPdfLog
+  EP /user/etp/getSimpleEtpHist
+  EP /user/etp/getSimpleEtpIntra1
+  EP /user/etp/getWeeklyReportAsset
+  EP /user/etp/getWeeklyReportAssetTop
+  EP /user/etp/getWeeklyReportBasic
+  EP /user/etp/getWeeklyReportCompany
+  EP /user/etp/getWeeklyReportHot
+  EP /user/etp/getWeeklyReportInvestor
+  EP /user/etp/getWeeklyReportList
+  EP /user/etp/getWeeklyReportNew
+  EP /user/etp/getWeeklyReportRank
+  EP /user/etp/insertEtpScreenerLog
+  EP /user/member/checkEventSNSLog
+  EP /user/member/checkEventSignupLog
+  EP /user/member/checkFavorItem
+  EP /user/member/checkUserAuth
+  EP /user/member/checkUserEmail
+  EP /user/member/checkUserNickname
+  EP /user/member/checkUserToken
+  EP /user/member/deleteFavorGroup
+  EP /user/member/deleteTalk
+  EP /user/member/deleteTalkLike
+  EP /user/member/getFavorGroupItemList
+  EP /user/member/getFavorGroupList
+  EP /user/member/getFavorItemList
+  EP /user/member/getMyOpinionsSummary
+  EP /user/member/getTalkInvestDist
+  EP /user/member/getTalkLikeList
+  EP /user/member/getTalkList
+  EP /user/member/insertAdPopupClickLog
+  EP /user/member/insertAdPopupLog
+  EP /user/member/insertBannerClickLog
+  EP /user/member/insertCompareLog
+  EP /user/member/insertEtpInfoLog
+  EP /user/member/insertEventClickLog
+  EP /user/member/insertEventSNSLog
+  EP /user/member/insertEventSinupLog
+  EP /user/member/insertFavorGroup
+  EP /user/member/insertNewsLog
+  EP /user/member/insertReportLog
+  EP /user/member/insertSearchLog
+  EP /user/member/insertTalkLike
+  EP /user/member/insertUserAppLog
+  EP /user/member/insertUserAppLogExtend
+  EP /user/member/rearrangeFavorItemOne
+  EP /user/member/saveUserInfo
+  EP /user/member/sendUserAuth
+  EP /user/member/updateBannerViewCount
+  EP /user/member/updateFavorGroup
+  EP /user/member/updateFavorItemOrder
+  EP /user/member/updateTalkLikeCount
+  EP /user/member/updateUserPassword
+  EP /user/member/userLogin
+  EP /user/member/userLogout
+  EP /user/member/userSignup
+  EP /user/member/userSnsLogin
+  EP /user/member/userWithdraw
+  EP /user/member/writeReplyTalk
+  EP /user/member/writeTalk
+GUESS HIT /api/user/etp/getEtfPdfRankListWeightAll get {'code': '0163Y0'} {"success":true,"results":[{"F16013":"0163Y0","F12506":"20260904","F16012":"KR70163Y0007","F16316":"KR7095610002","F1600
+playwright pdf etfcheck responses: 34 html 186230
+    GET 302 https://www.etfcheck.co.kr/mobile/etpitem/0163Y0/pdf | post:  | body: 
+    GET 200 https://www.etfcheck.co.kr/?redirect=%2Fmobile%2Fetpitem%2F0163Y0%2Fpdf | post:  | body: <!DOCTYPE html> <html lang="ko" class="onWide">  <head>     <meta charset="utf-8">     <meta na
+    GET 200 https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-2452625032731133&output=html&adk=1812271804&adf=3025194257&abgtt=1&lmt=1741588882&plat=3% | post:  | body: <html><body style="background-color:transparent"></body></html>                                     
+    POST 204 https://www.google-analytics.com/g/collect?v=2&tid=G-8W6PNHQZTR&gtm=45je6921v885000026za200zd885000026xf1&_p=1788606800872&gcd=13l3l3l3l1l1&npa=0&dma= | post:  | body: 
+    GET 200 blob:https://www.etfcheck.co.kr/a3075cbb-0994-40ca-8673-8c852f25a6b3 | post:  | body: (()=>{var e={636:function(e,t,r){var n;n=function(){return(()=>{var e=[,(e,t,r)=>{"use strict";Objec
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpCtgLarge | post:  | body: {"success":true,"results":[{"ctg_hidden_code":"01","ctg_large_code":"0101","ctg_large_name":"주식","ct
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpCtgMiddle | post:  | body: {"success":true,"results":[{"ctg_hidden_code":"01","ctg_large_code":"0101","ctg_code":"0101001","ctg
+    GET 200 https://www.etfcheck.co.kr/stock/etp/getEtfTotalExpenseRatio | post:  | body: {"success":true,"results":[{"F16013":"0000D0","F35188":"0.390","F35190":"0.47","F35192":"0.4746"},{"
+    GET 200 https://www.etfcheck.co.kr/user/cust/getAdPopupList?testSuffix= | post:  | body: {"success":true,"results":[],"date":1788606801888}
+    GET 302 https://www.etfcheck.co.kr/version.json?t=1788606800991 | post:  | body: 
+    GET 200 https://www.etfcheck.co.kr/user/common/getLastBusinessDay?date=20260905 | post:  | body: {"success":true,"results":[{"F12506":"20260904"},{"F12506":"20260903"}],"date":1788606801992}
+    GET 200 https://www.etfcheck.co.kr/user/common/getJangGubun | post:  | body: {"success":true,"results":[{"F11011":"20260904","F11012":"31000000","F15001":"6687.21"}],"date":1788
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpMainTIekcerList?dataInfo[]=%7B%22type%22:%22index%22,%22name%22:%22KOSPI%22,%22code%22:%221%22,%22marketId%2 | post:  | body: {"success":true,"results":[{"F16013":"1","F16002":"코스피","F15001":"6687.21000","F15004":"1.64","F1547
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpScreenerLog | post:  | body: {"success":true,"results":[{"ctg_large_name":null,"ctg_name":"월배당","keyword_type":"2","keyword":"060
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/etc/etp/getBreakingNewsList?timeDiff=7200 | post:  | body: {"success":true,"results":[],"date":1788606802319}
+    GET 200 https://www.etfcheck.co.kr/?redirect=%2Fversion.json%3Ft%3D1788606800991 | post:  | body: <!DOCTYPE html> <html lang="ko" class="onWide">  <head>     <meta charset="utf-8">     <meta na
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/etc/etp/getNewsList?gubun=1&limit=14 | post:  | body: {"success":true,"results":[{"F16013":"200N00000404","F15531":20260905,"F15532":200005,"F15503":"머스크,
+    POST 200 https://www.etfcheck.co.kr/user/member/updateBannerViewCount | post: {"banner":"mrjs_1_1_20251208","type":1} | body: {"success":true,"results":{"fieldCount":0,"affectedRows":2,"insertId":0,"serverStatus":2,"warningCou
+    POST 200 https://www.etfcheck.co.kr/user/member/insertUserAppLog | post: {"email":"","path":"/mobile/main3","isPC":0,"os":"web"} | body: {"success":true,"results":{"fieldCount":0,"affectedRows":1,"insertId":149566604,"serverStatus":2,"wa
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpMast | post:  | body: {"success":true,"results":[{"F16012":"KR7451060008","F16013":"451060","F16002":"1Q 200액티브","F16493":
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpCtgMap | post:  | body: {"success":true,"results":[{"F16012":"0P0001YK57","F16013":null,"domestic_flag":0,"ctgInfo":"06|0606
+    GET 200 https://www.etfcheck.co.kr/user/common/getGlobalEtfMast | post:  | body: {"success":true,"results":[{"MSTARID":"F00001DC2E","FUNDNAME":"-1x Short VIX Futures ETF","SIMPLE_CO
+    GET 200 https://www.etfcheck.co.kr/user/etp/getLatestWeeklyReport?pubYn=Y&toDate=20250905 | post:  | body: {"success":true,"results":[{"REP_DATE":"20260831","START_DATE":"20260824","END_DATE":"20260828","WEE
+    GET 200 https://www.etfcheck.co.kr/user/etp/getLatestMonthlyReport?pubYn=Y&toDate=20250905 | post:  | body: {"success":true,"results":[{"REP_MONTH":"202608","START_DATE":"20260801","END_DATE":"20260831"}],"da
+    GET 200 https://www.etfcheck.co.kr/report/getReport?start_date=2026-09-05+05:13:27&SHOW=1 | post:  | body: {"success":true,"results":[{"TITLE":"[KB: 전략] 이그전 - 연준의 금리 결정, 돌고돌아 제자리로 / 이은택","CONTENTS_SEQ":53864
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpRankListYield?annuityCode=A&ctgLargeCode=A&orderBy=DESC&type=ETF&order=D&limit=10&exceptList=true | post:  | body: {"success":true,"results":[{"F16002":"TIGER 코리아휴머노이드로봇산업","F16013":"0148J0","F18070":"00","F15001":"
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpRankListAumVariation?annuityCode=A&ctgLargeCode=A&orderBy=DESC&type=ETF&order=D&limit=10 | post:  | body: {"success":true,"results":[{"F16002":"KODEX 종합채권(AA-이상)액티브","F16013":"273130","F18070":"00","F15001"
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/stock/etp/getEtpRankListInvestor2?order=W&limit=all | post:  | body: {"success":true,"results":[{"F16013":"0000D0","F16002":"TIGER 엔비디아미국채커버드콜밸런스(합성)","F06511_08_SUM":"-
+playwright pdf2 etfcheck responses: 43 html 185366
+    GET 302 https://www.etfcheck.co.kr/mobile/etpitem/445290/pdf | post:  | body: 
+    GET 200 https://www.etfcheck.co.kr/?redirect=%2Fmobile%2Fetpitem%2F445290%2Fpdf | post:  | body: <!DOCTYPE html> <html lang="ko" class="onWide">  <head>     <meta charset="utf-8">     <meta na
+    GET 200 https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-2452625032731133&output=html&adk=1812271804&adf=3025194257&abgtt=1&lmt=1741588882&plat=3% | post:  | body: <html><body style="background-color:transparent"></body></html>                                     
+    POST 204 https://www.google-analytics.com/g/collect?v=2&tid=G-8W6PNHQZTR&gtm=45je6921v885000026za200zd885000026&_p=1788606830499&gcd=13l3l3l3l1l1&npa=0&dma=0&_ | post:  | body: 
+    GET 200 blob:https://www.etfcheck.co.kr/9b9a5e64-4721-4076-92d1-6334cccaa11c | post:  | body: (()=>{var e={636:function(e,t,r){var n;n=function(){return(()=>{var e=[,(e,t,r)=>{"use strict";Objec
+    GET 200 https://www.etfcheck.co.kr/user/cust/getAdPopupList?testSuffix= | post:  | body: {"success":true,"results":[],"date":1788606831574}
+    GET 200 https://www.etfcheck.co.kr/stock/etp/getEtfTotalExpenseRatio | post:  | body: {"success":true,"results":[{"F16013":"0000D0","F35188":"0.390","F35190":"0.47","F35192":"0.4746"},{"
+    GET 302 https://www.etfcheck.co.kr/version.json?t=1788606830607 | post:  | body: 
+    GET 200 https://www.etfcheck.co.kr/user/common/getJangGubun | post:  | body: {"success":true,"results":[{"F11011":"20260904","F11012":"31000000","F15001":"6687.21"}],"date":1788
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpMainTIekcerList?dataInfo[]=%7B%22type%22:%22index%22,%22name%22:%22KOSPI%22,%22code%22:%221%22,%22marketId%2 | post:  | body: {"success":true,"results":[{"F16013":"1","F16002":"코스피","F15001":"6687.21000","F15004":"1.64","F1547
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpScreenerLog | post:  | body: {"success":true,"results":[{"ctg_large_name":null,"ctg_name":"월배당","keyword_type":"2","keyword":"060
+    GET 200 https://www.etfcheck.co.kr/etc/etp/getBreakingNewsList?timeDiff=7200 | post:  | body: {"success":true,"results":[],"date":1788606832198}
+    GET 200 https://www.etfcheck.co.kr/etc/etp/getNewsList?gubun=1&limit=14 | post:  | body: {"success":true,"results":[{"F16013":"200N00000404","F15531":20260905,"F15532":200005,"F15503":"머스크,
+    GET 200 https://www.etfcheck.co.kr/?redirect=%2Fversion.json%3Ft%3D1788606830607 | post:  | body: <!DOCTYPE html> <html lang="ko" class="onWide">  <head>     <meta charset="utf-8">     <meta na
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpMast | post:  | body: {"success":true,"results":[{"F16012":"KR7451060008","F16013":"451060","F16002":"1Q 200액티브","F16493":
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpCtgMap | post:  | body: {"success":true,"results":[{"F16012":"0P0001YK57","F16013":null,"domestic_flag":0,"ctgInfo":"06|0606
+    GET 200 https://www.etfcheck.co.kr/user/common/getGlobalEtfMast | post:  | body: {"success":true,"results":[{"MSTARID":"F00001DC2E","FUNDNAME":"-1x Short VIX Futures ETF","SIMPLE_CO
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/etp/getLatestWeeklyReport?pubYn=Y&toDate=20250905 | post:  | body: {"success":true,"results":[{"REP_DATE":"20260831","START_DATE":"20260824","END_DATE":"20260828","WEE
+    GET 200 https://www.etfcheck.co.kr/user/etp/getLatestMonthlyReport?pubYn=Y&toDate=20250905 | post:  | body: {"success":true,"results":[{"REP_MONTH":"202608","START_DATE":"20260801","END_DATE":"20260831"}],"da
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpRankListAumVariation?annuityCode=A&ctgLargeCode=A&orderBy=DESC&type=ETF&order=D&limit=10 | post:  | body: {"success":true,"results":[{"F16002":"KODEX 종합채권(AA-이상)액티브","F16013":"273130","F18070":"00","F15001"
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpRankListInflow?annuityCode=A&ctgLargeCode=A&orderBy=DESC&type=ETF&order=D&limit=10 | post:  | body: {"success":true,"results":[{"F16002":"KODEX 종합채권(AA-이상)액티브","F16013":"273130","F18070":"00","F15001"
+    GET 200 https://www.etfcheck.co.kr/dpforms/etp/getEtpMarketAction?etpType=ETF | post:  | body: {"success":false,"message":"Error while performing Query."}
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpMajorItemCurrent?limit=10&order=D&ctgLargeCode=A&type=ETF&annuityCode=A | post:  | body: {"success":true,"results":[{"F16002":"KODEX 200","F16013":"069500","F15001":"105720","YIELD":"2.04"}
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpAumVariation?type=ETF&order=D | post:  | body: {"success":true,"results":[{"F16013":"0000D0","AUM":"61586418700","AUM_VAR":"220658013"},{"F16013":"
+    GET 200 https://www.etfcheck.co.kr/stock/getIntraLongTerm?mid=001&F16013=069500&term=2 | post:  | body: {"success":true,"results":[{"F20044_03":"20260904","F20004_03":"9000099","F20005_03":"103610","F2000
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpInflowByType?type=ETF&order=D | post:  | body: {"success":true,"results":[{"stockSum":"-188274059100.00","bondSum":"101055054820.00","materialSum":
+    GET 200 https://www.etfcheck.co.kr/stock/getIntraLongTerm?mid=001&F16013=360750&term=2 | post:  | body: {"success":true,"results":[{"F20044_03":"20260904","F20004_03":"9000099","F20005_03":"25840","F20006
+    GET 200 https://www.etfcheck.co.kr/stock/getIntraLongTerm?mid=001&F16013=133690&term=2 | post:  | body: {"success":true,"results":[{"F20044_03":"20260904","F20004_03":"9000099","F20005_03":"175270","F2000
+    GET 200 https://www.etfcheck.co.kr/stock/getIntraLongTerm?mid=001&F16013=379800&term=2 | post:  | body: {"success":true,"results":[{"F20044_03":"20260904","F20004_03":"9000099","F20005_03":"23485","F20006
+    GET 200 https://www.etfcheck.co.kr/stock/getIntraLongTerm?mid=001&F16013=396500&term=2 | post:  | body: {"success":true,"results":[{"F20044_03":"20260904","F20004_03":"9000099","F20005_03":"33395","F20006
+    GET 200 https://www.etfcheck.co.kr/stock/getIntraLongTerm?mid=001&F16013=379810&term=2 | post:  | body: {"success":true,"results":[{"F20044_03":"20260904","F20004_03":"9000099","F20005_03":"26205","F20006
+    GET 200 https://www.etfcheck.co.kr/stock/getIntraLongTerm?mid=001&F16013=488770&term=2 | post:  | body: {"success":true,"results":[{"F20044_03":"20260904","F20004_03":"9000099","F20005_03":"105410","F2000
+    GET 200 https://www.etfcheck.co.kr/stock/getIntraLongTerm?mid=001&F16013=102110&term=2 | post:  | body: {"success":true,"results":[{"F20044_03":"20260904","F20004_03":"9000099","F20005_03":"103860","F2000
+    GET 200 https://www.etfcheck.co.kr/stock/etp/getEtpRankListInvestor2?order=W&limit=all | post:  | body: {"success":true,"results":[{"F16013":"0000D0","F16002":"TIGER 엔비디아미국채커버드콜밸런스(합성)","F06511_08_SUM":"-
+    GET 200 https://www.etfcheck.co.kr/stock/getIntraLongTerm?mid=001&F16013=459580&term=2 | post:  | body: {"success":true,"results":[{"F20044_03":"20260904","F20004_03":"9000099","F20005_03":"1073850","F200
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/stock/getIntraLongTerm?mid=001&F16013=278530&term=2 | post:  | body: {"success":true,"results":[{"F20044_03":"20260904","F20004_03":"9000099","F20005_03":"37540","F20006
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpAumVariation?type=ETF&order=D | post:  | body: {"success":true,"results":[{"F16013":"0000D0","AUM":"61586418700","AUM_VAR":"220658013"},{"F16013":"
+item clicked 구성종목
+playwright item etfcheck responses: 39 html 121835
+    GET 302 https://www.etfcheck.co.kr/mobile/etpitem/0163Y0 | post:  | body: 
+    GET 200 https://www.etfcheck.co.kr/?redirect=%2Fmobile%2Fetpitem%2F0163Y0 | post:  | body: <!DOCTYPE html> <html lang="ko" class="onWide">  <head>     <meta charset="utf-8">     <meta na
+    GET 200 https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-2452625032731133&output=html&adk=1812271804&adf=3025194257&abgtt=1&lmt=1741588882&plat=3% | post:  | body: <html><body style="background-color:transparent"></body></html>                                     
+    GET 200 blob:https://www.etfcheck.co.kr/44dcefaf-e997-49d1-8aab-49c12cc9e66a | post:  | body: (()=>{var e={636:function(e,t,r){var n;n=function(){return(()=>{var e=[,(e,t,r)=>{"use strict";Objec
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpCtgLarge | post:  | body: {"success":true,"results":[{"ctg_hidden_code":"01","ctg_large_code":"0101","ctg_large_name":"주식","ct
+    POST 200 https://www.etfcheck.co.kr/user/member/insertUserAppLog | post: {"email":"","path":"/mobile/etpitem/0163Y0","isPC":0,"os":"web"} | body: {"success":true,"results":{"fieldCount":0,"affectedRows":1,"insertId":149566688,"serverStatus":2,"wa
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpTermHist?F16013=0163Y0&gubun=1Y | post:  | body: {"success":true,"results":[{"F12506":"20260904","F15001":"8800","F15015":"420774"},{"F12506":"202609
+    GET 200 https://www.etfcheck.co.kr/stock/etp/getEtfTotalExpenseRatio | post:  | body: {"success":true,"results":[{"F16013":"0000D0","F35188":"0.390","F35190":"0.47","F35192":"0.4746"},{"
+    GET 200 https://www.etfcheck.co.kr/user/etp/getScaleCtgName | post:  | body: {"success":true,"results":[{"ctg_code":"0301001","ctg_name":"정방향"},{"ctg_code":"0301002","ctg_name":
+    POST 200 https://www.etfcheck.co.kr/user/member/insertEtpInfoLog | post: {"email":"","code":"0163Y0","name":""} | body: {"success":true,"results":{"fieldCount":0,"affectedRows":1,"insertId":21361004,"serverStatus":2,"war
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpDiffHistAvg?F16013=0163Y0&limit=60&type=diff | post:  | body: {"success":true,"results":[{"AVG_DIFF_20D":"-0.10","AVG_DIFF_60D":"0.04","AVG_DIFF_120D":"-0.10","AV
+    GET 200 https://www.etfcheck.co.kr/user/etp/getSimpleEtpHist?F16013=0163Y0&limit=60&type=diff | post:  | body: {"success":true,"results":[{"F12506":"20260904","F15001":"8800","F16500":"448230","F15301":"8840.83"
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpItemOutline?code=0163Y0&befDate=20250905 | post:  | body: {"success":true,"results":[{"ctg_large_code":"0101","ctg_large_name":"주식","DESCRIPTION":"This invest
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpLatestFee?code=0163Y0 | post:  | body: {"success":true,"results":[{"TRADEDATE":"202607","TER":"0.51000","TOTAL_FEE":"0.81150"}],"date":1788
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpDesc?code=0163Y0 | post:  | body: {"success":true,"results":[{"DESCRIPTION_K":"이 투자신탁은 국내주식을 주된 투자대상으로 하는 액티브상장지수펀드로서, 한국거래소가 산출·발표하는 
+    POST 200 https://www.etfcheck.co.kr/user/member/insertUserAppLog | post: {"email":"","path":"/mobile/etpitem/0163Y0/basic/%EA%B0%9C%EC%9A%94","isPC":0,"os":"web"} | body: {"success":true,"results":{"fieldCount":0,"affectedRows":1,"insertId":149566690,"serverStatus":2,"wa
+    GET 302 https://www.etfcheck.co.kr/version.json?t=1788606859648 | post:  | body: 
+    GET 200 https://www.etfcheck.co.kr/user/common/getLastBusinessDay?date=20260905 | post:  | body: {"success":true,"results":[{"F12506":"20260904"},{"F12506":"20260903"}],"date":1788606860974}
+    GET 200 https://www.etfcheck.co.kr/user/common/getJangGubun | post:  | body: {"success":true,"results":[{"F11011":"20260904","F11012":"31000000","F15001":"6687.21"}],"date":1788
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpMainTIekcerList?dataInfo[]=%7B%22type%22:%22index%22,%22name%22:%22KOSPI%22,%22code%22:%221%22,%22marketId%2 | post:  | body: {"success":true,"results":[{"F16013":"1","F16002":"코스피","F15001":"6687.21000","F15004":"1.64","F1547
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpScreenerLog | post:  | body: {"success":true,"results":[{"ctg_large_name":null,"ctg_name":"월배당","keyword_type":"2","keyword":"060
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpItemOutlineAssetRank?code=0163Y0&F16012=KR70163Y0007&ctgLargeCode=0101&etpType=ETF | post:  | body: {"success":true,"results":[{"F16012":"KR70163Y0007","NET_ASSET":"448230000000","TOTAL_CNT":"1167","R
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpItemOutlineAssetRank2?code=0163Y0&F16012=KR70163Y0007&ctgLargeCode=0101&etpType=ETF | post:  | body: {"success":true,"results":[{"F16012":"KR70163Y0007","NET_ASSET":"447920000000","TOTAL_CNT":"1167","R
+    GET 200 https://www.etfcheck.co.kr/?redirect=%2Fversion.json%3Ft%3D1788606859648 | post:  | body: <!DOCTYPE html> <html lang="ko" class="onWide">  <head>     <meta charset="utf-8">     <meta na
+    POST 200 https://www.etfcheck.co.kr/user/member/updateBannerViewCount | post: {"banner":"shjs_17_1_20260101","type":17} | body: {"success":true,"results":{"fieldCount":0,"affectedRows":2,"insertId":0,"serverStatus":2,"warningCou
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    POST 200 https://www.etfcheck.co.kr/user/member/insertUserAppLog | post: {"email":"","path":"/mobile/etpitem/0163Y0/basic/%EA%B0%9C%EC%9A%942","isPC":0,"os":"web"} | body: {"success":true,"results":{"fieldCount":0,"affectedRows":1,"insertId":149566692,"serverStatus":2,"wa
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpCtgMap | post:  | body: {"success":true,"results":[{"F16012":"0P0001YK57","F16013":null,"domestic_flag":0,"ctgInfo":"06|0606
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpMast | post:  | body: {"success":true,"results":[{"F16012":"KR7451060008","F16013":"451060","F16002":"1Q 200액티브","F16493":
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpItemRecommendList?limit=3&code=0163Y0&type=ETF&assetCode=0101&scaleCode=0301001&ctgCodeList[]=0501003 | post:  | body: {"success":true,"results":[{"F16002":"TIME 코스닥액티브","F16013":"0162Y0","F15001":"7245","F15004":"4.24"
+    GET 200 https://www.etfcheck.co.kr/user/member/checkFavorItem?email=&code=0163Y0 | post:  | body: {"success":true,"results":[],"date":1788606863665}
+    GET 200 https://www.etfcheck.co.kr/etc/etp/getTodayDisclosureTitleList?code=0163Y0 | post:  | body: {"success":true,"results":[],"date":1788606863667}
+    GET 200 https://www.etfcheck.co.kr/user/etp/getGlobalEtfItemRecommendList?limit=2&code=0163Y0&assetCode=0101&scaleCode=0301001&ctgCodeList[]=0501003 | post:  | body: {"success":true,"results":[],"date":1788606863801}
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpItemCash?code=0163Y0 | post:  | body: {"success":true,"results":[],"date":1788606863813}
+    GET 200 https://www.etfcheck.co.kr/user/common/getGlobalEtfMast | post:  | body: {"success":true,"results":[{"MSTARID":"F00001DC2E","FUNDNAME":"-1x Short VIX Futures ETF","SIMPLE_CO
+    POST 200 https://www.etfcheck.co.kr/user/member/insertUserAppLog | post: {"email":"","path":"/mobile/user/signin?redirect=%2Fmobile%2Fetpitem%2F0163Y0%2Fcompose","isPC":0,"os":"web"} | body: {"success":true,"results":{"fieldCount":0,"affectedRows":1,"insertId":149566707,"serverStatus":2,"wa
+    POST 204 https://www.google-analytics.com/g/collect?v=2&tid=G-8W6PNHQZTR&gtm=45je6921v885000026za200zd885000026&_p=1788606859489&gcd=13l3l3l3l1l1&npa=0&dma=0&_ | post:  | body: 
+playwright pc etfcheck responses: 27 html 147239
+    GET 302 https://www.etfcheck.co.kr/etpitem/0163Y0/pdf | post:  | body: 
+    GET 200 https://www.etfcheck.co.kr/?redirect=%2Fetpitem%2F0163Y0%2Fpdf | post:  | body: <!DOCTYPE html> <html lang="ko" class="onWide">  <head>     <meta charset="utf-8">     <meta na
+    GET 200 https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-2452625032731133&output=html&adk=1812271804&adf=3025194257&abgtt=1&lmt=1741588882&plat=3% | post:  | body: <html><body style="background-color:transparent"></body></html>                                     
+    POST 204 https://www.google-analytics.com/g/collect?v=2&tid=G-8W6PNHQZTR&gtm=45je6930h2v885000026za200zd885000026&_p=1788606892955&gcd=13l3l3l3l1l1&npa=0&dma=0 | post:  | body: 
+    GET 200 blob:https://www.etfcheck.co.kr/993f9c9f-37e1-4e37-abea-5e0105707766 | post:  | body: (()=>{var e={636:function(e,t,r){var n;n=function(){return(()=>{var e=[,(e,t,r)=>{"use strict";Objec
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpCtgLarge | post:  | body: {"success":true,"results":[{"ctg_hidden_code":"01","ctg_large_code":"0101","ctg_large_name":"주식","ct
+    GET 200 https://www.etfcheck.co.kr/stock/etp/getEtfTotalExpenseRatio | post:  | body: {"success":true,"results":[{"F16013":"0000D0","F35188":"0.390","F35190":"0.47","F35192":"0.4746"},{"
+    GET 200 https://www.etfcheck.co.kr/user/cust/getAdPopupList?testSuffix= | post:  | body: {"success":true,"results":[],"date":1788606893810}
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpCtgMiddle | post:  | body: {"success":true,"results":[{"ctg_hidden_code":"01","ctg_large_code":"0101","ctg_code":"0101001","ctg
+    GET 302 https://www.etfcheck.co.kr/version.json?t=1788606893053 | post:  | body: 
+    GET 200 https://www.etfcheck.co.kr/user/common/getLastBusinessDay?date=20260905 | post:  | body: {"success":true,"results":[{"F12506":"20260904"},{"F12506":"20260903"}],"date":1788606893945}
+    GET 200 https://www.etfcheck.co.kr/user/common/getJangGubun | post:  | body: {"success":true,"results":[{"F11011":"20260904","F11012":"31000000","F15001":"6687.21"}],"date":1788
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpMainTIekcerList?dataInfo[]=%7B%22type%22:%22index%22,%22name%22:%22KOSPI%22,%22code%22:%221%22,%22marketId%2 | post:  | body: {"success":true,"results":[{"F16013":"1","F16002":"코스피","F15001":"6687.21000","F15004":"1.64","F1547
+    GET 200 https://www.etfcheck.co.kr/user/etp/getEtpScreenerLog | post:  | body: {"success":true,"results":[{"ctg_large_name":null,"ctg_name":"월배당","keyword_type":"2","keyword":"060
+    GET 200 https://www.etfcheck.co.kr/etc/etp/getBreakingNewsList?timeDiff=7200 | post:  | body: {"success":true,"results":[],"date":1788606894230}
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/?redirect=%2Fversion.json%3Ft%3D1788606893053 | post:  | body: <!DOCTYPE html> <html lang="ko" class="onWide">  <head>     <meta charset="utf-8">     <meta na
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/etc/etp/getNewsList?gubun=1&limit=14 | post:  | body: {"success":true,"results":[{"F16013":"200N00000404","F15531":20260905,"F15532":200005,"F15503":"머스크,
+    POST 200 https://www.etfcheck.co.kr/user/member/updateBannerViewCount | post: {"banner":"mrjs_1_1_20251208","type":1} | body: {"success":true,"results":{"fieldCount":0,"affectedRows":2,"insertId":0,"serverStatus":2,"warningCou
+    POST 200 https://www.etfcheck.co.kr/user/member/insertUserAppLog | post: {"email":"","path":"/mobile/main3","isPC":0,"os":"web"} | body: {"success":true,"results":{"fieldCount":0,"affectedRows":1,"insertId":149566740,"serverStatus":2,"wa
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/cust/getbannerInfo?testSuffix= | post:  | body: {"success":true,"results":[{"seq":315,"id":"mrjs_1_1_20251208","img":"tiger_1080_220_20260803.jpg","
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpMast | post:  | body: {"success":true,"results":[{"F16012":"KR7451060008","F16013":"451060","F16002":"1Q 200액티브","F16493":
+    GET 200 https://www.etfcheck.co.kr/user/common/getEtpCtgMap | post:  | body: {"success":true,"results":[{"F16012":"0P0001YK57","F16013":null,"domestic_flag":0,"ctgInfo":"06|0606
+    GET 200 https://www.etfcheck.co.kr/user/common/getGlobalEtfMast | post:  | body: {"success":true,"results":[{"MSTARID":"F00001DC2E","FUNDNAME":"-1x Short VIX Futures ETF","SIMPLE_CO
