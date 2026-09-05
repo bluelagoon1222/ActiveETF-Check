@@ -52,7 +52,7 @@ NV_HEADERS = {"User-Agent": UA, "Accept": "application/json, text/plain, */*", "
               "Referer": "https://m.stock.naver.com/"}
 
 PDF_KEEP_DAYS = 70
-SLEEP = 0.25
+SLEEP = 0.7   # ETF CHECK throttles bursts: ~30 rapid calls then drops connections
 CASH_WORDS = ("현금", "예금", "설정현금", "원화", "CASH")
 # active ETFs whose name matches this are NOT domestic equity (bonds, money market, overseas, commodities...)
 EXCLUDE_RE = re.compile(r"채권|국공채|국채|회사채|은행채|금융채|CD금리|KOFR|머니마켓|MMF|단기채|단기자금|혼합|TDF|TRF|금리|달러|"
@@ -110,7 +110,15 @@ class Http:
             except Exception as e:  # noqa
                 log("warm-up failed", u, e)
 
-    def get_json(self, url, headers, params=None, tries=3):
+    def reset_session(self):
+        try:
+            self.s.close()
+        except Exception:  # noqa
+            pass
+        self.s = requests.Session()
+        self.warmed = False
+
+    def get_json(self, url, headers, params=None, tries=4):
         last = None
         for i in range(tries):
             try:
@@ -123,7 +131,14 @@ class Http:
                 return js
             except Exception as e:  # noqa
                 last = e
-                time.sleep(1.5 * (i + 1))
+                wait = 8 * (i + 1)
+                log("  retry %d/%d in %ds: %s %s" % (i + 1, tries, wait, url.split("/")[-1], str(e)[:80]))
+                if "etfcheck" in url:
+                    self.reset_session()
+                    time.sleep(wait)
+                    self.warm_up()
+                else:
+                    time.sleep(wait)
         raise RuntimeError("GET failed %s %s: %s" % (url, params, last))
 
     def ec(self, path, **params):
@@ -215,7 +230,7 @@ def fetch_naver_analysis(h, code):
 
 
 def fetch_pdf(h, code):
-    rows = h.ec("/api/user/etp/getEtfPdfRankListWeightAll", code=code)
+    rows = h.ec("/api/user/etp/getEtfPdfRankListWeightAll", code=code, start=0, limit=3000)
     holdings, date = [], None
     for r in rows:
         date = date or r.get("F12506")
@@ -448,6 +463,19 @@ def main():
         except Exception as ex:  # noqa
             log("PDF failed", code, e["name"], ex)
             pdf_today[code] = []
+    missing_codes = [c for c, v in pdf_today.items() if not v]
+    if missing_codes:
+        log("second pass for %d empty PDFs after cool-down" % len(missing_codes))
+        time.sleep(30)
+        h.reset_session()
+        for code in missing_codes:
+            try:
+                rows, d = fetch_pdf(h, code)
+                pdf_today[code] = rows
+                if d:
+                    pdf_dates[d] += 1
+            except Exception as ex:  # noqa
+                log("PDF failed again", code, str(ex)[:100])
     asof = max(pdf_dates.items(), key=lambda kv: kv[1])[0] if pdf_dates else dt.datetime.now(KST).strftime("%Y%m%d")
     n_ok = sum(1 for v in pdf_today.values() if v)
     log("PDF ok: %d/%d  asof=%s" % (n_ok, len(active), asof))
@@ -602,7 +630,7 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception as e:  # noqa
+    except BaseException as e:  # noqa
         log("FATAL:", repr(e))
         import traceback
         traceback.print_exc()
