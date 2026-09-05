@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>액티브 ETF CHECK — 국내 액티브 ETF 구성종목·성과 비교</title>
+<meta name="description" content="같은 섹터에 투자하는 국내 액티브 ETF의 구성종목과 성과를 한 페이지에서 매일 비교합니다. 전일 대비 신규편입·제외·비중변화, 지수 대비 초과·과소 비중 표시.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --line:#e3e6ea; --text:#1b1f24; --muted:#6b7280; --faint:#9ca3af;
+  --accent:#1f4fd8; --up:#15803d; --up-bg:#dcfce7; --down:#c02626; --down-bg:#fee2e2;
+  --new:#0f766e; --new-bg:#ccfbf1; --out:#6b7280; --out-bg:#f1f2f4; --hi:#fff7d6;
+  --heat0:#ffffff; --heat1:#eaf0fb;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Segoe UI,Roboto,sans-serif;font-size:14px;line-height:1.45}
+a{color:var(--accent);text-decoration:none}
+.wrap{max-width:1500px;margin:0 auto;padding:14px 14px 60px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 18px;margin-bottom:12px}
+header h1{font-size:22px;margin:0;letter-spacing:-.3px}
+header h1 span{color:var(--accent)}
+.asof{color:var(--muted);font-size:13px}
+.asof b{color:var(--text)}
+.banner{background:#fff3cd;border:1px solid #f1d27a;color:#7a5a00;padding:8px 12px;border-radius:8px;margin-bottom:12px;font-size:13px}
+.banner.err{background:var(--down-bg);border-color:#f3b4b4;color:#8a1c1c}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}
+.tab{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:13px;color:var(--text);white-space:nowrap}
+.tab .n{color:var(--faint);margin-left:4px;font-size:12px}
+.tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab.on .n{color:#dbe4ff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.card h2{font-size:16px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:12.5px;margin-bottom:10px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:6px 0 10px;font-size:13px}
+.toolbar label{display:inline-flex;align-items:center;gap:5px;color:var(--muted);cursor:pointer}
+.toolbar input[type=text]{border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:13px;min-width:160px}
+.toolbar input[type=number]{width:60px;border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:var(--card);padding:5px 9px;font-size:12.5px;cursor:pointer;color:var(--muted)}
+.seg button.on{background:var(--accent);color:#fff}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:right;vertical-align:middle}
+th{background:#fafbfc;color:var(--muted);font-weight:600;font-size:12px;position:sticky;top:0;z-index:2;cursor:pointer;user-select:none}
+th.l,td.l{text-align:left}
+th.sorted{color:var(--accent)}
+.perf td.name{min-width:190px}
+.etfname{font-weight:600;cursor:pointer}
+.etfname:hover{color:var(--accent)}
+.meta{color:var(--faint);font-size:11.5px}
+.ret{font-weight:600}
+.ex{display:block;font-size:11px;color:var(--faint);font-weight:400}
+.pos{color:var(--up)} .neg{color:var(--down)}
+.pill{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:999px;font-weight:700;vertical-align:middle;margin-left:4px}
+.pill.new{background:var(--new-bg);color:var(--new)}
+.pill.out{background:var(--out-bg);color:var(--out)}
+.pill.up{background:var(--up-bg);color:var(--up)}
+.pill.dn{background:var(--down-bg);color:var(--down)}
+/* matrix */
+.matrix th.stock,.matrix td.stock{position:sticky;left:0;background:var(--card);z-index:3;text-align:left;min-width:150px;max-width:210px;overflow:hidden;text-overflow:ellipsis;box-shadow:2px 0 0 var(--line)}
+.matrix th.stock{z-index:4;background:#fafbfc}
+.matrix th.etfcol{max-width:120px;white-space:normal;line-height:1.25;text-align:center;vertical-align:bottom}
+.matrix th.etfcol .mg{display:block;color:var(--faint);font-weight:400;font-size:10.5px}
+.matrix td.cell{text-align:center;padding:4px 6px;min-width:84px}
+.matrix td.cell .w{font-weight:700;font-size:13px}
+.matrix td.cell .a{display:block;font-size:10.5px;line-height:1.1;color:var(--faint)}
+.matrix td.cell.dark,.matrix td.cell.dark .a,.matrix td.cell.dark .c,.matrix td.cell.dark .pos,.matrix td.cell.dark .neg{color:#fff!important}
+.matrix td.cell.dark .pill{background:rgba(255,255,255,.9)}
+.matrix td.cell .c{display:block;font-size:10.5px;line-height:1.1}
+.matrix tr.outrow td{color:var(--out)}
+.matrix tr.outrow td.stock{text-decoration:line-through}
+.matrix td.cnt{color:var(--muted)}
+.matrix tr:hover td{filter:brightness(.97)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;color:var(--muted);font-size:12px;margin-top:8px}
+.legend span b{font-weight:700}
+.chartbox{height:300px;position:relative}
+.grid2{display:grid;grid-template-columns:1fr;gap:14px}
+.chartbox{height:280px}
+@media (max-width:900px){.chartbox{height:230px}}
+/* drawer */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;z-index:50}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(560px,100%);background:var(--card);z-index:51;transform:translateX(100%);transition:transform .2s;overflow-y:auto;padding:16px;box-shadow:-4px 0 24px rgba(0,0,0,.15)}
+.drawer.open{transform:none}
+.overlay.open{display:block}
+.drawer h3{margin:0 0 2px;font-size:17px}
+.drawer .close{position:absolute;top:10px;right:12px;border:0;background:transparent;font-size:22px;cursor:pointer;color:var(--muted)}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:12px 0}
+.kv div{background:var(--bg);border-radius:8px;padding:8px}
+.kv small{display:block;color:var(--muted);font-size:11px}
+.kv b{font-size:15px}
+.drawer h4{margin:16px 0 6px;font-size:14px}
+.drawer table{font-size:12.5px}
+.events li{padding:5px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+.events .d{color:var(--faint);margin-right:6px;font-size:11.5px}
+footer{color:var(--faint);font-size:11.5px;line-height:1.6;margin-top:20px}
+.empty{color:var(--muted);padding:20px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>액티브 <span>ETF</span> CHECK</h1>
+  <div class="asof" id="asof">데이터 불러오는 중…</div>
+</header>
+<div id="banner"></div>
+<div class="tabs" id="tabs"></div>
+
+<div class="card">
+  <h2 id="grpTitle">성과 비교</h2>
+  <div class="sub">같은 그룹 액티브 ETF의 기간 수익률. 각 셀 아래 회색 숫자는 <b>해당 ETF의 비교지수 대비 초과수익(%p)</b>입니다. 열 제목을 누르면 정렬됩니다.</div>
+  <div class="toolbar">
+    <span>수익률 기준</span>
+    <span class="seg" id="basisSeg"><button data-b="close" class="on">종가</button><button data-b="nav">NAV</button></span>
+    <span>차트 기간</span>
+    <span class="seg" id="periodSeg"><button data-p="1M">1M</button><button data-p="3M" class="on">3M</button><button data-p="6M">6M</button><button data-p="YTD">YTD</button><button data-p="1Y">1Y</button></span>
+  </div>
+  <div class="grid2">
+    <div class="tblwrap perf"><table id="perfTbl"></table></div>
+    <div class="chartbox"><canvas id="chart"></canvas></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>구성종목 비교 매트릭스</h2>
+  <div class="sub">행 = 종목, 열 = ETF. 셀 큰 숫자는 <b>당일 PDF 비중(%)</b>, 아래 작은 숫자는 <b>지수 대비 초과(+)/과소(−) 비중(%p)</b>과 <b>전일 대비 변화</b>입니다. 열 제목(ETF명)을 누르면 상세가 열립니다.</div>
+  <div class="toolbar">
+    <input type="text" id="q" placeholder="종목명 검색">
+    <span class="seg" id="filterSeg"><button data-f="all" class="on">전체</button><button data-f="common">공통보유(2개↑)</button><button data-f="solo">단독보유</button><button data-f="changed">전일 변동만</button></span>
+    <label>변동 기준 <input type="number" id="thr" value="0.3" step="0.1" min="0">%p</label>
+    <label><input type="checkbox" id="showCash"> 현금·기타 표시</label>
+    <label><input type="checkbox" id="showBm" checked> 지수 미보유 종목 포함</label>
+  </div>
+  <div class="tblwrap matrix"><table id="mtx"></table></div>
+  <div class="legend">
+    <span><span class="pill new">NEW</span> 전일 대비 신규 편입</span>
+    <span><span class="pill out">OUT</span> 전일 보유 → 당일 제외</span>
+    <span><span class="pill up">▲</span>/<span class="pill dn">▼</span> 비중 변화가 기준 이상</span>
+    <span><b class="pos">+초과</b> / <b class="neg">−과소</b> = 비교지수 대비</span>
+    <span>셀 배경 진하기 = 비중 크기</span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>최근 편입·제외 타임라인</h2>
+  <div class="sub">보관 중인 일별 PDF 스냅샷에서 감지된 신규 편입 / 제외 이벤트 (이 그룹, 최근 순)</div>
+  <ul class="events" id="events" style="list-style:none;padding:0;margin:0"></ul>
+</div>
+
+<footer id="foot"></footer>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer"></div>
+
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+let D=null, grp=null, basis='close', period='3M', filt='all', sortKey='aum', sortDir=-1, chart=null;
+
+const fmtPct=(v,pp)=>v==null?'<span class="meta">–</span>':`<span class="${v>0?'pos':v<0?'neg':''}">${v>0?'+':''}${v.toFixed(2)}${pp?'p':'%'}</span>`;
+const fmtNum=v=>v==null?'–':v.toLocaleString('ko-KR');
+const fmtAum=v=>v==null?'–':(v>=1e12?(v/1e12).toFixed(2)+'조':Math.round(v/1e8).toLocaleString('ko-KR')+'억');
+const shortName=n=>n.replace(/액티브/g,'').replace(/\s+/g,' ').trim();
+const fmtDate=d=>d?`${d.slice(0,4)}.${d.slice(4,6)}.${d.slice(6,8)}`:'–';
+
+async function load(){
+  let st=null;
+  try{ st=await (await fetch('data/status.json?_='+Date.now())).json(); }catch(e){}
+  try{
+    const r=await fetch('data/latest.json?_='+Date.now());
+    if(!r.ok) throw new Error('latest.json '+r.status);
+    D=await r.json();
+  }catch(e){
+    $('#banner').innerHTML=`<div class="banner err">데이터 파일(data/latest.json)을 불러올 수 없습니다. GitHub Actions의 첫 수집이 아직 완료되지 않았을 수 있습니다. (${e.message})</div>`;
+    $('#asof').textContent='';
+    return;
+  }
+  let b='';
+  if(D.sample) b+=`<div class="banner">현재 표시되는 값은 <b>화면 확인용 샘플 데이터</b>입니다. GitHub Actions 첫 수집이 끝나면 실제 KRX 데이터로 자동 교체됩니다.</div>`;
+  if(st && st.ok===false) b+=`<div class="banner err">최근 자동 수집이 실패했습니다 (${st.generated_at}). 아래 데이터는 마지막 성공 시점 기준입니다. 오류: ${st.error||''}</div>`;
+  $('#banner').innerHTML=b;
+  $('#asof').innerHTML=`기준일 <b>${fmtDate(D.asof)}</b> · 전일 <b>${fmtDate(D.prev)}</b> · 갱신 ${D.generated_at} · 국내 주식형 액티브 ETF <b>${D.stats.n_active}</b>종 (PDF 수집 ${D.stats.n_pdf_ok}종)`;
+  const h=location.hash.replace('#','');
+  grp=(D.groups.find(g=>g.key===h)||D.groups[0]).key;
+  renderTabs(); renderAll();
+  $('#foot').innerHTML=`데이터: 한국거래소 정보데이터시스템(data.krx.co.kr) ETF 기본정보·시세·구성종목(PDF)·지수구성종목. 비중은 PDF 기준(순자산 대비), 지수 비중은 지수 구성종목 시가총액 가중(유동비율 미반영 근사치) 또는 동일 지수 패시브 ETF PDF 대용. 수익률은 종가 또는 NAV 단순 등락률, 분배금 미반영. 매 영업일 18:40 KST 자동 갱신.<br>본 사이트는 공시 데이터를 정리한 참고자료이며 특정 상품의 매수·매도를 권유하지 않습니다. 투자 판단과 책임은 투자자 본인에게 있습니다.`;
+}
+
+function renderTabs(){
+  $('#tabs').innerHTML=D.groups.map(g=>`<button class="tab ${g.key===grp?'on':''}" data-g="${g.key}">${g.name}<span class="n">${g.etfs.length}</span></button>`).join('');
+  $('#tabs').querySelectorAll('.tab').forEach(t=>t.onclick=()=>{grp=t.dataset.g;location.hash=grp;renderTabs();renderAll();});
+}
+function G(){return D.groups.find(g=>g.key===grp);}
+function E(){return G().etfs.map(c=>D.etfs[c]);}
+function renderAll(){ $('#grpTitle').textContent=`성과 비교 — ${G().name} (${G().etfs.length}종)`; renderPerf(); renderChart(); renderMatrix(); renderEvents(); }
+
+/* ---------------- performance table ---------------- */
+const PER=['1D','1W','1M','3M','6M','YTD','1Y'];
+function pv(e,p){ return basis==='nav'?e.perf[p+'_nav']:e.perf[p]; }
+function excess(e,p){ const r=pv(e,p), i=e.perf[p+'_idx']; return (r==null||i==null)?null:+(r-i).toFixed(2); }
+function renderPerf(){
+  const es=E().slice();
+  const key=sortKey;
+  es.sort((a,b)=>{
+    let va,vb;
+    if(key==='aum'){va=a.aum||0;vb=b.aum||0;}
+    else if(key==='fee'){va=a.fee;vb=b.fee;}
+    else if(key==='name'){return sortDir*a.name.localeCompare(b.name,'ko');}
+    else if(key.startsWith('ex_')){va=excess(a,key.slice(3));vb=excess(b,key.slice(3));}
+    else {va=pv(a,key);vb=pv(b,key);}
+    va=va==null?-1e9:va; vb=vb==null?-1e9:vb; return sortDir*(va-vb);
+  });
+  const th=(k,label,cls='')=>`<th class="${cls} ${sortKey===k?'sorted':''}" data-k="${k}">${label}${sortKey===k?(sortDir<0?' ▼':' ▲'):''}</th>`;
+  let h='<thead><tr>'+th('name','ETF','l')+th('aum','순자산')+th('fee','총보수')+PER.map(p=>th(p,p)).join('')+'<th>종목수</th><th>Top10</th><th>전일변경</th></tr></thead><tbody>';
+  for(const e of es){
+    const s=e.summary;
+    const chg=(s.new||s.out||s.up||s.down)?`${s.new?`<span class="pill new">N${s.new}</span>`:''}${s.out?`<span class="pill out">O${s.out}</span>`:''}${s.up?`<span class="pill up">▲${s.up}</span>`:''}${s.down?`<span class="pill dn">▼${s.down}</span>`:''}`:'<span class="meta">–</span>';
+    h+=`<tr><td class="l name"><div class="etfname" data-c="${e.code}">${e.name}</div><div class="meta">${e.manager} · ${e.code} · ${e.index||''}${e.premium!=null?` · 괴리 ${e.premium>0?'+':''}${e.premium}%`:''}</div></td>`+
+       `<td>${fmtAum(e.aum)}</td><td>${e.fee!=null?e.fee.toFixed(2)+'%':'–'}</td>`+
+       PER.map(p=>`<td><span class="ret">${fmtPct(pv(e,p))}</span><span class="ex">${excess(e,p)==null?'':(excess(e,p)>0?'+':'')+excess(e,p).toFixed(2)+'p vs 지수'}</span></td>`).join('')+
+       `<td>${s.n_holdings}</td><td>${s.top10}%</td><td class="l">${chg}</td></tr>`;
+  }
+  h+='</tbody>';
+  const t=$('#perfTbl'); t.innerHTML=h;
+  t.querySelectorAll('th[data-k]').forEach(x=>x.onclick=()=>{const k=x.dataset.k; if(sortKey===k) sortDir*=-1; else {sortKey=k;sortDir=(k==='name'||k==='fee')?1:-1;} renderPerf();});
+  t.querySelectorAll('.etfname').forEach(x=>x.onclick=()=>openDrawer(x.dataset.c));
+}
+
+/* ---------------- chart ---------------- */
+const PALETTE=['#1f4fd8','#d97706','#0f766e','#c02626','#7c3aed','#0891b2','#be185d','#4d7c0f','#92400e','#334155','#db2777','#059669'];
+function renderChart(){
+  const es=E(); if(!window.Chart){ $('#chart').parentElement.style.display='none'; return; }
+  const days={'1M':30,'3M':91,'6M':182,'1Y':365}[period];
+  const end=D.asof;
+  let start;
+  if(period==='YTD') start=end.slice(0,4)+'0101';
+  else { const d=new Date(+end.slice(0,4),+end.slice(4,6)-1,+end.slice(6,8)); d.setDate(d.getDate()-days); start=d.toISOString().slice(0,10).replace(/-/g,''); }
+  const dateSet=new Set(); es.forEach(e=>e.series.forEach(s=>{if(s[0]>=start) dateSet.add(s[0]);}));
+  const labels=[...dateSet].sort();
+  const ds=es.map((e,i)=>{
+    const m=new Map(e.series.map(s=>[s[0],s[1]]));
+    const first=labels.find(d=>m.get(d)>0); const base=first?m.get(first):null;
+    return {label:shortName(e.name),data:labels.map(d=>base&&m.get(d)>0?+((m.get(d)/base-1)*100).toFixed(2):null),borderColor:PALETTE[i%PALETTE.length],borderWidth:1.6,pointRadius:0,tension:.15,spanGaps:true};
+  });
+  // if all ETFs share one benchmark index, add it dashed
+  const idxNames=new Set(es.map(e=>e.index));
+  if(idxNames.size===1 && es[0].series.some(s=>s[2]>0)){
+    const m=new Map(es[0].series.map(s=>[s[0],s[2]])); const first=labels.find(d=>m.get(d)>0); const base=first?m.get(first):null;
+    ds.push({label:'지수: '+es[0].index,data:labels.map(d=>base&&m.get(d)>0?+((m.get(d)/base-1)*100).toFixed(2):null),borderColor:'#111',borderDash:[5,4],borderWidth:1.4,pointRadius:0,tension:.15,spanGaps:true});
+  }
+  if(chart) chart.destroy();
+  chart=new Chart($('#chart'),{type:'line',data:{labels:labels.map(fmtDate),datasets:ds},options:{
+    responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y>0?'+':''}${c.parsed.y}%`}}},
+    scales:{x:{ticks:{maxTicksLimit:7,font:{size:10.5}},grid:{display:false}},y:{ticks:{callback:v=>(v>0?'+':'')+v+'%',font:{size:10.5}},grid:{color:'#eef0f3'}}}
+  }});
+}
+
+/* ---------------- matrix ---------------- */
+function heat(w){ if(!w) return ''; const a=Math.min(0.85,0.08+w/12); return `background:rgba(31,79,216,${a.toFixed(3)})`; }
+function isDark(w){ return w && (0.08+w/12)>0.5; }
+function renderMatrix(){
+  const es=E(); const q=$('#q').value.trim(); const thr=+$('#thr').value||0; const showCash=$('#showCash').checked; const showBm=$('#showBm').checked;
+  const rows=new Map(); // code -> {name, cells:{etfcode:h}}
+  es.forEach(e=>e.holdings.forEach(h=>{
+    if(h.cash && !showCash) return;
+    if(!rows.has(h.code)) rows.set(h.code,{code:h.code,name:h.name,cells:{},cash:h.cash});
+    rows.get(h.code).cells[e.code]=h;
+  }));
+  let list=[...rows.values()].map(r=>{
+    const held=Object.values(r.cells).filter(h=>h.status!=='out');
+    r.n=held.length; r.avg=held.length?held.reduce((s,h)=>s+h.w,0)/held.length:0; r.max=Math.max(0,...held.map(h=>h.w));
+    r.changed=Object.values(r.cells).some(h=>h.status==='new'||h.status==='out'||(h.chg!=null&&Math.abs(h.chg)>=thr));
+    r.allOut=held.length===0;
+    return r;
+  });
+  if(q) list=list.filter(r=>r.name.includes(q)||r.code.includes(q));
+  if(filt==='common') list=list.filter(r=>r.n>=2);
+  if(filt==='solo') list=list.filter(r=>r.n===1);
+  if(filt==='changed') list=list.filter(r=>r.changed);
+  if(!showBm) list=list.filter(r=>Object.values(r.cells).some(h=>h.bw!=null));
+  list.sort((a,b)=>b.n-a.n||b.avg-a.avg);
+  let h='<thead><tr><th class="stock">종목 <span class="meta">(보유 ETF수 / 평균비중)</span></th>'+es.map(e=>`<th class="etfcol"><span class="etfname" data-c="${e.code}">${shortName(e.name)}</span><span class="mg">${e.manager}${e.bm_source?'':' · 지수비중 없음'}</span></th>`).join('')+'</tr></thead><tbody>';
+  if(!list.length) h+=`<tr><td colspan="${es.length+1}" class="empty">조건에 맞는 종목이 없습니다.</td></tr>`;
+  for(const r of list){
+    h+=`<tr class="${r.allOut?'outrow':''}"><td class="stock" title="${r.code}">${r.name} <span class="meta">${r.n}/${es.length} · ${r.avg.toFixed(1)}%</span></td>`;
+    for(const e of es){
+      const c=r.cells[e.code];
+      if(!c){ h+='<td class="cell"></td>'; continue; }
+      let badge='';
+      if(c.status==='new') badge='<span class="pill new">NEW</span>';
+      else if(c.status==='out') badge='<span class="pill out">OUT</span>';
+      else if(c.chg!=null && c.chg>=thr && thr>0) badge='<span class="pill up">▲</span>';
+      else if(c.chg!=null && c.chg<=-thr && thr>0) badge='<span class="pill dn">▼</span>';
+      const act=(c.active==null)?'':`<span class="a ${c.active>0?'pos':c.active<0?'neg':''}">${c.active>0?'+':''}${c.active.toFixed(2)} vs 지수${c.bw!=null?' '+c.bw.toFixed(2):''}</span>`;
+      const chg=(c.chg==null)?'':`<span class="c ${c.chg>0?'pos':c.chg<0?'neg':''}" >${c.chg>0?'+':''}${c.chg.toFixed(2)}p 전일</span>`;
+      const style=c.status==='out'?'':heat(c.w);
+      h+=`<td class="cell ${c.status!=='out'&&isDark(c.w)?'dark':''}" style="${style}"><span class="w">${c.status==='out'?`<s>${c.pw.toFixed(2)}</s>`:c.w.toFixed(2)}</span>${badge}${act}${chg}</td>`;
+    }
+    h+='</tr>';
+  }
+  h+='</tbody>';
+  const t=$('#mtx'); t.innerHTML=h;
+  t.querySelectorAll('.etfname').forEach(x=>x.onclick=()=>openDrawer(x.dataset.c));
+}
+
+/* ---------------- events ---------------- */
+function renderEvents(){
+  const codes=new Set(G().etfs);
+  const ev=(D.events||[]).filter(x=>codes.has(x.etf)).slice(0,40);
+  $('#events').innerHTML=ev.length?ev.map(x=>`<li><span class="d">${fmtDate(x.date)}</span><b>${shortName(D.etfs[x.etf].name)}</b> <span class="pill ${x.type}">${x.type==='new'?'NEW':'OUT'}</span> ${x.name} <span class="meta">${x.w.toFixed(2)}%</span></li>`).join(''):'<li class="empty">이벤트가 아직 없습니다. 스냅샷이 2일 이상 쌓이면 표시됩니다.</li>';
+}
+
+/* ---------------- drawer ---------------- */
+function openDrawer(code){
+  const e=D.etfs[code]; const s=e.summary;
+  const changed=e.holdings.filter(h=>!h.cash&&(h.status!=='same'||(h.chg!=null&&Math.abs(h.chg)>=0.1))).sort((a,b)=>Math.abs(b.chg||0)-Math.abs(a.chg||0));
+  const over=e.holdings.filter(h=>!h.cash&&h.status!=='out'&&h.active!=null).sort((a,b)=>b.active-a.active);
+  const rowsHtml=(arr)=>arr.length?`<table><thead><tr><th class="l">종목</th><th>당일</th><th>전일</th><th>변화</th><th>지수</th><th>초과/과소</th></tr></thead><tbody>${arr.map(h=>`<tr><td class="l">${h.name}${h.status==='new'?'<span class="pill new">NEW</span>':h.status==='out'?'<span class="pill out">OUT</span>':''}</td><td>${h.w.toFixed(2)}</td><td>${h.pw==null?'–':h.pw.toFixed(2)}</td><td>${h.chg==null?'–':fmtPct(h.chg,true)}</td><td>${h.bw==null?'–':h.bw.toFixed(2)}</td><td>${h.active==null?'–':fmtPct(h.active,true)}</td></tr>`).join('')}</tbody></table>`:'<div class="meta">해당 없음</div>';
+  $('#drawer').innerHTML=`<button class="close" id="dclose">×</button><h3>${e.name}</h3><div class="meta">${e.manager} · ${e.code} · 비교지수 ${e.index||'–'} · 총보수 ${e.fee}% · 상장 ${fmtDate(e.listed)}</div>
+  <div class="kv"><div><small>순자산</small><b>${fmtAum(e.aum)}</b></div><div><small>종가 / NAV</small><b>${fmtNum(e.close)} / ${fmtNum(e.nav)}</b></div><div><small>보유 종목수</small><b>${s.n_holdings}</b></div><div><small>Top10 집중도</small><b>${s.top10}%</b></div><div><small>현금·기타</small><b>${s.cash}%</b></div><div><small>전일 대비 회전(편도)</small><b>${s.turnover==null?'–':s.turnover+'%'}</b></div></div>
+  <div class="meta">지수 비중 기준: ${e.bm_source||'확보 불가 (초과·과소 비중 미표시)'}</div>
+  <h4>전일 대비 변경 (신규 ${s.new} · 제외 ${s.out} · 증가 ${s.up} · 감소 ${s.down})</h4>${rowsHtml(changed.slice(0,60))}
+  <h4>지수 대비 가장 큰 초과 비중 (매니저의 확신)</h4>${rowsHtml(over.slice(0,12))}
+  <h4>지수 대비 가장 큰 과소 비중</h4>${rowsHtml(over.slice(-12).reverse())}
+  <h4>지수 대형종목 중 미보유 (비중 0.5%↑)</h4>${e.bm_missing&&e.bm_missing.length?`<div class="meta">${e.bm_missing.map(m=>`${m.name} <b>${m.bw.toFixed(2)}</b>`).join(' · ')}</div>`:'<div class="meta">해당 없음</div>'}
+  <h4>전체 보유 종목 (${e.holdings.filter(h=>h.status!=='out').length})</h4>${rowsHtml(e.holdings.filter(h=>h.status!=='out'))}`;
+  $('#drawer').classList.add('open'); $('#overlay').classList.add('open');
+  $('#dclose').onclick=closeDrawer;
+}
+function closeDrawer(){ $('#drawer').classList.remove('open'); $('#overlay').classList.remove('open'); }
+$('#overlay').onclick=closeDrawer;
+
+/* ---------------- controls ---------------- */
+$('#basisSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{basis=b.dataset.b;$('#basisSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderPerf();});
+$('#periodSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{period=b.dataset.p;$('#periodSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderChart();});
+$('#filterSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{filt=b.dataset.f;$('#filterSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderMatrix();});
+['q','thr','showCash','showBm'].forEach(id=>$('#'+id).addEventListener('input',renderMatrix));
+load();
+})();
+</script>
+</body>
+</html>
