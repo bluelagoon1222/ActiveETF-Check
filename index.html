@@ -178,14 +178,14 @@ async function load(){
     return;
   }
   let b='';
-  if(D.sample) b+=`<div class="banner">현재 표시되는 값은 <b>화면 확인용 샘플 데이터</b>입니다. GitHub Actions 첫 수집이 끝나면 실제 KRX 데이터로 자동 교체됩니다.</div>`;
+  if(D.sample) b+=`<div class="banner">현재 표시되는 값은 <b>화면 확인용 샘플 데이터</b>입니다. GitHub Actions 첫 수집이 끝나면 실제 데이터로 자동 교체됩니다.</div>`;
   if(st && st.ok===false) b+=`<div class="banner err">최근 자동 수집이 실패했습니다 (${st.generated_at}). 아래 데이터는 마지막 성공 시점 기준입니다. 오류: ${st.error||''}</div>`;
   $('#banner').innerHTML=b;
   $('#asof').innerHTML=`기준일 <b>${fmtDate(D.asof)}</b> · 전일 <b>${fmtDate(D.prev)}</b> · 갱신 ${D.generated_at} · 국내 주식형 액티브 ETF <b>${D.stats.n_active}</b>종 (PDF 수집 ${D.stats.n_pdf_ok}종)`;
   const h=location.hash.replace('#','');
   grp=(D.groups.find(g=>g.key===h)||D.groups[0]).key;
   renderTabs(); renderAll();
-  $('#foot').innerHTML=`데이터: 한국거래소 정보데이터시스템(data.krx.co.kr) ETF 기본정보·시세·구성종목(PDF)·지수구성종목. 비중은 PDF 기준(순자산 대비), 지수 비중은 지수 구성종목 시가총액 가중(유동비율 미반영 근사치) 또는 동일 지수 패시브 ETF PDF 대용. 수익률은 종가 또는 NAV 단순 등락률, 분배금 미반영. 매 영업일 18:40 KST 자동 갱신.<br>본 사이트는 공시 데이터를 정리한 참고자료이며 특정 상품의 매수·매도를 권유하지 않습니다. 투자 판단과 책임은 투자자 본인에게 있습니다.`;
+  $('#foot').innerHTML=`데이터: ETF CHECK(코스콤) ETF 기본정보·시세·NAV·순자산·구성종목(PDF)·총보수, 네이버 금융 기간수익률(가격·NAV)·추적오차·섹터비중. 구성종목 비중은 당일 PDF 기준(순자산 대비). '지수 대비' 비중과 초과수익은 동일 비교지수를 추종하는 최대 규모 패시브 ETF의 PDF와 가격을 지수 대용으로 사용한 근사치입니다. 수익률은 분배금 미반영 단순 등락률. 매 영업일 18:40 KST 자동 갱신.<br>본 사이트는 공시 데이터를 정리한 참고자료이며 특정 상품의 매수·매도를 권유하지 않습니다. 투자 판단과 책임은 투자자 본인에게 있습니다.`;
 }
 
 function renderTabs(){
@@ -218,7 +218,7 @@ function renderPerf(){
     const s=e.summary;
     const chg=(s.new||s.out||s.up||s.down)?`${s.new?`<span class="pill new">N${s.new}</span>`:''}${s.out?`<span class="pill out">O${s.out}</span>`:''}${s.up?`<span class="pill up">▲${s.up}</span>`:''}${s.down?`<span class="pill dn">▼${s.down}</span>`:''}`:'<span class="meta">–</span>';
     h+=`<tr><td class="l name"><div class="etfname" data-c="${e.code}">${e.name}</div><div class="meta">${e.manager} · ${e.code} · ${e.index||''}${e.premium!=null?` · 괴리 ${e.premium>0?'+':''}${e.premium}%`:''}</div></td>`+
-       `<td>${fmtAum(e.aum)}</td><td>${e.fee!=null?e.fee.toFixed(2)+'%':'–'}</td>`+
+       `<td>${fmtAum(e.aum)}</td><td>${e.fee!=null?e.fee.toFixed(2)+'%':'–'}${e.total_cost!=null?`<span class="ex">실부담 ${e.total_cost.toFixed(2)}%</span>`:''}</td>`+
        PER.map(p=>`<td><span class="ret">${fmtPct(pv(e,p))}</span><span class="ex">${excess(e,p)==null?'':(excess(e,p)>0?'+':'')+excess(e,p).toFixed(2)+'p vs 지수'}</span></td>`).join('')+
        `<td>${s.n_holdings}</td><td>${s.top10}%</td><td class="l">${chg}</td></tr>`;
   }
@@ -321,7 +321,7 @@ function openDrawer(code){
   const rowsHtml=(arr)=>arr.length?`<table><thead><tr><th class="l">종목</th><th>당일</th><th>전일</th><th>변화</th><th>지수</th><th>초과/과소</th></tr></thead><tbody>${arr.map(h=>`<tr><td class="l">${h.name}${h.status==='new'?'<span class="pill new">NEW</span>':h.status==='out'?'<span class="pill out">OUT</span>':''}</td><td>${h.w.toFixed(2)}</td><td>${h.pw==null?'–':h.pw.toFixed(2)}</td><td>${h.chg==null?'–':fmtPct(h.chg,true)}</td><td>${h.bw==null?'–':h.bw.toFixed(2)}</td><td>${h.active==null?'–':fmtPct(h.active,true)}</td></tr>`).join('')}</tbody></table>`:'<div class="meta">해당 없음</div>';
   $('#drawer').innerHTML=`<button class="close" id="dclose">×</button><h3>${e.name}</h3><div class="meta">${e.manager} · ${e.code} · 비교지수 ${e.index||'–'} · 총보수 ${e.fee}% · 상장 ${fmtDate(e.listed)}</div>
   <div class="kv"><div><small>순자산</small><b>${fmtAum(e.aum)}</b></div><div><small>종가 / NAV</small><b>${fmtNum(e.close)} / ${fmtNum(e.nav)}</b></div><div><small>보유 종목수</small><b>${s.n_holdings}</b></div><div><small>Top10 집중도</small><b>${s.top10}%</b></div><div><small>현금·기타</small><b>${s.cash}%</b></div><div><small>전일 대비 회전(편도)</small><b>${s.turnover==null?'–':s.turnover+'%'}</b></div></div>
-  <div class="meta">지수 비중 기준: ${e.bm_source||'확보 불가 (초과·과소 비중 미표시)'}</div>
+  <div class="meta">지수 비중 기준: ${e.bm_source||'동일 지수 패시브 ETF 없음 (초과·과소 비중 미표시)'}${e.tracking_err!=null?` · 추적오차 ${e.tracking_err}%`:''}</div>
   <h4>전일 대비 변경 (신규 ${s.new} · 제외 ${s.out} · 증가 ${s.up} · 감소 ${s.down})</h4>${rowsHtml(changed.slice(0,60))}
   <h4>지수 대비 가장 큰 초과 비중 (매니저의 확신)</h4>${rowsHtml(over.slice(0,12))}
   <h4>지수 대비 가장 큰 과소 비중</h4>${rowsHtml(over.slice(-12).reverse())}
