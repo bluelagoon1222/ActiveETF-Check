@@ -1,0 +1,287 @@
+[
+ {
+  "name": "ipinfo",
+  "status": 200,
+  "ms": 82,
+  "len": 273,
+  "ctype": "application/json",
+  "server": null,
+  "body": "{   \"ip\": \"48.217.109.212\",   \"city\": \"Dulles Town Center\",   \"region\": \"Virginia\",   \"country\": \"US\",   \"loc\": \"39.0376,-77.4158\",   \"org\": \"AS8075 Microsoft Corporation\",   \"postal\": \"20164\",   \"timezone\": \"America/New_York\",   \"readme\": \"https://ipinfo.io/missingauth\" }"
+ },
+ {
+  "name": "krx_home_get",
+  "status": 200,
+  "ms": 532,
+  "len": 407,
+  "ctype": "text/html;charset=utf-8",
+  "server": null,
+  "body": "<!DOCTYPE html> <html> <head> <title></title> </head> <body> <script type='text/javascript'> alert('로그인 또는 회원가입이 필요합니다.'); location.href='/contents/MDC/COMS/client/MDCCOMS001.cmd?locale=ko_KR&redirectURL=b2h0aEZNWThrQ2s4amxkQjNPS3pLdmxteXFTdGFHRElNWlh0c2pYbU4rRnRVSml4MXpWeWwrZUpBVUlJUmlERVdFT1ZUb2k3a2JiMURsalZKenFxUExIaHhLUmRGaTNRSFhQM0x3bGZXbDA9'; </script> </body> </html> "
+ },
+ {
+  "name": "krx_post_plain",
+  "status": 403,
+  "ms": 321,
+  "len": 2613,
+  "ctype": "text/html;charset=EUC-KR",
+  "server": null,
+  "body": "\r \r \r \r \r \r \r \r \r  \r  \r \r \r \t\r \t\t<html>\r <head>\r   <title>에러페이지 - 한국거래소 | 정보데이터시스템</title>\r   <meta charset=\"utf-8\">\r   <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\r   <meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\">\r   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\r   <meta name=\"author\" content=\"한국거래소\" />\r   <meta name=\"description\" content=\"증권·파생상품의 시장정보(Marketdata), 공매도정보, 투자분석정보(SMILE) 등 한국거래소의 정보데이터를 통합하여 제공 서비스\" />\r   <meta name=\"keywords\" content=\"정보데이터시스템 데이터시스템 한국거래소 통계 KRX통계 한국거래소정보 시장정보 주식 한국거래소데이터 KRX 한국거래소공매도 공매도"
+ },
+ {
+  "name": "krx_post_referer",
+  "status": 400,
+  "ms": 280,
+  "len": 6,
+  "ctype": "text/html; charset=utf-8",
+  "server": null,
+  "body": "LOGOUT"
+ },
+ {
+  "name": "krx_post_http",
+  "status": 400,
+  "ms": 231,
+  "len": 6,
+  "ctype": "text/html; charset=utf-8",
+  "server": null,
+  "body": "LOGOUT"
+ },
+ {
+  "name": "krx_otp_generate",
+  "status": 200,
+  "ms": 430,
+  "len": 6,
+  "ctype": "text/html; charset=UTF-8",
+  "server": null,
+  "body": "LOGOUT"
+ },
+ {
+  "name": "krx_open_api_home",
+  "status": 200,
+  "ms": 467,
+  "len": 175,
+  "ctype": "text/html",
+  "server": null,
+  "body": "<!DOCTYPE html>\r <html lang=\"ko\">\r <head>\r <meta charset=\"UTF-8\">\r <title>KRX ìì¥</title>\r </head>\r <body>\r <script>location.href=\"main/main.jsp\"</script>\r </body>\r </html>"
+ },
+ {
+  "name": "krx_kind",
+  "status": 200,
+  "ms": 465,
+  "len": 1650,
+  "ctype": "text/html; charset=UTF-8",
+  "server": null,
+  "body": "\r \r \r \r \r \r \r \r <!DOCTYPE html>\r <html>\r <head>\r <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\r <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\r <meta http-equiv=\"content-language\" content=\"kr\" />\r <meta http-equiv=\"content-style-type\" content=\"text/css\" />\r <meta http-equiv=\"pragma\" content=\"no-cache\" />\r <meta http-equiv=\"cache-control\" content=\"no-cache\" />\r <meta http-equiv=\"imagetoolbar\" content=\"no\" />\r <meta name=\"copyright\" content=\"(c)2012\" />\r <meta name=\"description\" content=\"대한민국 대표 기업공시채널 KIND\" />\r <meta name=\"keywords\" content=\"대한민국 대표 기업공시채널 KIND\""
+ },
+ {
+  "name": "naver_etf_list",
+  "status": 200,
+  "ms": 1898,
+  "len": 260481,
+  "ctype": "text/plain;charset=EUC-KR",
+  "server": "nfront",
+  "body": "{\"resultCode\":\"success\",\"result\":{\"etfItemList\":[{\"itemcode\":\"069500\",\"etfTabCode\":1,\"itemname\":\"KODEX 200\",\"nowVal\":105720,\"risefall\":\"2\",\"changeVal\":2110,\"changeRate\":2.04,\"nav\":105725.0,\"threeMonthEarnRate\":-23.6411,\"quant\":20187455,\"amonut\":2131083,\"marketSum\":245588},{\"itemcode\":\"360750\",\"etfTabCode\":4,\"itemname\":\"TIGER 미국S&P500\",\"nowVal\":25980,\"risefall\":\"2\",\"changeVal\":140,\"changeRate\":0.54,\"nav\":25960.0,\"threeMonthEarnRate\":-8.9388,\"quant\":37723723,\"amonut\":982836,\"marketSum\":203709},{\"itemcode\":\"133690\",\"etfTabCode\":4,\"itemname\":\"TIGER 미국나스닥100\",\"nowVal\":176990,\"risefall\":\"2\",\"changeV"
+ },
+ {
+  "name": "naver_m_basic",
+  "status": 200,
+  "ms": 1577,
+  "len": 3451,
+  "ctype": "application/json;charset=UTF-8",
+  "server": "nfront",
+  "body": "{\"stockEndType\":\"etf\",\"itemCode\":\"069500\",\"reutersCode\":\"069500\",\"stockName\":\"KODEX 200\",\"itemLogoUrl\":\"https://ssl.pstatic.net/imgstock/fn/real/logo/etf/StockKRETFKODEX.svg\",\"itemLogoPngUrl\":\"https://ssl.pstatic.net/imgstock/fn/real/logo/png/etf/StockKRETFKODEX.png\",\"sosok\":\"0\",\"closePrice\":\"105,720\",\"compareToPreviousClosePrice\":\"2,110\",\"compareToPreviousPrice\":{\"code\":\"2\",\"text\":\"상승\",\"name\":\"RISING\"},\"fluctuationsRatio\":\"2.04\",\"marketStatus\":\"CLOSE\",\"localTradedAt\":\"2026-09-04T16:10:17+09:00\",\"tradeStopType\":{\"code\":\"1\",\"text\":\"운영.Trading\",\"name\":\"TRADING\"},\"tradableStatus\":\"tradable\",\"trad"
+ },
+ {
+  "name": "naver_m_integration",
+  "status": 200,
+  "ms": 795,
+  "len": 9480,
+  "ctype": "application/json;charset=UTF-8",
+  "server": "nfront",
+  "body": "{\"stockEndType\":\"etf\",\"itemCode\":\"069500\",\"reutersCode\":\"069500\",\"stockName\":\"KODEX 200\",\"totalInfos\":[{\"code\":\"lastClosePrice\",\"key\":\"전일\",\"value\":\"103,610\"},{\"code\":\"openPrice\",\"key\":\"시가\",\"value\":\"105,005\",\"compareToPreviousPrice\":{\"code\":\"2\",\"text\":\"상승\",\"name\":\"RISING\"}},{\"code\":\"highPrice\",\"key\":\"고가\",\"value\":\"106,785\",\"compareToPreviousPrice\":{\"code\":\"2\",\"text\":\"상승\",\"name\":\"RISING\"}},{\"code\":\"lowPrice\",\"key\":\"저가\",\"value\":\"104,705\",\"compareToPreviousPrice\":{\"code\":\"2\",\"text\":\"상승\",\"name\":\"RISING\"}},{\"code\":\"accumulatedTradingVolume\",\"key\":\"거래량\",\"value\":\"20,187,455\"},{\"code\":\"accumulatedTradin"
+ },
+ {
+  "name": "naver_m_etfAnalysis",
+  "status": 200,
+  "ms": 585,
+  "len": 4864,
+  "ctype": "application/json;charset=UTF-8",
+  "server": "nfront",
+  "body": "{\"itemCode\":\"069500\",\"itemName\":\"KODEX 200\",\"etfSummary\":\"1좌당 순자산가치의 변동률을 기초지수인 KOSPI200의 변동률과 유사하도록 투자신탁재산을 운용하는 것을 목표로 합니다.한국거래소가 산출하는 KOSPI200 지수는 한국을 대표하는 200개 종목의 시가총액을 지수화한 것입니다. 200개 종목은 시장 대표성, 유동성, 업종 대표성을 고려하여 선정하는데, 전체 종목을 9개업 군으로 분류하여 시가총액과 거래량 비중이 높은 종목들을 우선 선정합니다.\",\"listedDate\":\"20021014\",\"issuerName\":\"삼성자산운용(ETF)\",\"etfBaseIndex\":\"코스피 200\",\"marketValue\":\"24조 5,588억\",\"totalNav\":\"24조 1,236억\",\"nav\":103846.89,\"etfChaseEarningRateSymbol\":\"+\",\"etfChaseEarningRate\":1.000000,\"deviationSign\":\"-\",\"deviationRate\":0.23,\"totalFee\":0.1500,\"chaseErrorRate\":0.38,\"taxationTypeCode\":\"1\",\"themeRetu"
+ },
+ {
+  "name": "naver_pc_etf_item",
+  "status": 200,
+  "ms": 1126,
+  "len": 141893,
+  "ctype": "text/html;charset=UTF-8",
+  "server": "nfront",
+  "body": "  \t \t \t \t \t <html lang='ko'> <head>   \t \t\t<title>KODEX 200 : Npay 증권</title> \t \t     <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />  <meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\"> <meta http-equiv=\"Content-Style-Type\" content=\"text/css\"> <meta name=\"apple-mobile-web-app-title\" content=\"Npay 증권\" />      \t              <meta property=\"og:url\" content=\"https://finance.naver.com/item/main.naver?code=069500\"/>          \t\t\t \t\t     \t\t    \t<meta property=\"og:title\" content=\"KODEX 200 - Npay 증권 : Npay 증권\"/> \t\t      \t\t \t\t \t\t\t \t\t\t   <meta property=\"og:description"
+ },
+ {
+  "name": "seibro_home",
+  "status": 200,
+  "ms": 4801,
+  "len": 1048,
+  "ctype": "text/html; charset=EUC-KR",
+  "server": "",
+  "body": "         <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> <html xmlns='http://www.w3.org/1999/xhtml' xmlns:ev='http://www.w3.org/2001/xml-events' xmlns:w2='http://www.inswave.com/websquare' xmlns:xf='http://www.w3.org/2002/xforms' lang='ko'> \t<head> \t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /> \t\t<!--<meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\" />--> \t\t<meta http-equiv=\"X-UA-Compatible\" content=\"IE=9, chrome=1\" /> \t\t<title>  SEIBro  </title> \t\t<script type=\"text/javascript\" src=\"javascrip"
+ },
+ {
+  "name": "kofia_freesis",
+  "status": 200,
+  "ms": 1544,
+  "len": 797,
+  "ctype": "text/html",
+  "server": null,
+  "body": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\" \"http://www.w3.org/TR/html4/frameset.dtd\"> \r <html>\r <head>\r <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\r <!--  BEGIN Browser History required section -->\r <link rel=\"icon\" type=\"image/ico\" href=\"/stat/img/icon/favicon.ico\"/>\r <link rel=\"shortcut icon\" href=\"/stat/img/icon/favicon.ico\"/>\r <!--  END Browser History required section -->\r \r <title>::::: ê¸ìµí¬ìíí ì¢í©íµê³ Portal :::::</title>\r </head>\r \r <frameset rows=\"100%\" frameborder=\"0\" framespacing=\"0\" border=\"0\">\r  <frame name=\"main\" src=\"/ind"
+ },
+ {
+  "name": "etfcheck_home",
+  "status": 200,
+  "ms": 1375,
+  "len": 4777,
+  "ctype": "text/html; charset=UTF-8",
+  "server": "Apache",
+  "body": "<!DOCTYPE html>\r <html lang=\"ko\" class=\"onWide\">\r \r <head>\r     <meta charset=\"utf-8\">\r     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\r     <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\r     <meta http-equiv=\"X-UA-Compatible\" content=\"IE=11\" />\r     <meta name=\"immersive-reader-forbidden\" content=\"true\">\r     <!--\r     <meta name=\"google-signin-client_id\" content=\"131634020115-1av4le00n341b94epmbvl88a1its9b2g.apps.googleusercontent.com\">\r     -->\r      <!--<meta name=\"naver-site-verification\" content=\"a0ffca2b514a21d3ff4014436"
+ },
+ {
+  "name": "etfcheck_m",
+  "status": 200,
+  "ms": 1338,
+  "len": 4777,
+  "ctype": "text/html; charset=UTF-8",
+  "server": "Apache",
+  "body": "<!DOCTYPE html>\r <html lang=\"ko\" class=\"onWide\">\r \r <head>\r     <meta charset=\"utf-8\">\r     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\r     <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\r     <meta http-equiv=\"X-UA-Compatible\" content=\"IE=11\" />\r     <meta name=\"immersive-reader-forbidden\" content=\"true\">\r     <!--\r     <meta name=\"google-signin-client_id\" content=\"131634020115-1av4le00n341b94epmbvl88a1its9b2g.apps.googleusercontent.com\">\r     -->\r      <!--<meta name=\"naver-site-verification\" content=\"a0ffca2b514a21d3ff4014436"
+ },
+ {
+  "name": "fnguide_etf",
+  "status": 200,
+  "ms": 1568,
+  "len": 1829,
+  "ctype": "text/html",
+  "server": null,
+  "body": "ï»¿<html lang=\"ko\"><head>\r     <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\">\r     <meta charset=\"utf-8\">\r     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">\r     <meta name=\"author\" content=\"\">\r     <meta name=\"description\" content=\"\">\r     <title>FnGuide,Your Best Financial Guide</title>\r     \r     <style >\r     .error_wrap {\r     width: 500px;\r     margin: 0 auto;\r     padding-top: 150px\r     }\r .error_wrap .error_table {\r     width: 100%;\r     border-width: 0;\r     background-color: #fafafa\r }\r \r .error_wrap .err"
+ },
+ {
+  "name": "funetf",
+  "status": 200,
+  "ms": 2701,
+  "len": 614876,
+  "ctype": "text/html;charset=UTF-8",
+  "server": "cloudflare",
+  "body": "<!DOCTYPE html>\r \r \r \r \r \r \r \r \r \r \r \r \r \r <html lang=\"ko\" class=\"\">\r \r \r   \r   \r     <head>\r         \r       \r         <!-- Google tag (gtag.js) -->\r         <script async src=\"https://www.googletagmanager.com/gtag/js?id=G-ZGV52ZV3XH\"></script>\r \r         <script> // 공통 수집 데이터 정의 부분\r         \r         \r         window.dataLayer = window.dataLayer || [];\r         window.dataLayer.push({\r           \"login_status\" : \"N\",\r           \"device_type\" : \"PC\",\r           \"customer_user_id\" : \"\",\r           \"user_group\" : \"\",\r           \"membership_level\" : \"\",\r           \"seller_category\" : \"\",\r       "
+ },
+ {
+  "name": "am_kodex",
+  "status": 200,
+  "ms": 1005,
+  "len": 77495,
+  "ctype": "text/html;charset=UTF-8",
+  "server": "cloudflare",
+  "body": "<!DOCTYPE html>\r \r <html lang=\"ko\" id=\"top-of-site\">\r <head>\r \t\r \r \r \r \r <script>\r \tvar lang\t\t\t= \"ko\";\r \tvar langUri         = \"\";\r \tvar resourceDomain\t= \"/assets\";\r </script>\r \r \t\r \r   \t\r \t\r \r \r \r \r \r \r \r <script>\r \t(function() {\r \t\tconst hostname\t= location.hostname;\r \t\tconst isLocal\t= hostname.endsWith(\"localhost\");\r \t\tconst isMobPage\t= hostname.endsWith(\"m.samsungfund.com\");\r \r \t\tconst width\t\t= top.innerWidth;\r \t\tconst height\t= top.innerHeight;\r \t\tconst isDesktop\t= width > 1280;\r \t\tconst isTablet\t= width > 680 && !isDesktop;\r \t\tconst isMobile\t= !isDesktop && !isTablet;\r \r \t\tconsole.log('wi"
+ },
+ {
+  "name": "am_tiger",
+  "status": 403,
+  "ms": 627,
+  "len": 261,
+  "ctype": "text/html; charset=iso-8859-1",
+  "server": "Apache",
+  "body": "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"> <html><head> <title>301 Moved Permanently</title> </head><body> <h1>Moved Permanently</h1> <p>The document has moved <a href=\"http://investments.miraeasset.com/tigeretf/index.html\">here</a>.</p> </body></html> "
+ },
+ {
+  "name": "am_koact",
+  "status": 200,
+  "ms": 2751,
+  "len": 70523,
+  "ctype": "text/html;charset=UTF-8",
+  "server": "cloudflare",
+  "body": "<!DOCTYPE html>\r \r \r \r \r \r <html lang=\"ko\" id=\"top-of-site\">\r <head>\r \t\r \r \r \r <!-- <script>\r \tvar lang\t\t\t= \"ko\";\r \tvar langUri         = \"\";\r \tvar resourceDomain\t= \"/assets\";\r </script> -->\r \r \t\r \r   \t\r \t\r \r \r \r \r \r \r \r <script src=\"/assets/sns/kakao.min.js\"></script>\r <script src=\"/assets/sns/sns.js\"></script>\r <script>\r \tconst sns = new Sns('6e34a757331dff5182c5ac77ed6ececc');\r </script>\r \r <meta charset=\"UTF-8\">\r <meta name=\"viewport\" content=\"width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">\r <meta http-equiv=\"X-UA-Compatible\" content=\"ie=edg"
+ },
+ {
+  "name": "am_timefolio",
+  "status": 200,
+  "ms": 1688,
+  "len": 102342,
+  "ctype": "text/html; charset=utf-8",
+  "server": "Apache",
+  "body": "<!DOCTYPE html>\r <html charset=\"utf-8\">\r <head>\r <meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\" />\r <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes\" />\r <title>타임폴리오</title>\r <meta name=\"Robots\" content=\"all\" />\r <meta name=\"Keywords\" content=\"타임폴리오자산운용, 타임폴리오, 타임폴리오소개, 타임폴리오투자철학, 타임폴리오회사소개\" />\r <meta name=\"Description\" content=\" 타임폴리오자산운용은 멀티전략 헤지펀드, 공모펀드, 대체투자, 액티브 ETF, 신기술조합, 글로벌펀드 등 다양한 투자 전략을 운용하는 종합 자산운용사입니다.\" />\r <meta name=\"Author\" content=\"DESIGNPIXEL\" />\r <meta name=\"Copyright\" content=\"(c)DESIGNPIXEL\" />\r <meta name=\"r"
+ },
+ {
+  "name": "am_ace",
+  "status": 200,
+  "ms": 1778,
+  "len": 103788,
+  "ctype": "text/html; charset=utf-8",
+  "server": "nginx",
+  "body": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no\"/><title>한국투자 ACE ETF</title><meta name=\"next-head-count\" content=\"3\"/><meta charSet=\"utf-8\"/><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','da"
+ },
+ {
+  "name": "am_rise",
+  "status": 200,
+  "ms": 2980,
+  "len": 158193,
+  "ctype": "text/html; charset=UTF-8",
+  "server": null,
+  "body": "\r \r \r \r <!DOCTYPE html>\r \r \r \r \r \r <html lang=\"ko\">\r <head>\r \t<!-- <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover\"> -->\r \t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi\" />\r \r     <meta name=\"format-detection\" content=\"telephone=no\">\r     <meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\">\r     <meta charset=\"utf-8\">\r \t\r   \t\t\r   \t\t\r \t\t\t<title>RISE ETF</title> \r   \t\t\r   \t\r   \t<meta name=\"na"
+ },
+ {
+  "name": "am_sol",
+  "status": 200,
+  "ms": 5513,
+  "len": 1298524,
+  "ctype": "text/html;charset=UTF-8",
+  "server": null,
+  "body": "<!DOCTYPE html>\r <html\r         lang=\"ko\"\r         class=\"no-js\">\r <head>\r     <title>SOL ETF</title>\r     <meta charset=\"utf-8\">\r     <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\r     <link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"/static/pc/img/common/favicon.ico\" />\r \r     <meta property=\"og:type\" content=\"website\" />\r     <meta property=\"og:title\" content=\"SOL ETF\" />\r     <meta property=\"og:description\" content=\"ETF 투자 솔루션을 제공하는 자산운용사인 신한 SOL ETF 공식 홈페이지\" />\r     <meta property=\"og:image\" content=\"/static/pc/img/common/share.png?v=3\" />\r     <meta property=\"og:url\" content"
+ },
+ {
+  "name": "am_plus",
+  "status": 200,
+  "ms": 4662,
+  "len": 190526,
+  "ctype": "text/html;charset=UTF-8",
+  "server": "Apache",
+  "body": "<!-- Worker Version Check: P_MA1.html -->\r <!DOCTYPE html>\r <!-- Worker Version Check: 65cbab9 --> <html lang=\"ko\">\r <head>\r     <meta charset=\"utf-8\" />\r     <meta name=\"robots\" content=\"index,follow\">\r     <meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge; chrome=1\" />\r     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1\"/>\r     <meta itemprop=\"name\" content=\"PLUS ETF\" />\r     <meta itemprop=\"image\" content=\"../../static/ClientUI/images/common/plus-etf-ozimage.jpg\" />\r     <meta name=\"author\" content=\"한화자산운용\" />\r     <link rel=\"shortcu"
+ },
+ {
+  "name": "am_hanaro",
+  "status": 200,
+  "ms": 1706,
+  "len": 166656,
+  "ctype": "text/html;charset=utf-8",
+  "server": null,
+  "body": "\r \r <!DOCTYPE html>\r \r \r \r \r \r \r \r \r \r <!-- 필요 정보는 아래에 나열 -->\r \r <!-- 인증 사용자 관련 -->\r \r \r \r     \r \r \r \r \r \r \r <script type=\"text/javascript\">\r //window.gLang = '';\r </script>\r <html xml:lang=\"ko\" lang=\"ko\">\r <head>\r <meta charset=\"utf-8\">\r <meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\">\r <title>HANARO ETF</title>\r \r <meta name=\"description\" content=\"SIMPLY HANARO - 투자의 미래를 하나로\">\r <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=no\">\r <meta name=\"msapplication-TileColor\" content=\"#ffffff\">\r <meta name=\"msapplication-TileImage\" content=\""
+ },
+ {
+  "name": "am_kiwoom",
+  "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='www.kiwoomam.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1016)')))\"))"
+ },
+ {
+  "name": "am_kosef",
+  "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='www.kosef.co.kr', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1016)')))\"))"
+ },
+ {
+  "name": "am_woori_won",
+  "status": 200,
+  "ms": 4669,
+  "len": 187405,
+  "ctype": "text/html;charset=utf-8",
+  "server": null,
+  "body": "\r <!doctype html>\r <!-- UI 없는 페이지 전체 헤더 개발용 -->\r \r \r \r \r \r <html xml:lang=\"ko\" lang=\"ko\">\r <head>\r     <!-- 공통 메타 태그용 -->\r     <title>우리자산운용 </title>\r     \r \r <meta charset=\"utf-8\">\r <meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\">\r <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\"/>\r <link rel=\"shortcut icon\" href=\"/assets/global/images/favicon.ico\" />\r <meta name=\"csrf-token\" content=\"a1e205ed-8b10-4811-87ac-475739275030\">\r \r <meta name=\"description\" content=\"오늘의 혁신으로 내일의 가치를 만드는 자산운용사입니다.\" />\r <meta name=\"author\" content=\"우리자산운용\""
+ },
+ {
+  "name": "am_daishin343",
+  "error": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'www.daishin343.com\\', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host=\\'www.daishin343.com\\', port=443): Failed to resolve \\'www.daishin343.com\\' ([Errno -2] Name or service not known)\"))'))"
+ },
+ {
+  "name": "am_bnk",
+  "error": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'www.bnkasset.com\\', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host=\\'www.bnkasset.com\\', port=443): Failed to resolve \\'www.bnkasset.com\\' ([Errno -2] Name or service not known)\"))'))"
+ },
+ {
+  "name": "am_dbetf",
+  "error": "ConnectionError(ProtocolError('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer')))"
+ },
+ {
+  "name": "am_hankookmiraemang",
+  "error": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'www.hi-am.com\\', port=443): Max retries exceeded with url: / (Caused by NewConnectionError(\"HTTPSConnection(host=\\'www.hi-am.com\\', port=443): Failed to establish a new connection: [Errno 111] Connection refused\"))'))"
+ }
+]

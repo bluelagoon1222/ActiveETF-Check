@@ -1,5 +1,5 @@
 {
  "ok": false,
  "error": "RuntimeError('KRX call failed permanently: bld=dbms/MDC/STAT/standard/MDCSTAT04601 err=HTTP 400')",
- "generated_at": "2026-09-05 19:46 KST"
+ "generated_at": "2026-09-05 19:50 KST"
 }
