@@ -1,66 +1,121 @@
-import requests, json, time, os, sys
-OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data"); os.makedirs(OUT, exist_ok=True)
-UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-      "Accept-Language": "ko-KR,ko;q=0.9"}
-res = []
-def rec(name, fn):
-    t = time.time()
-    try:
-        r = fn()
-        body = r.text[:600].replace("\n", " ")
-        res.append({"name": name, "status": r.status_code, "ms": int((time.time()-t)*1000), "len": len(r.content),
-                    "ctype": r.headers.get("content-type"), "server": r.headers.get("server"), "body": body})
-    except Exception as e:
-        res.append({"name": name, "error": repr(e)[:300]})
-    print(res[-1]["name"], res[-1].get("status"), res[-1].get("error", "")[:80], flush=True)
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Diagnostics round 2: discover ETF holdings (PDF) data sources reachable from the runner.
+Saves everything under data/probe2/ so it can be read from the repository afterwards."""
+import json, os, re, subprocess, sys, time
+import requests
 
-rec("ipinfo", lambda: requests.get("https://ipinfo.io/json", timeout=15))
-# --- KRX variants
-s = requests.Session(); s.headers.update(UA)
-rec("krx_home_get", lambda: s.get("https://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201030108", timeout=20))
-krx_pay = {"bld": "dbms/MDC/STAT/standard/MDCSTAT04601", "locale": "ko_KR", "share": "1", "csvxls_isNo": "false"}
-rec("krx_post_plain", lambda: s.post("https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd", data=krx_pay, timeout=20))
-rec("krx_post_referer", lambda: s.post("https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd", data=krx_pay, timeout=20,
-    headers={"Referer": "https://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201030108"}))
-rec("krx_post_http", lambda: requests.post("http://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd", data=krx_pay, timeout=20,
-    headers={**UA, "Referer": "http://data.krx.co.kr/contents/MDC/MDI/mdiLoader"}))
-rec("krx_otp_generate", lambda: s.post("https://data.krx.co.kr/comm/fileDn/GenerateOTP/generate.cmd", timeout=20,
-    data={"locale": "ko_KR", "mktId": "ALL", "share": "1", "csvxls_isNo": "false", "name": "fileDown", "url": "dbms/MDC/STAT/standard/MDCSTAT04601"},
-    headers={"Referer": "https://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201030108"}))
-rec("krx_open_api_home", lambda: requests.get("https://open.krx.co.kr", timeout=20, headers=UA))
-rec("krx_kind", lambda: requests.get("https://kind.krx.co.kr/main.do", timeout=20, headers=UA))
-# --- Naver
-rec("naver_etf_list", lambda: requests.get("https://finance.naver.com/api/sise/etfItemList.nhn", timeout=20, headers=UA))
-rec("naver_m_basic", lambda: requests.get("https://m.stock.naver.com/api/stock/069500/basic", timeout=20, headers=UA))
-rec("naver_m_integration", lambda: requests.get("https://m.stock.naver.com/api/stock/069500/integration", timeout=20, headers=UA))
-rec("naver_m_etfAnalysis", lambda: requests.get("https://m.stock.naver.com/api/stock/069500/etfAnalysis", timeout=20, headers=UA))
-rec("naver_pc_etf_item", lambda: requests.get("https://finance.naver.com/item/main.naver?code=069500", timeout=20, headers=UA))
-# --- Seibro / KOFIA / others
-rec("seibro_home", lambda: requests.get("https://seibro.or.kr/websquare/control.jsp?w2xPath=/IPORTAL/user/etf/BIP_CNTS06030V.xml&menuNo=179", timeout=20, headers=UA))
-rec("kofia_freesis", lambda: requests.get("https://freesis.kofia.or.kr/", timeout=20, headers=UA))
-rec("etfcheck_home", lambda: requests.get("https://www.etfcheck.co.kr/", timeout=20, headers=UA))
-rec("etfcheck_m", lambda: requests.get("https://www.etfcheck.co.kr/mobile/etpitem/069500/pdf", timeout=20, headers=UA))
-rec("fnguide_etf", lambda: requests.get("https://comp.fnguide.com/SVO2/ASP/etf_snapshot.asp?pGB=1&gicode=A069500", timeout=20, headers=UA))
-rec("funetf", lambda: requests.get("https://www.funetf.co.kr/", timeout=20, headers=UA))
-# --- asset managers
-for name, url in [
-    ("kodex", "https://www.samsungfund.com/etf/product/view.do?id=2ETF01"),
-    ("tiger", "https://www.tigeretf.com/ko/product/search/detail/index.do?ksdFund=KR7102110004"),
-    ("koact", "https://www.samsungactive.co.kr/"),
-    ("timefolio", "https://www.timefolio.co.kr/"),
-    ("ace", "https://www.aceetf.co.kr/"),
-    ("rise", "https://www.riseetf.co.kr/"),
-    ("sol", "https://www.soletf.com/"),
-    ("plus", "https://www.plusetf.co.kr/"),
-    ("hanaro", "https://www.hanaroetf.com/"),
-    ("kiwoom", "https://www.kiwoomam.com/"),
-    ("kosef", "https://www.kosef.co.kr/"),
-    ("woori_won", "https://www.wooriam.kr/"),
-    ("daishin343", "https://www.daishin343.com/"),
-    ("bnk", "https://www.bnkasset.com/"),
-    ("dbetf", "https://www.db-am.com/"),
-    ("hankookmiraemang", "https://www.hi-am.com/"),
-]:
-    rec("am_" + name, lambda url=url: requests.get(url, timeout=20, headers=UA, allow_redirects=True))
-json.dump(res, open(os.path.join(OUT, "probe.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-print("DONE", len(res))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(ROOT, "data", "probe2")
+os.makedirs(OUT, exist_ok=True)
+UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+      "Accept-Language": "ko-KR,ko;q=0.9", "Referer": "https://m.stock.naver.com/"}
+CAP = 40000
+
+
+def save(name, text):
+    with open(os.path.join(OUT, name), "w", encoding="utf-8") as f:
+        f.write(text[:CAP] if isinstance(text, str) else json.dumps(text, ensure_ascii=False)[:CAP])
+
+
+def get(url, **kw):
+    try:
+        r = requests.get(url, timeout=25, headers=UA, **kw)
+        return r.status_code, r.text
+    except Exception as e:
+        return None, repr(e)
+
+
+log = []
+def L(*a):
+    s = " ".join(str(x) for x in a); print(s, flush=True); log.append(s)
+
+# 1. Naver ETF list -> find active ETFs
+st, body = get("https://finance.naver.com/api/sise/etfItemList.nhn")
+active_codes = []
+try:
+    js = json.loads(body)
+    items = js["result"]["etfItemList"]
+    save("naver_etf_list.json", {"n": len(items), "sample": items[:3]})
+    act = [i for i in items if "액티브" in i["itemname"] and i.get("etfTabCode") in (1, 2)]
+    L("naver list ok", len(items), "domestic active-named:", len(act))
+    save("naver_active_named.json", [{"code": i["itemcode"], "name": i["itemname"], "tab": i["etfTabCode"], "aum": i.get("marketSum")} for i in act])
+    active_codes = [i["itemcode"] for i in sorted(act, key=lambda x: -(x.get("marketSum") or 0))[:3]]
+except Exception as e:
+    L("naver list parse fail", e, str(body)[:200])
+X = active_codes[0] if active_codes else "069500"
+L("test code:", X, active_codes)
+
+# 2. Naver per-item endpoints (full bodies)
+for path in ["basic", "integration", "etfAnalysis", "etfComposition", "etfPortfolio", "composition", "portfolio",
+             "holdings", "etfHoldings", "etfConstituents", "constituents", "etfAnalysis/portfolio", "etfCu"]:
+    st, body = get(f"https://m.stock.naver.com/api/stock/{X}/{path}")
+    L("naver", path, st, len(body or ""))
+    if st == 200:
+        save(f"naver_{path.replace('/', '_')}.txt", body)
+for url in [f"https://m.stock.naver.com/api/etf/{X}/basic", f"https://m.stock.naver.com/api/etf/{X}/portfolio",
+            f"https://api.stock.naver.com/etf/{X}/basic", f"https://api.stock.naver.com/etf/{X}/portfolio",
+            f"https://navercomp.wisereport.co.kr/v2/ETF/index.aspx?cmp_cd={X}",
+            f"https://navercomp.wisereport.co.kr/v2/ETF/ETFPortfolio.aspx?cmp_cd={X}",
+            f"https://finance.naver.com/item/coinfo.naver?code={X}",
+            f"https://www.etfcheck.co.kr/mobile/etpitem/{X}/pdf",
+            f"https://www.etfcheck.co.kr/mobile/api/etp/{X}/pdf", f"https://www.etfcheck.co.kr/api/etp/{X}/pdf",
+            f"https://www.etfcheck.co.kr/mobile/api/etpitem/{X}/pdf"]:
+    st, body = get(url)
+    L("GET", url, st, len(body or ""))
+    if st == 200:
+        save("raw_" + re.sub(r"[^0-9A-Za-z]+", "_", url)[8:90] + ".txt", body)
+
+# 3. Headless browser: capture network calls made by data pages (reveals their internal APIs)
+try:
+    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "playwright"], check=True, timeout=300)
+    subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], check=True, timeout=600)
+    from playwright.sync_api import sync_playwright
+    pages = {
+        "etfcheck_pdf": f"https://www.etfcheck.co.kr/mobile/etpitem/{X}/pdf",
+        "etfcheck_item": f"https://www.etfcheck.co.kr/mobile/etpitem/{X}",
+        "wisereport": f"https://navercomp.wisereport.co.kr/v2/ETF/index.aspx?cmp_cd={X}",
+        "naver_m_etf": f"https://m.stock.naver.com/domestic/stock/{X}/etfAnalysis",
+        "seibro_etf": "https://seibro.or.kr/websquare/control.jsp?w2xPath=/IPORTAL/user/etf/BIP_CNTS06030V.xml&menuNo=179",
+        "kodex_list": "https://www.samsungfund.com/etf/product/list.do",
+        "koact_home": "https://www.samsungactive.co.kr/",
+        "timefolio_etf": "https://www.timefolio.co.kr/etf/etf_list.php",
+    }
+    with sync_playwright() as p:
+        b = p.chromium.launch()
+        for name, url in pages.items():
+            ctx = b.new_context(user_agent=UA["User-Agent"], locale="ko-KR")
+            pg = ctx.new_page()
+            captured = []
+            def on_resp(resp, captured=captured):
+                try:
+                    u = resp.url
+                    ct = resp.headers.get("content-type", "")
+                    if any(k in u for k in ("api", "json", "ajax", "Ajax", ".do", ".jsp", ".asp", "xml", "Service", "data")) or "json" in ct:
+                        body = ""
+                        try:
+                            if resp.status == 200 and ("json" in ct or "xml" in ct or "text" in ct or "javascript" in ct):
+                                body = resp.text()[:6000]
+                        except Exception:
+                            pass
+                        captured.append({"url": u[:400], "status": resp.status, "ct": ct[:60],
+                                         "method": resp.request.method, "post": (resp.request.post_data or "")[:800], "body": body})
+                except Exception:
+                    pass
+            pg.on("response", on_resp)
+            try:
+                pg.goto(url, timeout=45000, wait_until="domcontentloaded")
+                pg.wait_for_timeout(9000)
+                html = pg.content()
+            except Exception as e:
+                html = "ERR " + repr(e)
+            save(f"pw_{name}_net.json", captured)
+            save(f"pw_{name}_html.txt", html)
+            L("playwright", name, "responses:", len(captured), "html:", len(html))
+            ctx.close()
+        b.close()
+except Exception as e:
+    L("playwright stage failed:", repr(e))
+
+save("log.txt", "\n".join(log))
+print("PROBE2 DONE")
