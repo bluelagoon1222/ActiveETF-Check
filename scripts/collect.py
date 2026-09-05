@@ -42,7 +42,12 @@ EC = "https://www.etfcheck.co.kr"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
 EC_HEADERS = {"User-Agent": UA, "Accept": "application/json, text/plain, */*", "Accept-Language": "ko-KR,ko;q=0.9",
-              "Referer": EC + "/mobile/main3", "X-Requested-With": "XMLHttpRequest"}
+              "Referer": EC + "/", "X-Requested-With": "XMLHttpRequest", "Origin": EC,
+              "sec-ch-ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+              "sec-ch-ua-mobile": "?0", "sec-ch-ua-platform": '"Windows"',
+              "Sec-Fetch-Dest": "empty", "Sec-Fetch-Mode": "cors", "Sec-Fetch-Site": "same-origin"}
+EC_HEADERS_ALT = {"User-Agent": UA, "Accept": "*/*", "Accept-Language": "ko-KR,ko;q=0.9", "Referer": EC + "/mobile/main3",
+                  "Connection": "close"}
 NV_HEADERS = {"User-Agent": UA, "Accept": "application/json, text/plain, */*", "Accept-Language": "ko-KR,ko;q=0.9",
               "Referer": "https://m.stock.naver.com/"}
 
@@ -91,6 +96,19 @@ class Http:
     def __init__(self):
         self.s = requests.Session()
         self.calls = 0
+        self.warmed = False
+
+    def warm_up(self):
+        """Visit the ETF CHECK front page once so the session carries its cookies."""
+        if self.warmed:
+            return
+        self.warmed = True
+        for u in (EC + "/mobile/main3", EC + "/"):
+            try:
+                self.s.get(u, headers={"User-Agent": UA, "Accept": "text/html,*/*", "Accept-Language": "ko-KR,ko;q=0.9"}, timeout=30)
+                time.sleep(0.5)
+            except Exception as e:  # noqa
+                log("warm-up failed", u, e)
 
     def get_json(self, url, headers, params=None, tries=3):
         last = None
@@ -109,7 +127,13 @@ class Http:
         raise RuntimeError("GET failed %s %s: %s" % (url, params, last))
 
     def ec(self, path, **params):
-        js = self.get_json(EC + path, EC_HEADERS, params or None)
+        self.warm_up()
+        try:
+            js = self.get_json(EC + path, EC_HEADERS, params or None)
+        except Exception as e:  # noqa
+            log("ETF CHECK retry with alternate headers:", path, str(e)[:120])
+            time.sleep(3)
+            js = self.get_json(EC + path, EC_HEADERS_ALT, params or None, tries=2)
         if not js.get("success", True):
             raise RuntimeError("ETF CHECK error %s: %s" % (path, js.get("message")))
         return js.get("results", [])
@@ -136,6 +160,38 @@ def fetch_ec_master(h):
             "ec_ret": {"1W": to_num(r.get("W01001")), "1M": to_num(r.get("W01002")), "3M": to_num(r.get("W01003")),
                        "6M": to_num(r.get("W01004")), "1Y": to_num(r.get("W01005")), "3Y": to_num(r.get("W01006"))},
         }
+    return out
+
+
+def krw_text_to_won(t):
+    """'2조 4,500억' -> 2450000000000"""
+    if not t:
+        return None
+    t = str(t).replace(",", "")
+    won = 0.0
+    m = re.search(r"([\d.]+)\s*조", t)
+    if m:
+        won += float(m.group(1)) * 1e12
+    m = re.search(r"([\d.]+)\s*억", t)
+    if m:
+        won += float(m.group(1)) * 1e8
+    return won or None
+
+
+# benchmark index -> representative passive ETF (used when the ETF CHECK master list is unavailable)
+STATIC_PROXY = {"KOSPI200": "069500", "KOSDAQ150": "229200", "KRX반도체": "091160", "KRX300": "292190",
+                "KOSPI": "226490", "KRX바이오K뉴딜": "364970", "KRX2차전지K뉴딜": "364980", "KRXBBIGK뉴딜": "364960",
+                "KOSPI200커버드콜5OTM": "069500", "KOSPI200커버드콜": "069500", "KOSDAQ150커버드콜": "229200"}
+
+
+def fetch_naver_master(h, naver_list):
+    """Fallback universe built from Naver's ETF list (no benchmark index yet; filled from etfAnalysis later)."""
+    out = {}
+    for code, i in naver_list.items():
+        aum = to_num(i.get("marketSum"))
+        out[code] = {"code": code, "isin": None, "name": (i.get("itemname") or "").strip(), "manager": "", "index": "",
+                     "listed": "", "close": to_num(i.get("nowVal")), "nav": to_num(i.get("nav")),
+                     "aum": aum * 1e8 if aum is not None else None, "val": None, "date": None, "ec_ret": {}}
     return out
 
 
@@ -342,19 +398,27 @@ def main():
     h = Http()
 
     # 1. universe -----------------------------------------------------------
-    master = fetch_ec_master(h)
-    log("ETF CHECK master:", len(master))
-    fees = {}
-    try:
-        fees = fetch_ec_fees(h)
-    except Exception as e:  # noqa
-        log("fees failed:", e)
     naver_list = {}
     try:
         naver_list = fetch_naver_list(h)
         log("Naver list:", len(naver_list))
     except Exception as e:  # noqa
         log("naver list failed:", e)
+    master_src = "etfcheck"
+    try:
+        master = fetch_ec_master(h)
+        log("ETF CHECK master:", len(master))
+    except Exception as e:  # noqa
+        log("ETF CHECK master failed -> using Naver list as universe:", str(e)[:160])
+        if not naver_list:
+            raise
+        master = fetch_naver_master(h, naver_list)
+        master_src = "naver"
+    fees = {}
+    try:
+        fees = fetch_ec_fees(h)
+    except Exception as e:  # noqa
+        log("fees failed:", str(e)[:120])
 
     active = {}
     for code, e in master.items():
@@ -406,7 +470,25 @@ def main():
         except OSError:
             pass
 
-    # 3. benchmark proxies: largest passive ETF with same benchmark index --------
+    # 3a. Naver per-ETF analysis (also fills index/manager when master came from Naver) ----
+    naver = {}
+    for code, e in active.items():
+        try:
+            nv = fetch_naver_analysis(h, code)
+        except Exception as ex:  # noqa
+            log("naver analysis failed", code, ex)
+            nv = {}
+        naver[code] = nv
+        if not e["index"]:
+            e["index"] = re.sub(r"\(.*?지수\)$", "", (nv.get("etfBaseIndex") or "")).strip()
+        if not e["manager"]:
+            e["manager"] = nv.get("issuerName") or ""
+        if not e["listed"]:
+            e["listed"] = nv.get("listedDate") or ""
+        if e["aum"] is None:
+            e["aum"] = krw_text_to_won(nv.get("totalNav"))
+
+    # 3b. benchmark proxies: largest passive ETF with same benchmark index --------
     passive_by_index = defaultdict(list)
     for code, e in master.items():
         if "액티브" in e["name"] or not e["index"]:
@@ -421,6 +503,10 @@ def main():
             continue
         entry = {"name": e["index"], "source": None, "weights": {}, "names": {}, "proxy": None, "series": {}}
         cands = sorted(passive_by_index.get(key, []), key=lambda p: -(p["aum"] or 0))
+        if not cands:
+            sp = STATIC_PROXY.get(key) or next((v for k, v in STATIC_PROXY.items() if k and k in key), None)
+            if sp:
+                cands = [master.get(sp) or {"code": sp, "name": (naver_list.get(sp) or {}).get("itemname", sp), "aum": 0}]
         for p in cands[:1]:
             try:
                 rows, _ = fetch_pdf(h, p["code"])
@@ -437,19 +523,14 @@ def main():
         benchmarks[key] = entry
         log("benchmark", e["index"], "->", entry["source"], len(entry["weights"]))
 
-    # 4. per-ETF history + Naver analysis -----------------------------------------
-    hist, naver = {}, {}
+    # 4. per-ETF price history ------------------------------------------------------
+    hist = {}
     for code, e in active.items():
         try:
             hist[code] = fetch_hist(h, code)
         except Exception as ex:  # noqa
-            log("hist failed", code, ex)
+            log("hist failed", code, str(ex)[:100])
             hist[code] = {}
-        try:
-            naver[code] = fetch_naver_analysis(h, code)
-        except Exception as ex:  # noqa
-            log("naver analysis failed", code, ex)
-            naver[code] = {}
 
     # 5. assemble -------------------------------------------------------------------
     etf_out, groups = {}, defaultdict(list)
@@ -510,7 +591,7 @@ def main():
         "benchmarks": {k: {"name": v["name"], "source": v["source"], "n": len(v["weights"])} for k, v in benchmarks.items()},
         "events": events[:600],
         "stats": {"n_active": len(active), "n_pdf_ok": n_ok, "calls": h.calls, "seconds": round(time.time() - started)},
-        "sources": "ETF CHECK(코스콤) · 네이버 금융",
+        "sources": "ETF CHECK(코스콤) · 네이버 금융", "master_src": master_src,
     }
     save_json(LATEST_PATH, latest)
     save_json(STATUS_PATH, {"ok": True, "asof": asof, "generated_at": latest["generated_at"],
