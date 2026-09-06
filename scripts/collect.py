@@ -42,19 +42,15 @@ EC = "https://www.etfcheck.co.kr"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
 EC_HEADERS = {"User-Agent": UA, "Accept": "application/json, text/plain, */*", "Accept-Language": "ko-KR,ko;q=0.9",
-              "Referer": EC + "/", "X-Requested-With": "XMLHttpRequest", "Origin": EC,
-              "sec-ch-ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
-              "sec-ch-ua-mobile": "?0", "sec-ch-ua-platform": '"Windows"',
-              "Sec-Fetch-Dest": "empty", "Sec-Fetch-Mode": "cors", "Sec-Fetch-Site": "same-origin",
-              "Connection": "close"}   # ETF CHECK closes idle keep-alive sockets -> never reuse a connection
-EC_HEADERS_ALT = {"User-Agent": UA, "Accept": "*/*", "Accept-Language": "ko-KR,ko;q=0.9", "Referer": EC + "/mobile/main3",
-                  "Connection": "close"}
+              "Referer": EC + "/", "X-Requested-With": "XMLHttpRequest"}
+EC_RATE_PER_MIN = 22          # ETF CHECK answers ~30 requests/minute per IP, then returns 403 for a while
+EC_BLOCK_WAIT = 75            # seconds to wait after a 403 before trying again
 NV_HEADERS = {"User-Agent": UA, "Accept": "application/json, text/plain, */*", "Accept-Language": "ko-KR,ko;q=0.9",
               "Referer": "https://m.stock.naver.com/"}
 
 PDF_KEEP_DAYS = 70
-SLEEP = 0.4
-DEADLINE_SEC = 27 * 60   # stay well under the 40-minute job timeout; optional steps are skipped past this
+SLEEP = 0.3
+DEADLINE_SEC = 30 * 60   # stay well under the 40-minute job timeout; optional steps are skipped past this
 STARTED = time.time()
 
 
@@ -99,77 +95,53 @@ def save_json(path, obj, compact=True):
             json.dump(obj, f, ensure_ascii=False, indent=1)
 
 
-def new_session():
-    s = requests.Session()
-    try:
-        from requests.adapters import HTTPAdapter
-        from urllib3.util.retry import Retry
-        ad = HTTPAdapter(max_retries=Retry(total=2, connect=2, read=2, backoff_factor=0.8,
-                                           status_forcelist=[500, 502, 503, 504], allowed_methods=["GET"]),
-                         pool_connections=4, pool_maxsize=4)
-        s.mount("https://", ad)
-    except Exception:  # noqa
-        pass
-    return s
-
-
 class Http:
+    """Plain per-request connections (ETF CHECK drops reused keep-alive sockets) + a per-minute rate limiter."""
+
     def __init__(self):
-        self.s = new_session()
         self.calls = 0
-        self.warmed = False
+        self.ec_times = []
+        self.blocked_until = 0.0
 
-    def warm_up(self):
-        """Visit the ETF CHECK front page once so the session carries its cookies."""
-        if self.warmed:
-            return
-        self.warmed = True
-        for u in (EC + "/mobile/main3", EC + "/"):
-            try:
-                self.s.get(u, headers={"User-Agent": UA, "Accept": "text/html,*/*", "Accept-Language": "ko-KR,ko;q=0.9"}, timeout=30)
-                time.sleep(0.5)
-            except Exception as e:  # noqa
-                log("warm-up failed", u, e)
+    def _throttle(self):
+        now = time.time()
+        if now < self.blocked_until:
+            time.sleep(self.blocked_until - now)
+        self.ec_times = [t for t in self.ec_times if time.time() - t < 60]
+        if len(self.ec_times) >= EC_RATE_PER_MIN:
+            wait = 60 - (time.time() - self.ec_times[0]) + 0.5
+            if wait > 0:
+                time.sleep(wait)
+        self.ec_times.append(time.time())
 
-    def reset_session(self):
-        try:
-            self.s.close()
-        except Exception:  # noqa
-            pass
-        self.s = new_session()
-        self.warmed = False
-
-    def get_json(self, url, headers, params=None, tries=3):
+    def get_json(self, url, headers, params=None, tries=2):
         last = None
         for i in range(tries):
             try:
                 self.calls += 1
-                r = self.s.get(url, headers=headers, params=params, timeout=40)
+                r = requests.get(url, headers=headers, params=params, timeout=25)
+                if r.status_code == 403:
+                    raise PermissionError("HTTP 403")
                 if r.status_code != 200:
                     raise RuntimeError("HTTP %s" % r.status_code)
                 js = r.json()
                 time.sleep(SLEEP)
                 return js
+            except PermissionError as e:
+                last = e
+                if i < tries - 1:
+                    log("  403 from %s -> cooling down %ds" % (url.split("/")[-1], EC_BLOCK_WAIT))
+                    self.blocked_until = time.time() + EC_BLOCK_WAIT
+                    time.sleep(EC_BLOCK_WAIT)
+                    self.ec_times = []
             except Exception as e:  # noqa
                 last = e
-                wait = 3 * (i + 1)
-                log("  retry %d/%d in %ds: %s %s" % (i + 1, tries, wait, url.split("/")[-1], str(e)[:80]))
-                if "etfcheck" in url:
-                    self.reset_session()
-                    time.sleep(wait)
-                    self.warm_up()
-                else:
-                    time.sleep(wait)
+                time.sleep(2 * (i + 1))
         raise RuntimeError("GET failed %s %s: %s" % (url, params, last))
 
     def ec(self, path, **params):
-        self.warm_up()
-        try:
-            js = self.get_json(EC + path, EC_HEADERS, params or None)
-        except Exception as e:  # noqa
-            log("ETF CHECK retry with alternate headers:", path, str(e)[:120])
-            time.sleep(3)
-            js = self.get_json(EC + path, EC_HEADERS_ALT, params or None, tries=2)
+        self._throttle()
+        js = self.get_json(EC + path, EC_HEADERS, params or None)
         if not js.get("success", True):
             raise RuntimeError("ETF CHECK error %s: %s" % (path, js.get("message")))
         return js.get("results", [])
@@ -493,7 +465,6 @@ def main():
     if missing_codes and time_left() > 240:
         log("second pass for %d empty PDFs after cool-down" % len(missing_codes))
         time.sleep(15)
-        h.reset_session()
         for code in missing_codes:
             try:
                 rows, d = fetch_pdf(h, code)
@@ -558,6 +529,9 @@ def main():
         key = norm_index(e["index"])
         if not key or key in benchmarks:
             continue
+        if time_left() < 180:
+            log("deadline near - skipping remaining benchmarks")
+            break
         entry = {"name": e["index"], "source": None, "weights": {}, "names": {}, "proxy": None, "series": {}}
         cands = sorted(passive_by_index.get(key, []), key=lambda p: -(p["aum"] or 0))
         if not cands:
