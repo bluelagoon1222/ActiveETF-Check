@@ -1,5 +1,7 @@
 {
- "ok": false,
- "error": "RuntimeError(\"GET failed https://www.etfcheck.co.kr/user/common/getEtpMast None: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))\")",
- "generated_at": "2026-09-05 20:26 KST"
+ "ok": true,
+ "asof": "20260904",
+ "generated_at": "2026-09-06 21:06 KST",
+ "n_active": 85,
+ "n_pdf_ok": 85
 }
