@@ -123,7 +123,7 @@ footer{color:var(--faint);font-size:11.5px;line-height:1.6;margin-top:20px}
 
 <div class="card">
   <h2>구성종목 비교 매트릭스</h2>
-  <div class="sub">행 = 종목, 열 = ETF. 셀 큰 숫자는 <b>당일 PDF 비중(%)</b>, 아래 작은 숫자는 <b>지수 대비 초과(+)/과소(−) 비중(%p)</b>과 <b>전일 대비 변화</b>입니다. 열 제목(ETF명)을 누르면 상세가 열립니다.</div>
+  <div class="sub">행 = 종목, 열 = ETF. 셀 큰 숫자는 <b>당일 PDF 비중(%)</b>, 아래 작은 숫자는 <b>지수 대비 초과(+)/과소(−) 비중(%p)</b>(지수 대용 ETF가 없는 테마형은 <b>같은 그룹 평균 대비</b>)과 <b>전일 대비 변화</b>입니다. 열 제목(ETF명)을 누르면 상세가 열립니다.</div>
   <div class="toolbar">
     <input type="text" id="q" placeholder="종목명 검색">
     <span class="seg" id="filterSeg"><button data-f="all" class="on">전체</button><button data-f="common">공통보유(2개↑)</button><button data-f="solo">단독보유</button><button data-f="changed">전일 변동만</button></span>
@@ -136,7 +136,7 @@ footer{color:var(--faint);font-size:11.5px;line-height:1.6;margin-top:20px}
     <span><span class="pill new">NEW</span> 전일 대비 신규 편입</span>
     <span><span class="pill out">OUT</span> 전일 보유 → 당일 제외</span>
     <span><span class="pill up">▲</span>/<span class="pill dn">▼</span> 비중 변화가 기준 이상</span>
-    <span><b class="pos">+초과</b> / <b class="neg">−과소</b> = 비교지수 대비</span>
+    <span><b class="pos">+초과</b> / <b class="neg">−과소</b> = 비교지수(또는 그룹 평균) 대비</span>
     <span>셀 배경 진하기 = 비중 크기</span>
   </div>
 </div>
@@ -281,6 +281,8 @@ function renderMatrix(){
   if(filt==='solo') list=list.filter(r=>r.n===1);
   if(filt==='changed') list=list.filter(r=>r.changed);
   if(!showBm) list=list.filter(r=>Object.values(r.cells).some(h=>h.bw!=null));
+  // group average weight per stock (0 for non-holders) -> fallback reference when no index proxy exists
+  list.forEach(r=>{ r.gavg=Object.values(r.cells).filter(h=>h.status!=='out').reduce((s,h)=>s+h.w,0)/es.length; });
   list.sort((a,b)=>b.n-a.n||b.avg-a.avg);
   let h='<thead><tr><th class="stock">종목 <span class="meta">(보유 ETF수 / 평균비중)</span></th>'+es.map(e=>`<th class="etfcol"><span class="etfname" data-c="${e.code}">${shortName(e.name)}</span><span class="mg">${e.manager}${e.bm_source?'':' · 지수비중 없음'}</span></th>`).join('')+'</tr></thead><tbody>';
   if(!list.length) h+=`<tr><td colspan="${es.length+1}" class="empty">조건에 맞는 종목이 없습니다.</td></tr>`;
@@ -294,7 +296,9 @@ function renderMatrix(){
       else if(c.status==='out') badge='<span class="pill out">OUT</span>';
       else if(c.chg!=null && c.chg>=thr && thr>0) badge='<span class="pill up">▲</span>';
       else if(c.chg!=null && c.chg<=-thr && thr>0) badge='<span class="pill dn">▼</span>';
-      const act=(c.active==null)?'':`<span class="a ${c.active>0?'pos':c.active<0?'neg':''}">${c.active>0?'+':''}${c.active.toFixed(2)} vs 지수${c.bw!=null?' '+c.bw.toFixed(2):''}</span>`;
+      let act='';
+      if(c.active!=null) act=`<span class="a ${c.active>0?'pos':c.active<0?'neg':''}">${c.active>0?'+':''}${c.active.toFixed(2)} vs 지수${c.bw!=null?' '+c.bw.toFixed(2):''}</span>`;
+      else if(!c.cash && c.status!=='out' && es.length>1){ const dv=c.w-r.gavg; act=`<span class="a ${dv>0?'pos':dv<0?'neg':''}">${dv>0?'+':''}${dv.toFixed(2)} vs 그룹평균 ${r.gavg.toFixed(2)}</span>`; }
       const chg=(c.chg==null)?'':`<span class="c ${c.chg>0?'pos':c.chg<0?'neg':''}" >${c.chg>0?'+':''}${c.chg.toFixed(2)}p 전일</span>`;
       const style=c.status==='out'?'':heat(c.w);
       h+=`<td class="cell ${c.status!=='out'&&isDark(c.w)?'dark':''}" style="${style}"><span class="w">${c.status==='out'?`<s>${c.pw.toFixed(2)}</s>`:c.w.toFixed(2)}</span>${badge}${act}${chg}</td>`;
