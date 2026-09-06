@@ -1,0 +1,886 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+	<title>온라인기업정보 - ETF/ETN</title>
+	<link type="text/css" rel="shortcut icon" href="/favicon.ico" />
+	<script language="javascript" src="/include/domain.js" type="text/javascript"></script>
+	<link href="/v2/include/css?v=q7Pq73b9jj00gmFmOVUSxzXv_5FtLNW9qxkqFwJqh-g1" rel="stylesheet"/>
+
+	<link href="/v2/include/ETF?v=BiZyXYXVVFnyjoveBGiH4mCYzFvER0sUwNy-YnXFUf81" rel="stylesheet"/>
+
+	<script src="/v2/ETF/js?v=z4GWew1cV16CHWa_Sr9DuNTIEzw2K1tJt93rz_l9Wpw1"></script>
+
+	<link href="/v2/include/sitecss?v=NO2scjWyURrcKuALmuSFc8_aZjVlTCHcs6O-cPNOjtk1" rel="stylesheet"/>
+
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-74989022-7"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-74989022-7');
+	</script>
+
+	<script type="text/javascript">
+				
+		$(document).ready(function () {
+			var navUrl = location.href;
+			var url = $.url(navUrl);
+			if (5 == "25") {
+				$('#contentWrap .tab-menu .subMenu .sMenu').text('ETN');
+				$('#etf_path').text('ETN');
+			}
+			else {
+				$('#contentWrap .tab-menu .subMenu .sMenu').text('ETF');
+				$('#etf_path').text('ETF');
+			}
+
+			$('#hidden_cn').val(url.param('cn'));
+			$("#hpopupsearch").click(function () {
+				Main_OpenWindow('../ETF/lookup.aspx', 'm_invest', 460, 420, 0, 0, 0, 0);
+			});
+
+			$("#search").customAutocomplete({
+				source: function (request, response) {
+					//console.log(request.term);
+					$.ajax({
+						url: "../company/autocomplete.aspx",
+						dataType: "Json",
+						data: {
+							searchTyp: 'ETF',
+							searchVal: request.term
+						},
+						success: function (data) {
+							response($.map(data, function (item) {
+								return {
+									label: item.item_nm, //item.item + "(" + item.item_cd + ")",
+									value: item.item_cd,
+									desc: item.item_nm
+								}
+							}));
+						}
+					});
+				}
+                , select: function (event, ui) {
+                	document.location.href = "../ETF/ETF.aspx?cn=" + $('#hidden_cn').val() + "&cmp_cd=" + ui.item.value;
+                	return false;
+                }
+                , autoFocus: true
+			});
+			$('form').submit(function (e) {
+				e.preventDefault();
+				//#search value
+				var search = $(this).serializeArray()[0].value;
+			});
+
+
+			AjaxData.GetNAVData();
+			$("#txtStart,#txtEnd").datepicker({
+				duration: 0,
+				onClose: function (dateText, inst) {
+					setTimeout(function () {
+						if (!inst._keyEvent)
+							AjaxData.GetNAVData();
+					}, 0);
+					//$(this).trigger('blur');
+				}
+			});
+			$("#txtStart").datepicker("option", "defaultDate", '-3m').datepicker("option", "navigationAsDateFormat", true);
+			//            $("#NAV_TYPE input:radio").change(AjaxData.GetNAVData).change(function () {
+			//                $(this).next().addClass('selected').siblings('a').removeClass('selected');
+			//            });
+
+			$("#NAV_TYPE a").click(function (e) {
+				var eId = e.currentTarget.id;
+				$("#NAV_TYPE span").removeClass("selected");
+				switch (eId) {
+					case "aG31":
+						$("#hG3").val("D");
+						$("#aG31").parent().addClass("selected");
+						AjaxData.GetNAVData();
+						break;
+					case "aG32":
+						$("#hG3").val("W");
+						$("#aG32").parent().addClass("selected");
+						AjaxData.GetNAVData();
+						break;
+					case "aG33":
+						$("#hG3").val("M");
+						$("#aG33").parent().addClass("selected");
+						AjaxData.GetNAVData();
+						break;
+				}
+			});
+
+			//Masked Input 적용
+			$("#txtStart").mask("9999-99-99");
+			$("#txtEnd").mask("9999-99-99");
+
+			//의존성 있는 부분 체크해야함
+			//company_autocomplete();
+			Company_addr();
+			$(window).bind('resize', function () {
+				setTimeout(function () {
+					$("#frmCt1").css("width", $("#gHeadCt1").css("width"));
+				}, 100);
+			});
+			$(".viewCT").click(function (e) {
+				Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt1", "ct7", "0163Y0" + ";" + "20260904");
+			});
+			dispalyCT();
+			$("#hrefHome").attr("title", "새창열기:[홈페이지] " + $("#hrefHome").text() + "\n* 클릭 시 " + $('.nm_k').text() + " 홈페이지로 이동합니다.");
+    		
+
+			var maxRow = 9;
+			var curLength = $('#volume_grid_body tr').length;
+			if(curLength < maxRow){
+				while(curLength++ < maxRow){
+					$('#volume_grid_body').append('<tr><th class="title" scope="row">&nbsp;</th><td>&nbsp;</td><td>&nbsp;</td></tr>');
+				}
+			}
+		});
+       
+			function fn_cmpSearch() {
+				if ($("#hiddencmp_cd").val() == '') {
+					jAlert('종목을 선택해 주세요', '메세지');
+					$("#cmpSearch").val("");
+					return;
+				}
+				var cmp_cd = $("#hiddencmp_cd").val();
+				document.location.href = "../ETF/ETF.aspx?cn=" + $('#hidden_cn').val() + "&cmp_cd=" + cmp_cd;
+			}
+			function dispalyCT() {
+				var url = document.URL;
+				if (url.indexOf("client=comp") != -1) {
+					$("#ct1").show();
+				}
+			}
+	</script>
+</head>
+<body oncontextmenu="return false">
+<div class="body-section">
+	<input type="hidden" id="hiddencmp_cd" value="0163Y0" />
+	<input type="hidden" id="hidden_cn" />
+	<input type="hidden" id="cmp_typ" value="5" />
+	<div id="all_contentWrap">
+		<!--all_contentWrap-->
+		<div id="contentWrap">
+			<input type="hidden" id="printZone"><input type="hidden" id="cssZone">
+			<div id="pArea" class="MinWidthContainer">
+			<div id="summary_grid_body"></div>
+			<div class="tit-empty"></div>
+			<script id="summary_grid_template" type="text/x-jquery-tmpl">
+				<div class="wrapper-table">
+					<div class="cmp-table-div">
+						<table class="cmp-table">
+							<tr class="cmp-table-row">
+								<td class="cmp-table-cell td0101">
+									<dl>
+										<dt>
+											<span class="name">${ CMP_KOR }</span>
+											<a class="cEm" title="[홈페이지] ${ URL } %>" href="http://${ URL }" target="comPage"><img src="/images/icon_home.gif" hspace="3" align="absmiddle"></a>
+											<b class="num">${ CMP_CD }</b>
+										</dt>
+										<dt class="line-left">${ CMP_ENG }</dt>
+										<dt class="line-left">기초지수 : ${ BASE_IDX_NM_KOR}</dt>
+									</dl>
+								</td>
+							</tr>
+							<tr class="cmp-table-row">
+								<td class="cmp-table-cell td0201">
+									<div>&nbsp;</div>
+								</td>
+							</tr>
+							<tr class="cmp-table-row">
+								<td class="cmp-table-cell td0301">
+									<dl>
+										<dt>운용사: ${ISSUE_NM_KOR}</dt>
+                                        {{if CMP_TYP=="25"}} 
+                                            <dt class="line-left">제비용: ${EXPENSES}%</dt> 
+                                        {{else}} 
+                                            <dt class="line-left">총보수: ${FnGuideUtil.Format.currencyTrim(TOT_PAY, '')}%</dt> 
+                                        {{/if}}
+										<dt class="line-left">분류: ${ETF_TYP_SVC_NM}</dt>
+									</dl>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</script>
+			<script type="text/javascript">
+				(function(){
+					var summary_data = {"CMP_KOR":"KoAct 코스닥액티브","URL":"www.samsungactive.co.kr","CMP_CD":"0163Y0","CMP_ENG":"KoAct KOSDAQ Active","BASE_IDX_NM_KOR":"코스닥지수","ISSUE_NM_KOR":"삼성액티브자산운용 주식회사","ETF_TYP_SVC_NM":"국내주식형, 대표지수","TOT_PAY":"0.500","CMP_TYP":"5"};
+					$("#summary_grid_template").tmpl(summary_data).appendTo($("#summary_grid_body"));
+				})();
+			</script>
+
+
+				<div class="PageContainer">
+					<div class="PageContentContainer">
+						<div id="wrapper" class="all">
+							<!-- 시세 및 주주현황 -->
+							<div class="fl_le half">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell"><h5><span>시세</span> 및 주주현황</h5></dd>
+										<dd class="header-table-cell unit">
+											<p>[기준:26.09.04]</p>
+										</dd>
+									</dl>
+								</div>
+								<div class="body">
+									<table class="gHead" id="cTB11" summary="기업의 기본적인 시세정보(주가/전일대비/수익률,52주최고/최저,액면가,거래량/거래대금,시가총액,유동주식비율,외국인지분율,52주베타,수익률(1M/3M/6M/1Y))를 제공합니다.">
+										<caption class="blind">시세정보</caption>
+										<colgroup>
+											<col width="160" />
+											<col width="*" />
+										</colgroup>
+										<tbody id="status_grid_body">
+									</table>
+								</div>
+							</div>
+							<script id="status_grid_template" type="text/x-jquery-tmpl">
+								<tr>
+									<th class="txt" scope="row">종가/전일대비/수익률</th>
+									<td class="num">${CLS_PRC}원 / 
+								{{if PRC_CHG>0}} <span class="cUp">+${PRC_CHG}원</span> {{else PRC_CHG==0}} <span class="">${PRC_CHG}원</span> {{else}} <span class="cDn">${PRC_CHG}원</span> {{/if}} / 
+								{{if ADJ_CHG>0}} <span class="cUp">+${ADJ_CHG}%</span> {{else ADJ_CHG==0}} <span class="">${ADJ_CHG}%</span> {{else}} <span class="cDn">${ADJ_CHG}%</span> {{/if}}
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">52주 최고/최저</th>
+									<td class="num">${YR_HIGH}원/ ${YR_LOW}원</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">상장주식수</th>
+									<td class="num">${LIST_STK_CNT}천주</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">거래량/거래대금</th>
+									<td class="num">${trD_QTY}주/ ${trD_AMT}백만원</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">20일평균 거래량/거래대금</th>
+									<td class="num">${AVG_TRD_QTY20} 주/ ${AVG_TRD_AMT20}백만원</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">시가총액</th>
+									<td class="num">${MKT_VAL}억원</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">52주베타</th>
+									<td class="num">${YR_BETA} </td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">외국인지분율</th>
+									<td class="num">${FRG_RT}%</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">수익률<span class="span-sub">(1M/3M/6M/1Y)</span></th>
+									<td class="num">{{if ERN1>0}}<span class="cUp">+${ERN1}</span>{{else}}<span class="cDn">${ERN1}%</span>{{/if}} 
+								/ {{if ERN3>0}}<span class="cUp">+${ERN3}%</span>{{else}}<span class="cDn">${ERN3}%</span>{{/if}}
+								/ {{if ERN6>0}}<span class="cUp">+${ERN6}%</span>{{else}}<span class="cDn">${ERN6}%</span>{{/if}}
+								/ {{if ERN12>0}}<span class="cUp">+${ERN12}%</span>{{else}}<span class="cDn">${ERN12}%</span>{{/if}}
+									</td>
+								</tr>
+							</script>
+							<script type="text/javascript">
+								var status_data = {"CLS_PRC":"8,800","PRC_CHG":"325","ADJ_CHG":"3.84","YR_HIGH":"14,800","YR_LOW":"6,440","LIST_STK_CNT":"50,900","trD_QTY":"420,774","trD_AMT":"3,671","MKT_VAL":"4,479","YR_BETA":"0.26","AVG_TRD_QTY20":"704,863","AVG_TRD_AMT20":"6,286","FRG_RT":"1.21","ERN1":"6.54","ERN3":"-28.31","ERN6":"","ERN12":""};
+								if(status_data){
+									$("#status_grid_template").tmpl(status_data).appendTo($("#status_grid_body"));
+								}else{
+									$("#status_grid_body").html("<tr><td colspan='2' style='border:none; height:234px; text-align:center'>데이터가 존재하지 않습니다.</td></tr>");
+								}
+							</script>
+							<!-- 시세 및 주주현황 -->
+
+							<!-- 주가/상대 수익률 추이 차트 -->
+							<div class="fl_ri half">
+								<div class="header-table empty"></div>
+								<div class="body">
+									<div class='gHead'>
+										<h6 class="spanCT">주가/상대수익률</h6>
+										<div id='stock_price_relative_chart' class='chart-container full'></div>
+									</div>
+								</div>
+							</div>
+							<script type="text/javascript">
+								(function(){
+									var stock_price_relative_chart_data = {"name":[{"CMP_CD":"0163Y0","CMP_NM":"KoAct 코스닥액티브","MKT_NM":"KOSPI"}],"CMP_CLS":[[1773100800000.0,13455.0],[1773187200000.0,13630.0],[1773273600000.0,13835.0],[1773360000000.0,13785.0],[1773619200000.0,13355.0],[1773705600000.0,12900.0],[1773792000000.0,12990.0],[1773878400000.0,12630.0],[1773964800000.0,12910.0],[1774224000000.0,12080.0],[1774310400000.0,12380.0],[1774396800000.0,12740.0],[1774483200000.0,12430.0],[1774569600000.0,12380.0],[1774828800000.0,11840.0],[1774915200000.0,11190.0],[1775001600000.0,12330.0],[1775088000000.0,11500.0],[1775174400000.0,11450.0],[1775433600000.0,11175.0],[1775520000000.0,11040.0],[1775606400000.0,11640.0],[1775692800000.0,11470.0],[1775779200000.0,11820.0],[1776038400000.0,11945.0],[1776124800000.0,12210.0],[1776211200000.0,12570.0],[1776297600000.0,12670.0],[1776384000000.0,12830.0],[1776643200000.0,12835.0],[1776729600000.0,12880.0],[1776816000000.0,12920.0],[1776902400000.0,12785.0],[1776988800000.0,13045.0],[1777248000000.0,13240.0],[1777334400000.0,13120.0],[1777420800000.0,13235.0],[1777507200000.0,12855.0],[1777852800000.0,13125.0],[1778025600000.0,13000.0],[1778112000000.0,12865.0],[1778198400000.0,13070.0],[1778457600000.0,13270.0],[1778544000000.0,12980.0],[1778630400000.0,13045.0],[1778716800000.0,13095.0],[1778803200000.0,12430.0],[1779062400000.0,12290.0],[1779148800000.0,11890.0],[1779235200000.0,11750.0],[1779321600000.0,12335.0],[1779408000000.0,13215.0],[1779753600000.0,13335.0],[1779840000000.0,12885.0],[1779926400000.0,12410.0],[1780012800000.0,12015.0],[1780272000000.0,11825.0],[1780358400000.0,11615.0],[1780531200000.0,12275.0],[1780617600000.0,11795.0],[1780876800000.0,10600.0],[1780963200000.0,11630.0],[1781049600000.0,11445.0],[1781136000000.0,12080.0],[1781222400000.0,12390.0],[1781481600000.0,12270.0],[1781568000000.0,12010.0],[1781654400000.0,12065.0],[1781740800000.0,11805.0],[1781827200000.0,11370.0],[1782086400000.0,11650.0],[1782172800000.0,10535.0],[1782259200000.0,10615.0],[1782345600000.0,10500.0],[1782432000000.0,10245.0],[1782691200000.0,10745.0],[1782777600000.0,11125.0],[1782864000000.0,11390.0],[1782950400000.0,10110.0],[1783036800000.0,10120.0],[1783296000000.0,9580.0],[1783382400000.0,9285.0],[1783468800000.0,8655.0],[1783555200000.0,8960.0],[1783641600000.0,9735.0],[1783900800000.0,9365.0],[1783987200000.0,9325.0],[1784073600000.0,9900.0],[1784160000000.0,9275.0],[1784505600000.0,8600.0],[1784592000000.0,8660.0],[1784678400000.0,8500.0],[1784764800000.0,8820.0],[1784851200000.0,8160.0],[1785110400000.0,8350.0],[1785196800000.0,7425.0],[1785283200000.0,6850.0],[1785369600000.0,6505.0],[1785456000000.0,8000.0],[1785715200000.0,7810.0],[1785801600000.0,8260.0],[1785888000000.0,8540.0],[1785974400000.0,8500.0],[1786060800000.0,8410.0],[1786320000000.0,9195.0],[1786406400000.0,9155.0],[1786492800000.0,9145.0],[1786579200000.0,9165.0],[1786665600000.0,9190.0],[1787011200000.0,8980.0],[1787097600000.0,8840.0],[1787184000000.0,9040.0],[1787270400000.0,8565.0],[1787529600000.0,8635.0],[1787616000000.0,8920.0],[1787702400000.0,8910.0],[1787788800000.0,9050.0],[1787875200000.0,8985.0],[1788134400000.0,8915.0],[1788220800000.0,8745.0],[1788307200000.0,8655.0],[1788393600000.0,8475.0],[1788480000000.0,8800.0]],"CMP_TO_MKT":[[1773100800000.0,0.0],[1773187200000.0,-0.096282117837764858],[1773273600000.0,1.8912462511504025],[1773360000000.0,3.2993526840992216],[1773619200000.0,-1.0519061269904206],[1773705600000.0,-5.9587415902142009],[1773792000000.0,-9.8504874520097712],[1773878400000.0,-9.887935920499535],[1773964800000.0,-8.1766710445726929],[1774224000000.0,-8.1126424195660078],[1774310400000.0,-8.3429637270496784],[1774396800000.0,-7.1536218458681748],[1774483200000.0,-6.3976647559906841],[1774569600000.0,-6.4041157635567174],[1774828800000.0,-7.7461064720359847],[1774915200000.0,-8.9307021940957085],[1775001600000.0,-7.4598196127502074],[1775088000000.0,-9.6548676128542681],[1775174400000.0,-12.443981261692427],[1775433600000.0,-15.691857885744998],[1775520000000.0,-17.384116822856853],[1775606400000.0,-18.494564368315014],[1775692800000.0,-18.373737012349078],[1775779200000.0,-17.043885924871361],[1776038400000.0,-15.441363078502956],[1776124800000.0,-15.870205550672834],[1776211200000.0,-15.147692527825019],[1776297600000.0,-16.322480797325788],[1776384000000.0,-14.798722790020847],[1776643200000.0,-15.137891806846648],[1776729600000.0,-17.098232755033216],[1776816000000.0,-17.222496742874394],[1776902400000.0,-18.81955649818029],[1776988800000.0,-17.166341652842853],[1777248000000.0,-17.699788303391983],[1777334400000.0,-18.764878901620609],[1777420800000.0,-18.663741302594726],[1777507200000.0,-19.897274429298719],[1777852800000.0,-22.20117659421399],[1778025600000.0,-27.612510636502886],[1778112000000.0,-29.373146399740811],[1778198400000.0,-28.323805907265843],[1778457600000.0,-30.243517746185724],[1778544000000.0,-30.169187545667587],[1778630400000.0,-31.616593680706519],[1778716800000.0,-32.536220591093532],[1778803200000.0,-31.789733129792275],[1779062400000.0,-32.763114911565886],[1779148800000.0,-32.765361289641795],[1779235200000.0,-32.979040884160028],[1779321600000.0,-35.1033661759932],[1779408000000.0,-30.758095154549103],[1779753600000.0,-31.864055523093882],[1779840000000.0,-35.6130313351566],[1779926400000.0,-37.6577466085224],[1780012800000.0,-41.713238386748628],[1780272000000.0,-44.673001835117176],[1780358400000.0,-45.73650034566311],[1780531200000.0,-41.577222331473706],[1780617600000.0,-40.567886909325246],[1780876800000.0,-41.763793111141624],[1780963200000.0,-40.938548591196756],[1781049600000.0,-39.125554145542466],[1781136000000.0,-36.022245990709493],[1781222400000.0,-37.285712647938716],[1781481600000.0,-40.96256560905843],[1781568000000.0,-43.409605300206657],[1781654400000.0,-44.033183323375788],[1781740800000.0,-46.445182186742343],[1781827200000.0,-48.353540535414929],[1782086400000.0,-47.442405604307744],[1782172800000.0,-47.196568873994373],[1782259200000.0,-48.4736858862484],[1782345600000.0,-51.653166412980212],[1782432000000.0,-49.916084740004763],[1782691200000.0,-47.368152934498376],[1782777600000.0,-46.032877373609246],[1782864000000.0,-43.5957243072214],[1782950400000.0,-45.644568091047624],[1783036800000.0,-48.552307723163544],[1783296000000.0,-51.07366698812649],[1783382400000.0,-50.133695582754846],[1783468800000.0,-50.8904243818479],[1783555200000.0,-49.474398173942689],[1783641600000.0,-46.45549179665057],[1783900800000.0,-43.428032586217228],[1783987200000.0,-44.079603306433249],[1784073600000.0,-44.116242678693773],[1784160000000.0,-44.083996561752556],[1784505600000.0,-45.731956345657],[1784592000000.0,-47.229547113595629],[1784678400000.0,-48.583593920795579],[1784764800000.0,-48.897129375681914],[1784851200000.0,-49.850272252732388],[1785110400000.0,-49.177304995553214],[1785196800000.0,-49.314843383977149],[1785283200000.0,-50.2640531757218],[1785369600000.0,-52.180637145575083],[1785456000000.0,-50.124146569192504],[1785715200000.0,-48.678607548705685],[1785801600000.0,-46.587928403383984],[1785888000000.0,-46.780200826860565],[1785974400000.0,-44.489801504259916],[1786060800000.0,-44.747518361016944],[1786320000000.0,-39.982291730695273],[1786406400000.0,-40.675343495617042],[1786492800000.0,-42.8434550532647],[1786579200000.0,-44.688276277105658],[1786665600000.0,-45.845685114107539],[1787011200000.0,-46.250412971613407],[1787097600000.0,-43.828730237531651],[1787184000000.0,-45.7550764549195],[1787270400000.0,-49.054158876184772],[1787529600000.0,-46.981257578051405],[1787616000000.0,-45.60321579596804],[1787702400000.0,-46.186709780984039],[1787788800000.0,-46.164792927977594],[1787875200000.0,-45.57922344832064],[1788134400000.0,-46.249750490035147],[1788220800000.0,-47.396426081679046],[1788307200000.0,-45.771451243711681],[1788393600000.0,-47.03451894376326],[1788480000000.0,-45.88938178085612]]};
+									if(stock_price_relative_chart_data.name){
+										var label = stock_price_relative_chart_data.name[0];
+
+										new Highcharts.Chart({
+											chart: {
+												renderTo: 'stock_price_relative_chart',
+												type: 'line'
+											}
+											, xAxis: {
+												labels: {
+													formatter: function () { return Highcharts.dateFormat('%y/%m/%d', this.value); }
+												}
+											}
+											,yAxis: [{
+												title: {
+													text: '[원]' ,align: 'high' ,y: -7 ,rotation:0, x:10 ,offset:20
+												},
+												opposite: true
+											},{
+												title: {
+													text: '[%]' ,align: 'high' ,y: -7 ,rotation:0, x:5 ,offset:10
+												},
+												labels: {
+													formatter: function () { return Highcharts.numberFormat(this.value, 2, '.'); }
+												}
+											}]
+											, tooltip: {
+												formatter: function () {
+													var tooltip = '<table class="chart-tooltip"><tr><td align="center" colspan="3">' + Highcharts.dateFormat('%Y/%m/%d', this.x) + '</td></tr>';
+													$.each(this.points, function (i, value) {
+														if(value.series.name.indexOf('좌') != -1)
+														{
+															tooltip += '<tr><td style="color:' + value.series.color + '">' + value.series.name + '</td><td> : </td><td class="right">' + Highcharts.numberFormat(value.y, 2, '.') +'%</td></tr>';
+														}
+														else
+														{
+															tooltip += '<tr><td style="color:' + value.series.color + '">' + value.series.name + '</td><td> : </td><td class="right">' + Highcharts.numberFormat(value.y, 0, '.') + ' 원</td></tr>';
+														}
+													});
+													tooltip += '</table>';
+													return tooltip;
+												}
+												, useHTML: true
+												, shared: true
+												, crosshairs: [true, true]
+											},
+											legend: { itemWidth: 150 },
+											series: [{
+												name: label.CMP_NM,
+												data: stock_price_relative_chart_data.CMP_CLS,
+												marker: {
+													enabled: false
+												}
+												,legendIndex:1
+											}, {
+												name: 'to ' + label.MKT_NM +'(좌)',
+												data: stock_price_relative_chart_data.CMP_TO_MKT,
+												yAxis: 1 ,
+												marker: {
+													enabled: false
+												}
+												,legendIndex:0
+											}]
+										});
+									}
+								})();
+							</script>
+							<div class="clear">
+							</div>
+							<!-- 주가/상대 수익률 추이 차트 -->
+							
+							<div class="tit-empty"></div>
+							<!-- 상품개요 -->
+							<div class="all-width">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell">
+											<h5><span>상품개요</span></h5>
+										</dd>
+										<dd class="header-table-cell unit"></dd>
+									</dl>
+								</div>
+								<div class="body">
+									<table class="gHead" summary="검색한 종목의 상품개요 표">
+										<caption class="blind">
+											상품개요표</caption>
+										<colgroup>
+											<col style="width: 110px">
+											<col style="width: *">
+										</colgroup>
+										<tbody id="product_summary_grid_body">
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<script id="product_summary_grid_template" type="text/x-jquery-tmpl">
+								
+								<tr>
+									<th class="txt" title="기초지수명" scope="row">기초지수명 </th>
+									<td class="txt">
+										<div class="scroll" title="${BASE_IDX_NM_KOR}">${BASE_IDX_NM_KOR}</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" title="최초설정일/상장일" scope="row">최초설정일/상장일 </th>
+									<td class="txt">
+										<div class="scroll" title="${FIRST_SETTLE_DT + ' / ' + LIST_DT}">${FIRST_SETTLE_DT + ' / ' + LIST_DT}</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" title="펀드형태" scope="row">펀드형태 </th>
+									<td class="txt">
+										<div class="scroll" title="${FUND_TYP}">${FUND_TYP}</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" title="총보수(%)" scope="row">총보수</th>
+									<td class="txt">
+										<div class="scroll" title="${FnGuideUtil.Format.currencyTrim(TOT_PAY, '')}">${FnGuideUtil.Format.currencyTrim(TOT_PAY, '')}%</div>
+									</td>
+								</tr>
+								
+								<tr>
+									<th class="txt" title="분배금기준일" scope="row">분배금기준일 </th>
+									<td class="txt">
+										<div tabindex="0" class="scroll" title="${DIV_BASE_DT}">${DIV_BASE_DT}</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" title="유동성공급자(LP)" scope="row">유동성공급자(LP) </th>
+									<td class="txt">
+										<div class="scroll" title="${LP_NM_KOR}">${LP_NM_KOR}</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" title="자산운용사" scope="row">자산운용사 </th>
+									<td class="txt">
+										<div class="scroll" title="${ISSUE_NM_KOR}">${ISSUE_NM_KOR}</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="txt line-bottom" title="홈페이지" scope="row">홈페이지 </th>
+									<td class="txt line-bottom">
+										<a href="${URL}" target="_blank" class="cut" id="hrefHome">${URL}</a>
+									</td>
+								</tr>
+								
+							</script>
+							<script type="text/javascript">
+								(function(){
+									var product_summary_data = {"BASE_IDX_NM_KOR":"코스닥지수","FIRST_SETTLE_DT":"2026-03-09","LIST_DT":"2026-03-10","FUND_TYP":"수익증권형","TOT_PAY":"0.500","FIN_PRD":"1월 1일부터 매 1년 간. 단, 최초회계기간은 최초설정일로부터 2026년 12월 31일까지.","DIV_BASE_DT":"매 1, 4, 7, 10월의 마지막 영업일 및 회계기간 종료일 (종료일이 영업일이 아닌 경우 종료일의 직전영업일","LP_NM_KOR":"한국증권, 대신증권, 미래에셋증권, 유진증권, 메리츠, NH투자증권, 삼성증권, iM증권, 키움증권, IBK증권","ISSUE_NM_KOR":"삼성액티브자산운용 주식회사","URL":"http://www.samsungactive.co.kr"};
+									if(product_summary_data){
+										$("#product_summary_grid_template").tmpl(product_summary_data).appendTo($("#product_summary_grid_body"));
+									}else{
+										$("#product_summary_grid_body").html("<tr><td colspan='2' style='border:none; height:234px; text-align:center'>데이터가 존재하지 않습니다.</td></tr>");
+									}
+								})();
+							</script>
+							<!-- 상품개요 -->
+							
+							<div class="tit-empty"></div>
+							<!-- 상품설명 -->
+							<div class="all-width">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell">
+											<h5><span>상품설명</span></h5>
+										</dd>
+										<dd class="header-table-cell unit"></dd>
+									</dl>
+								</div>
+								<div class="cmp_comment" style=" margin-bottom:15px;">
+									<div style="padding: 10px 5px; line-height:20px;">
+										이 투자신탁은 국내주식을 주된 투자대상으로 하는 액티브상장지수펀드로서, 한국거래소가 산출·발표하는 코스닥 지수를 비교지수로 하여 비교지수 대비 초과성과를 목표로 투자신탁재산을 운용하는 것을 목표로 합니다. <br/>※ 그러나 상기의 투자목적이 반드시 달성된다는 보장은 없으며, 집합투자업자, 신탁업자, 판매회사 등 이 투자신탁과 관련된 어떠한 당사자도 투자원금의 보장 또는 투자목적의 달성을 보장하지 아니합니다.
+									</div>
+								</div>
+							</div>
+							<div class="clear"></div>
+							
+							<!--  순자산가치(NAV) 추이 -->
+							<!-- 상품설명 -->
+							
+							<div class="tit-empty"></div>
+							<div class="all-width">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell"><h5 id="nav_more" class="sub_title sub_title4"><span>순자산가치(NAV)</span>추이</h5></dd>
+										<dd id="divDateCont" class="header-table-cell unit">
+										<ul class="lst">
+											<li class="lst-button" id="NAV_TYPE">
+												<div class="radio">
+													<dl class="search-opt-lst">
+														<dt class="col01">
+															<span class="selected"><a id="aG31" class="radio1" title="순자산가치(NAV) 일간추이 검색" href="javascript:;">일간</a></span>
+														</dt>
+														<dt class="col02">
+															<span><a id="aG32" class="radio2" title="순자산가치(NAV) 주간추이 검색" href="javascript:;">주간</a></span>
+														</dt>
+														<dt class="col03">
+															<span><a id="aG33" class="radio3" title="순자산가치(NAV) 월간추이 검색" href="javascript:;">월간</a></span>
+														</dt>
+													</dl>
+													<input type="hidden" id="hG3" value="D" />
+												</div>
+											</li>
+											<li class="list-date" >
+												<label for="txtStart" class="blind">순자산가치(NAV)추이 검색시작일 - 년월일 직접입력가능(예:2013-05-16)</label><input class="rptInput01 calendarInput" id="txtStart" type="text" name="txtStart" value="2026-06-06">
+												~
+									<label for="txtEnd" class="blind">순자산가치(NAV)추이 검색종료일 - 년월일 직접입력가능(예:2013-08-16)</label><input class="rptInput01 calendarInput" id="txtEnd" type="text" name="txtEnd" value="2026-09-06">
+											</li>
+										</ul>
+										</dd>
+									</dl>
+								</div>
+							</div>
+							<div class="fl_le half">
+								<div class="height255 border_box" style="display: block; margin-bottom:0px;">
+									<div class="fixed-table-container">
+										<div class="header-background">
+										</div>
+										<div class="fixed-table-container-inner" style="height: 100%; overflow-x: hidden; overflow-y: auto">
+											<table tabindex="0" id="NAV_grid" class="table" cellspacing="0" summary="검색한 종목의 순자산가치(NAV) 추이">
+												<caption class="blind">순자산가치(NAV) 추이</caption>
+												<colgroup>
+													<col style="width: 22%" />
+													<col style="width: 33%" />
+													<col style="width: 22%" />
+													<col style="width: 23%" />
+												</colgroup>
+												<thead>
+													<tr>
+														<th class="first" scope="col">
+															<div class="th-inner" style="width: 22%">
+																날짜
+															</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 32%">순자산가치(NAV)</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 22%">ETF종가</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 23%">괴리율(%)</div>
+														</th>
+													</tr>
+												</thead>
+												<tbody id="NAV_grid_body">
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+								<script id="NAV_grid_template" type="text/x-jquery-tmpl">
+									<tr>
+										<th class="title" scope="row">${TRD_DT ? TRD_DT.replace(/-/g,'/'):'-'}</th>
+										<td class="num">${NAV ? Highcharts.numberFormat(NAV,2,'.'):'-'}</td>
+										<td class="num">${CLOSE_PRC ? Highcharts.numberFormat(CLOSE_PRC,0,'.'):'-'}</td>
+										<td class="num">${DIFF_RATE ? Highcharts.numberFormat(DIFF_RATE,2,'.'):'-'}</td>
+									</tr>
+								</script>
+							</div>
+							<div class="fl_ri half">
+								<div class='gHead mb-0'>
+								<div id="NAV_chart" class="chart">
+								</div>
+								</div>
+							</div>
+							<p class="disc table" style="text-align:left;">* 기초자산 종가 확정시간의 차이로 실제 시장 괴리율과 차이가 발생할 수 있음</p>
+							<div class="clear">
+							</div>
+							<!--  순자산가치(NAV) 추이 -->
+							
+							<div class="tit-empty"></div>
+							<!-- CU당 구성종목 -->
+							<div class="fl_le half">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell"><h5 id="cu_more"><span>CU당 구성종목</span></h5></dd>
+										<dd class="header-table-cell unit">
+											<p>[기준:26.09.04]</p>
+										</dd>
+									</dl>
+								</div>
+								<div class="height255 border_box" style="display: block; margin-bottom:0px;">
+									<div class="fixed-table-container">
+										<div class="header-background">
+										</div>
+										<div class="fixed-table-container-inner" style="height: 100%; overflow-x: hidden; overflow-y: auto">
+											<table tabindex="0" id="CU_grid" class="table" zzz cellspacing="0" summary="26.09.04 기준 CU당 구성종목" style="table-layout: fixed">
+												<caption class="blind">
+													CU당 구성종목</caption>
+												<colgroup>
+													<col width="*">
+													<col width="30%">
+													<col width="30%">
+												</colgroup>
+												<thead>
+													<tr>
+														<th scope="col">
+															<div class="th-inner" style="width: 40%">
+																구성종목명
+															</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 30%">
+																주식수(계약수)
+															</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 30%">
+																구성비중(%)
+															</div>
+														</th>
+													</tr>
+												</thead>
+												<tbody id="CU_grid_body">
+												</tbody>
+											</table>
+										</div>
+									</div>
+									<script id="CU_grid_template" type="text/x-jquery-tmpl">
+										<tr>
+											<td class="txt" title="${STK_NM_KOR}">
+												<div class="cut">${STK_NM_KOR}</div>
+											</td>
+											<td class="num">${AGMT_STK_CNT ? Highcharts.numberFormat(AGMT_STK_CNT,0):'-'}</td>
+											<td class="num">${ETF_WEIGHT ? Highcharts.numberFormat(ETF_WEIGHT,2):'-'}</td>
+										</tr>
+									</script>
+								</div>
+								<p class="disc table">* CU : 설정단위(Creation unit)</p>
+                                <p class="disc table">* 구성비중이 없는 경우 주식수로 정렬됨</p>
+							</div>
+							<div class="fl_ri half">
+								<div class="header-table empty"></div>
+								<div class="body">
+									<div class='gHead'>
+										<h6 class="spanCT">CU당 구성종목 TOP 10</h6>
+										<div id="CU_chart" class="chart"></div>
+									</div>
+								</div>
+								<script type="text/javascript">
+									(function(){
+										var CU_data = {"grid_data":[{"TRD_DT":"2026-09-04","AGMT_STK_CNT":195.00,"STK_NM_KOR":"테스","ETF_WEIGHT":6.47},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":186.00,"STK_NM_KOR":"피에스케이홀딩스","ETF_WEIGHT":6.06},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":88.00,"STK_NM_KOR":"알테오젠","ETF_WEIGHT":5.74},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":568.00,"STK_NM_KOR":"티엘비","ETF_WEIGHT":4.77},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":172.00,"STK_NM_KOR":"심텍","ETF_WEIGHT":4.59},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":57.00,"STK_NM_KOR":"티에스이","ETF_WEIGHT":3.05},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":30.00,"STK_NM_KOR":"이오테크닉스","ETF_WEIGHT":3.01},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":237.00,"STK_NM_KOR":"HPSP","ETF_WEIGHT":2.72},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":764.00,"STK_NM_KOR":"성호전자","ETF_WEIGHT":2.71},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":39.00,"STK_NM_KOR":"로보티즈","ETF_WEIGHT":2.69},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":454.00,"STK_NM_KOR":"코미코","ETF_WEIGHT":2.58},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":24.00,"STK_NM_KOR":"파마리서치","ETF_WEIGHT":2.10},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":791.00,"STK_NM_KOR":"서부T&D","ETF_WEIGHT":2.01},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":216.00,"STK_NM_KOR":"동진쎄미켐","ETF_WEIGHT":1.97},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":69.00,"STK_NM_KOR":"피에스케이","ETF_WEIGHT":1.97},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":122.00,"STK_NM_KOR":"리노공업","ETF_WEIGHT":1.84},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":144.00,"STK_NM_KOR":"하나머티리얼즈","ETF_WEIGHT":1.63},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":309.00,"STK_NM_KOR":"큐리언트","ETF_WEIGHT":1.61},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":99.00,"STK_NM_KOR":"제주반도체","ETF_WEIGHT":1.61},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":127.00,"STK_NM_KOR":"티에프이","ETF_WEIGHT":1.51},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":155.00,"STK_NM_KOR":"가온칩스","ETF_WEIGHT":1.48},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":133.00,"STK_NM_KOR":"지엔씨에너지","ETF_WEIGHT":1.35},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":161.00,"STK_NM_KOR":"엘티씨","ETF_WEIGHT":1.31},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":61.00,"STK_NM_KOR":"리가켐바이오","ETF_WEIGHT":1.27},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":115.00,"STK_NM_KOR":"RFHIC","ETF_WEIGHT":1.26},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":131.00,"STK_NM_KOR":"이엔에프테크놀로지","ETF_WEIGHT":1.24},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":252.00,"STK_NM_KOR":"네패스","ETF_WEIGHT":1.23},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":143.00,"STK_NM_KOR":"코나아이","ETF_WEIGHT":1.22},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":272.00,"STK_NM_KOR":"한양디지텍","ETF_WEIGHT":1.15},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":49.00,"STK_NM_KOR":"에스티팜","ETF_WEIGHT":1.12},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":67.00,"STK_NM_KOR":"에이비엘바이오","ETF_WEIGHT":1.08},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":26.00,"STK_NM_KOR":"ISC","ETF_WEIGHT":1.07},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":128.00,"STK_NM_KOR":"오스코텍","ETF_WEIGHT":1.06},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":70.00,"STK_NM_KOR":"선익시스템","ETF_WEIGHT":1.06},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":18.00,"STK_NM_KOR":"티씨케이","ETF_WEIGHT":1.03},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":48.00,"STK_NM_KOR":"에스피지","ETF_WEIGHT":1.02},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":385.00,"STK_NM_KOR":"아모텍","ETF_WEIGHT":0.98},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":119.00,"STK_NM_KOR":"하나마이크론","ETF_WEIGHT":0.94},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":43.00,"STK_NM_KOR":"올릭스","ETF_WEIGHT":0.93},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":365.00,"STK_NM_KOR":"하림지주","ETF_WEIGHT":0.91},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":49.00,"STK_NM_KOR":"에코프로","ETF_WEIGHT":0.91},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":112.00,"STK_NM_KOR":"아이티센글로벌","ETF_WEIGHT":0.90},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":39.00,"STK_NM_KOR":"기가비스","ETF_WEIGHT":0.89},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":118.00,"STK_NM_KOR":"태웅","ETF_WEIGHT":0.86},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":293.00,"STK_NM_KOR":"와이씨","ETF_WEIGHT":0.78},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":116.00,"STK_NM_KOR":"에스엔시스","ETF_WEIGHT":0.65},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":70.00,"STK_NM_KOR":"지투지바이오","ETF_WEIGHT":0.60},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":80.00,"STK_NM_KOR":"덕산네오룩스","ETF_WEIGHT":0.58},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":78.00,"STK_NM_KOR":"원익머트리얼즈","ETF_WEIGHT":0.56},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":74.00,"STK_NM_KOR":"서진시스템","ETF_WEIGHT":0.56},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":36.00,"STK_NM_KOR":"파두","ETF_WEIGHT":0.55},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":152.00,"STK_NM_KOR":"저스템","ETF_WEIGHT":0.52},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":96.00,"STK_NM_KOR":"한텍","ETF_WEIGHT":0.52},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":13.00,"STK_NM_KOR":"주성엔지니어링","ETF_WEIGHT":0.52},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":5.00,"STK_NM_KOR":"레인보우로보틱스","ETF_WEIGHT":0.52},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":75.00,"STK_NM_KOR":"비츠로셀","ETF_WEIGHT":0.51},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":52.00,"STK_NM_KOR":"솔브레인홀딩스","ETF_WEIGHT":0.51},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":26.00,"STK_NM_KOR":"대주전자재료","ETF_WEIGHT":0.50},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":76.00,"STK_NM_KOR":"고영","ETF_WEIGHT":0.48},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":553.00,"STK_NM_KOR":"감성코퍼레이션","ETF_WEIGHT":0.47},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":251.00,"STK_NM_KOR":"이랜텍","ETF_WEIGHT":0.40},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":169.00,"STK_NM_KOR":"덕산하이메탈","ETF_WEIGHT":0.38},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":205.00,"STK_NM_KOR":"에스에이엠티","ETF_WEIGHT":0.37},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":56.00,"STK_NM_KOR":"알지노믹스","ETF_WEIGHT":0.36},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":37.00,"STK_NM_KOR":"와이지엔터테인먼트","ETF_WEIGHT":0.35},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":103.00,"STK_NM_KOR":"샘씨엔에스","ETF_WEIGHT":0.32},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":36.00,"STK_NM_KOR":"한중엔시에스","ETF_WEIGHT":0.32},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":26.00,"STK_NM_KOR":"디앤디파마텍","ETF_WEIGHT":0.29},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":24.00,"STK_NM_KOR":"에이치브이엠","ETF_WEIGHT":0.26},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":53.00,"STK_NM_KOR":"씨메스로보틱스","ETF_WEIGHT":0.21},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":15.00,"STK_NM_KOR":"비나텍","ETF_WEIGHT":0.20},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":12.00,"STK_NM_KOR":"인텔리안테크","ETF_WEIGHT":0.17},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":8.00,"STK_NM_KOR":"펌텍코리아","ETF_WEIGHT":0.10},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":0.00,"STK_NM_KOR":"원화현금","ETF_WEIGHT":0.53}],"chart_data":[["테스",6.47],["피에스케이홀딩스",6.06],["알테오젠",5.74],["티엘비",4.77],["심텍",4.59],["티에스이",3.05],["이오테크닉스",3.01],["HPSP",2.72],["성호전자",2.71],["로보티즈",2.69]]};
+										var chartDraw = false;
+
+										//console.log(CU_data.grid_data);
+
+										if(CU_data.grid_data){
+											chartDraw = true;
+											$("#CU_grid_template").tmpl(CU_data.grid_data).appendTo($("#CU_grid_body"));
+
+											$.each(CU_data.grid_data,function(i,value){
+												// 차트 Top 10 안에 비중 및 주식수 값 널값인 경우
+												if(!value.ETF_WEIGHT && i < 10){
+													chartDraw = false;
+												}	
+											});
+										}else{
+											$("#CU_grid_body").html("<tr><td colspan='3' style='border:none; height:220px; text-align:center'>데이터가 존재하지 않습니다.</td></tr>");
+										}
+            
+										if(chartDraw){
+											new Highcharts.Chart({
+												chart: {
+													renderTo: 'CU_chart'
+													, marginTop: 20
+												},
+												plotOptions: {
+													pie: {
+														dataLabels: {
+															distance: 10,
+															formatter: function(){
+																if(this.key.length > 7)
+																{
+																	return this.key.substr(0, 5) + '...(' + this.y + '%)' 									
+																}
+																else
+																{
+																	return this.key + '('+ this.y +'%)'
+																}
+															}
+														}
+														, size: 120
+													}
+												},
+												tooltip: {
+													formatter: function () {
+														return this.point.name + ' : ' + this.y + ' %';
+													}
+												},
+												series: [{
+													type: 'pie',
+													data: CU_data.chart_data
+												}]
+											});
+										}else{
+											//var table = $("<div style='line-height:250px; text-align:center'>데이터가 존재하지 않습니다.</div>");
+											var table = $("<div style='height:100%; text-align:center; padding-top:100px'>일부 구성종목에 대한 구성비중이 공시되지 않아<br/>그래프를 제공하지 않습니다.</div>");
+											$("#CU_chart").empty().append(table);
+										}
+									})();
+								</script>
+							</div>
+							<div class="clear">
+							</div>
+							<!-- CU당 구성종목 -->
+							
+							<div class="tit-empty"></div>
+							<!-- 거래량, 거래대금(1개월,평균) -->
+							<div class="fl_le half">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell"><h5><span>거래량,</span> 거래대금(1개월,평균)</h5></dd>
+										<dd class="header-table-cell unit"></dd>
+									</dl>
+								</div>
+								<div class="height255 border_box" style="display: block;">
+									<div class="fixed-table-container">
+										<div class="header-background">
+										</div>
+										<div class="fixed-table-container-inner" style="height: 100%; overflow-x: hidden; overflow-y: auto">
+											<table tabindex="0" id="volume_grid" class="table" cellspacing="0" summary="검색 종목 1개월 평균 거래량, 거래대금">
+												<caption class="blind">
+													거래량, 거래대금(1개월, 평균)</caption>
+												<colgroup>
+													<col width="*">
+													<col width="40%">
+													<col width="40%">
+												</colgroup>
+												<thead>
+													<tr>
+														<th class="first" scope="col">
+															<div class="th-inner" style="width: 20%">
+																날짜
+															</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 40%">
+																거래량(천주)
+															</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 40%">
+																거래대금(백만원)
+															</div>
+														</th>
+													</tr>
+												</thead>
+												<tbody id="volume_grid_body">
+												</tbody>
+											</table>
+										</div>
+										<script id="volume_grid_template" type="text/x-jquery-tmpl">
+											<tr>
+												<th class="title" scope="row">${TRD_DT ? TRD_DT.substring(0,7).replace(/-/g,'/'):'-'}</th>
+												<td class="num">${AVG_TRD_QTY ? Highcharts.numberFormat(AVG_TRD_QTY,0):'-'}</td>
+												<td class="num">${AVG_TRD_AMT ? Highcharts.numberFormat(AVG_TRD_AMT,0):'-'}</td>
+											</tr>
+										</script>
+									</div>
+								</div>
+							</div>
+							<div class="fl_ri half">
+								<div class="header-table empty"></div>
+								<div class='gHead'>
+								<div id="volume_chart" class="chart" style="height: 255px; width: 100%">
+								</div>
+								</div>
+							</div>
+							<script type="text/javascript">
+								(function(){
+									var volume_chart_data = {"grid_data":[{"TRD_DT":"2026-03-31","AVG_TRD_QTY":14553.0,"AVG_TRD_AMT":195519.0},{"TRD_DT":"2026-04-30","AVG_TRD_QTY":2717.0,"AVG_TRD_AMT":33297.0},{"TRD_DT":"2026-05-29","AVG_TRD_QTY":2702.0,"AVG_TRD_AMT":34568.0},{"TRD_DT":"2026-06-30","AVG_TRD_QTY":1866.0,"AVG_TRD_AMT":21365.0},{"TRD_DT":"2026-07-31","AVG_TRD_QTY":1673.0,"AVG_TRD_AMT":15145.0},{"TRD_DT":"2026-08-31","AVG_TRD_QTY":857.0,"AVG_TRD_AMT":7487.0},{"TRD_DT":"2026-09-04","AVG_TRD_QTY":422.0,"AVG_TRD_AMT":3667.0}],"AVG_TRD_QTY":[[1774915200000.0,14553.0],[1777507200000.0,2717.0],[1780012800000.0,2702.0],[1782777600000.0,1866.0],[1785456000000.0,1673.0],[1788134400000.0,857.0],[1788480000000.0,422.0]],"AVG_TRD_AMT":[[1774915200000.0,195519.0],[1777507200000.0,33297.0],[1780012800000.0,34568.0],[1782777600000.0,21365.0],[1785456000000.0,15145.0],[1788134400000.0,7487.0],[1788480000000.0,3667.0]]};
+									if(volume_chart_data.grid_data){
+										$("#volume_grid_template").tmpl(volume_chart_data.grid_data.reverse()).appendTo($("#volume_grid_body"));
+										new Highcharts.Chart({
+											chart: {
+												renderTo: 'volume_chart'
+											},
+											xAxis:{
+												labels:{
+													formatter: function () { return Highcharts.dateFormat('%Y/%m', this.value); }
+												}
+											},
+											yAxis: [{
+												title: {
+													text: '(천주)' ,align: 'high' ,y: -7 ,rotation:0 ,offset:15, x:5
+												}
+											},{
+												title: {
+													text: '(백만원)' ,align: 'high' ,y: -7 ,rotation:0 ,offset:15, x:25
+											}
+								,opposite: true
+										}]
+							, tooltip: {
+								formatter: function () {
+									var tooltip = '<table class="chart-tooltip"><tr><td align="center" colspan="3">' + Highcharts.dateFormat('%Y/%m/%d', this.x) + '</td></tr>';
+									$.each(this.points, function (i, value) {
+										if(value.series.name.indexOf('거래량') != -1)
+										{
+											tooltip += '<tr><td style="color:' + value.series.color + '">' + value.series.name + '</td><td> : </td><td class="right">' + Highcharts.numberFormat(value.y, 0, '.') +' 천주</td></tr>';
+										}
+										else
+										{
+											tooltip += '<tr><td style="color:' + value.series.color + '">' + value.series.name + '</td><td> : </td><td class="right">' + Highcharts.numberFormat(value.y, 0, '.') + ' 백만원</td></tr>';
+										}
+									});
+									tooltip += '</table>';
+									return tooltip;
+								}
+								, useHTML: true
+								, shared: true
+								, crosshairs: [true, true]
+							},
+											legend: {itemWidth: 140 },
+											series: [{
+												name: '월간평균거래량(좌)', data: volume_chart_data.AVG_TRD_QTY ,type: 'column'
+											}, {
+												name: '월간평균거래대금', data: volume_chart_data.AVG_TRD_AMT ,yAxis: 1
+											}]
+										});
+					}else{
+						$("#volume_grid_body").html("<tr><td colspan='3' style='border:none; height:220px; text-align:center'>데이터가 존재하지 않습니다.</td></tr>");
+					}
+								})();
+							</script>
+							<div class="clear">
+							</div>
+							<!-- 거래량, 거래대금(1개월,평균) -->
+						</div>
+					</div>
+				</div>
+			</div>
+			<script>
+				$(document).ajaxComplete(function() {
+					var targetvalue = '';
+					var moretop = (targetvalue === 'cu_more') ? ($('#cu_more').offset() || {top: 0}).top : (targetvalue === 'nav_more') ? ($('#nav_more').offset() || {top: 0}).top : ({top: 0}).top;
+					setTimeout(function () { autoResize({ moretop: moretop }); }, 1000);
+				});
+				$(window).load(function () {
+					
+					var targetvalue = '';
+					var moretop = (targetvalue === 'cu_more') ? ($('#cu_more').offset() || {top: 0}).top : (targetvalue === 'nav_more') ? ($('#nav_more').offset() || {top: 0}).top : ({top: 0}).top;
+					setTimeout(function () { autoResize({ moretop: moretop }); }, 1000);
+				});
+			</script>
+			
+	<div class="clr">&nbsp;</div> <!-- 여백 -->
+    <div class="foot-wrap">
+        <div></div>
+        <div id="foot-section">
+            <div>
+                <span></span>
+            </div>
+            <div>
+                <p>
+                    FnGuide에서 제공하는 정보는 신뢰할 만한 자료 및 정보로부터 얻어진 것이나 그 정확성이나 완전성을 보장 할 수 없으며, 시간이 경과함에 따라 변경될 수 있습니다.
+                    따라서 정보의 오류, 누락에 대하여 FnGuide 또는FnGuide에 자료를 제공하는 회사에서는 그 결과에 대해 법적인 책임을 지지 않습니다.
+                    모든 콘텐츠에 대한 저작권은 FnGuide에 있으며 사전 허가없이 이를 무단으로 사용하거나, 데이터 베이스화 할 경우 민형사상 책임을 물을 수 있습니다.
+                </p>
+            </div>
+        </div>
+        <div></div>
+    </div>
+	<div class="clr">&nbsp;</div> <!-- 여백 -->
+
+		</div>
+	</div>
+</div>
+</body>
+</html>
+

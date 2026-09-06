@@ -1,0 +1,52 @@
+[
+ {
+  "name": "fnguide",
+  "ok": true,
+  "info": {
+   "status": 200,
+   "len": 1829,
+   "n_tr": 5,
+   "has_pdf_word": false
+  }
+ },
+ {
+  "name": "naver_pc",
+  "ok": true,
+  "info": {
+   "status": 200,
+   "len": 130749,
+   "n_tr": 120,
+   "has_pdf_word": true
+  }
+ },
+ {
+  "name": "wisereport",
+  "ok": true,
+  "info": {
+   "status": 200,
+   "len": 48891,
+   "n_tr": 37,
+   "has_pdf_word": true
+  }
+ },
+ {
+  "name": "kodex_api_pdf",
+  "ok": true,
+  "info": {
+   "status": 500,
+   "len": 63,
+   "n_tr": 0,
+   "has_pdf_word": false
+  }
+ },
+ {
+  "name": "koact_search",
+  "ok": true,
+  "info": {
+   "status": 405,
+   "len": 117,
+   "n_tr": 0,
+   "has_pdf_word": false
+  }
+ }
+]
