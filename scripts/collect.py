@@ -43,7 +43,7 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
 EC_HEADERS = {"User-Agent": UA, "Accept": "application/json, text/plain, */*", "Accept-Language": "ko-KR,ko;q=0.9",
               "Referer": EC + "/", "X-Requested-With": "XMLHttpRequest"}
-EC_RATE_PER_MIN = 22          # ETF CHECK answers ~30 requests/minute per IP, then returns 403 for a while
+EC_RATE_PER_MIN = 14          # ETF CHECK answers ~30 requests/minute per IP, then returns 403 for a while
 EC_BLOCK_WAIT = 75            # seconds to wait after a 403 before trying again
 NV_HEADERS = {"User-Agent": UA, "Accept": "application/json, text/plain, */*", "Accept-Language": "ko-KR,ko;q=0.9",
               "Referer": "https://m.stock.naver.com/"}
@@ -139,9 +139,9 @@ class Http:
                 time.sleep(2 * (i + 1))
         raise RuntimeError("GET failed %s %s: %s" % (url, params, last))
 
-    def ec(self, path, **params):
+    def ec(self, path, _tries=2, **params):
         self._throttle()
-        js = self.get_json(EC + path, EC_HEADERS, params or None)
+        js = self.get_json(EC + path, EC_HEADERS, params or None, tries=_tries)
         if not js.get("success", True):
             raise RuntimeError("ETF CHECK error %s: %s" % (path, js.get("message")))
         return js.get("results", [])
@@ -150,7 +150,7 @@ class Http:
 # ---------------------------------------------------------------- collectors
 
 def fetch_ec_master(h):
-    rows = h.ec("/user/common/getEtpMast")
+    rows = h.ec("/user/common/getEtpMast", _tries=1)
     out = {}
     for r in rows:
         code = (r.get("F16013") or "").strip()
@@ -187,7 +187,7 @@ def krw_text_to_won(t):
 
 
 # benchmark index -> representative passive ETF (used when the ETF CHECK master list is unavailable)
-STATIC_PROXY = {"KOSPI200": "069500", "KOSDAQ150": "229200", "KRX반도체": "091160", "KRX300": "292190",
+STATIC_PROXY = {"KOSPI200": "069500", "KOSDAQ150": "229200", "KOSDAQ": "229200", "KRX반도체": "091160", "KRX300": "292190",
                 "KOSPI": "226490", "KRX바이오K뉴딜": "364970", "KRX2차전지K뉴딜": "364980", "KRXBBIGK뉴딜": "364960",
                 "KOSPI200커버드콜5OTM": "069500", "KOSPI200커버드콜": "069500", "KOSDAQ150커버드콜": "229200"}
 
@@ -205,7 +205,7 @@ def fetch_naver_master(h, naver_list):
 
 def fetch_ec_fees(h):
     out = {}
-    for r in h.ec("/stock/etp/getEtfTotalExpenseRatio"):
+    for r in h.ec("/stock/etp/getEtfTotalExpenseRatio", _tries=1):
         code = r.get("F16013")
         if code:
             out[code] = {"fee": to_num(r.get("F35188")), "ter": to_num(r.get("F35190")), "total": to_num(r.get("F35192"))}
@@ -631,6 +631,56 @@ def main():
     save_json(STATUS_PATH, {"ok": True, "asof": asof, "generated_at": latest["generated_at"],
                             "n_active": len(active), "n_pdf_ok": n_ok}, compact=False)
     log("DONE asof=%s active=%d pdf_ok=%d calls=%d %.0fs" % (asof, len(active), n_ok, h.calls, time.time() - started))
+    try:
+        probe_full_pdf(h)
+    except Exception as ex:  # noqa
+        log("probe skipped:", str(ex)[:100])
+
+
+def probe_full_pdf(h):
+    """Find a source that returns the FULL holdings list (ETF CHECK anonymous API caps at 20 rows)."""
+    out_dir = os.path.join(DATA_DIR, "probe4")
+    os.makedirs(out_dir, exist_ok=True)
+    X = "0163Y0"
+    res = []
+    def rec(name, fn):
+        try:
+            v = fn()
+            res.append({"name": name, "ok": True, "info": v})
+            log("probe", name, str(v)[:120])
+        except Exception as e:  # noqa
+            res.append({"name": name, "ok": False, "err": str(e)[:200]})
+            log("probe", name, "ERR", str(e)[:100])
+    variants = [("/api/user/etp/getEtfPdfRankListWeightAll", {"code": X, "limit": "all"}),
+                ("/api/user/etp/getEtfPdfRankListWeightAll", {"code": X, "showAll": "true"}),
+                ("/api/user/etp/getEtfPdfRankListWeightAll", {"code": X, "start": 0, "limit": 100, "showAll": 1}),
+                ("/api/user/etp/getEtfPdfRankListWeightAll", {"code": X, "page": 2}),
+                ("/api/user/etp/getEtfPdfRankListWeightAll", {"code": X, "start": 20, "limit": 20}),
+                ("/user/etp/getEtfPdfRankListWeight", {"code": X}),
+                ("/user/etp/getEtfPdfRankListWeight", {"code": X, "start": 0, "limit": 500}),
+                ("/user/etp/getEtfPdfRankListWeight", {"F16013": X, "limit": 500}),
+                ("/user/etp/getEtfPdfRate", {"code": X}),
+                ("/user/etp/getEtpSector", {"code": X})]
+    for path, params in variants:
+        if time_left() < 60:
+            break
+        rec("ec %s %s" % (path.split("/")[-1], json.dumps(params)),
+            lambda path=path, params=params: (lambda rows: {"n": len(rows), "first": rows[:1], "last": rows[-1:]} )(h.ec(path, **params)))
+    # other public pages that may list the full PDF
+    pages = {"fnguide": "https://comp.fnguide.com/SVO2/ASP/etf_snapshot.asp?pGB=1&gicode=A%s" % X,
+             "naver_pc": "https://finance.naver.com/item/main.naver?code=%s" % X,
+             "wisereport": "https://navercomp.wisereport.co.kr/v2/ETF/index.aspx?cmp_cd=%s" % X,
+             "kodex_api_pdf": "https://m.samsungfund.com/api/v1/kodex/product/pdf.do?fundId=%s" % X,
+             "koact_search": "https://www.samsungactive.co.kr/search/recommend.do?keyword=%s" % "코스닥"}
+    for name, url in pages.items():
+        def fetch(url=url, name=name):
+            r = requests.get(url, headers={"User-Agent": UA, "Accept-Language": "ko-KR,ko;q=0.9"}, timeout=25)
+            t = r.text
+            with open(os.path.join(out_dir, name + ".html"), "w", encoding="utf-8") as f:
+                f.write(t[:400000])
+            return {"status": r.status_code, "len": len(t), "n_tr": t.count("<tr"), "has_pdf_word": ("구성종목" in t) or ("PDF" in t)}
+        rec(name, fetch)
+    save_json(os.path.join(out_dir, "probe4.json"), res, compact=False)
 
 
 if __name__ == "__main__":
