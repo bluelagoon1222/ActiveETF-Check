@@ -45,14 +45,21 @@ EC_HEADERS = {"User-Agent": UA, "Accept": "application/json, text/plain, */*", "
               "Referer": EC + "/", "X-Requested-With": "XMLHttpRequest", "Origin": EC,
               "sec-ch-ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
               "sec-ch-ua-mobile": "?0", "sec-ch-ua-platform": '"Windows"',
-              "Sec-Fetch-Dest": "empty", "Sec-Fetch-Mode": "cors", "Sec-Fetch-Site": "same-origin"}
+              "Sec-Fetch-Dest": "empty", "Sec-Fetch-Mode": "cors", "Sec-Fetch-Site": "same-origin",
+              "Connection": "close"}   # ETF CHECK closes idle keep-alive sockets -> never reuse a connection
 EC_HEADERS_ALT = {"User-Agent": UA, "Accept": "*/*", "Accept-Language": "ko-KR,ko;q=0.9", "Referer": EC + "/mobile/main3",
                   "Connection": "close"}
 NV_HEADERS = {"User-Agent": UA, "Accept": "application/json, text/plain, */*", "Accept-Language": "ko-KR,ko;q=0.9",
               "Referer": "https://m.stock.naver.com/"}
 
 PDF_KEEP_DAYS = 70
-SLEEP = 0.7   # ETF CHECK throttles bursts: ~30 rapid calls then drops connections
+SLEEP = 0.4
+DEADLINE_SEC = 27 * 60   # stay well under the 40-minute job timeout; optional steps are skipped past this
+STARTED = time.time()
+
+
+def time_left():
+    return DEADLINE_SEC - (time.time() - STARTED)
 CASH_WORDS = ("현금", "예금", "설정현금", "원화", "CASH")
 # active ETFs whose name matches this are NOT domestic equity (bonds, money market, overseas, commodities...)
 EXCLUDE_RE = re.compile(r"채권|국공채|국채|회사채|은행채|금융채|CD금리|KOFR|머니마켓|MMF|단기채|단기자금|혼합|TDF|TRF|금리|달러|"
@@ -92,9 +99,23 @@ def save_json(path, obj, compact=True):
             json.dump(obj, f, ensure_ascii=False, indent=1)
 
 
+def new_session():
+    s = requests.Session()
+    try:
+        from requests.adapters import HTTPAdapter
+        from urllib3.util.retry import Retry
+        ad = HTTPAdapter(max_retries=Retry(total=2, connect=2, read=2, backoff_factor=0.8,
+                                           status_forcelist=[500, 502, 503, 504], allowed_methods=["GET"]),
+                         pool_connections=4, pool_maxsize=4)
+        s.mount("https://", ad)
+    except Exception:  # noqa
+        pass
+    return s
+
+
 class Http:
     def __init__(self):
-        self.s = requests.Session()
+        self.s = new_session()
         self.calls = 0
         self.warmed = False
 
@@ -115,10 +136,10 @@ class Http:
             self.s.close()
         except Exception:  # noqa
             pass
-        self.s = requests.Session()
+        self.s = new_session()
         self.warmed = False
 
-    def get_json(self, url, headers, params=None, tries=4):
+    def get_json(self, url, headers, params=None, tries=3):
         last = None
         for i in range(tries):
             try:
@@ -131,7 +152,7 @@ class Http:
                 return js
             except Exception as e:  # noqa
                 last = e
-                wait = 8 * (i + 1)
+                wait = 3 * (i + 1)
                 log("  retry %d/%d in %ds: %s %s" % (i + 1, tries, wait, url.split("/")[-1], str(e)[:80]))
                 if "etfcheck" in url:
                     self.reset_session()
@@ -455,6 +476,9 @@ def main():
     os.makedirs(PDF_DIR, exist_ok=True)
     pdf_today, pdf_dates = {}, defaultdict(int)
     for code, e in active.items():
+        if time_left() < 300:
+            log("deadline near - skipping remaining PDFs")
+            break
         try:
             rows, d = fetch_pdf(h, code)
             pdf_today[code] = rows
@@ -463,10 +487,12 @@ def main():
         except Exception as ex:  # noqa
             log("PDF failed", code, e["name"], ex)
             pdf_today[code] = []
+    for code in active:
+        pdf_today.setdefault(code, [])
     missing_codes = [c for c, v in pdf_today.items() if not v]
-    if missing_codes:
+    if missing_codes and time_left() > 240:
         log("second pass for %d empty PDFs after cool-down" % len(missing_codes))
-        time.sleep(30)
+        time.sleep(15)
         h.reset_session()
         for code in missing_codes:
             try:
@@ -501,6 +527,9 @@ def main():
     # 3a. Naver per-ETF analysis (also fills index/manager when master came from Naver) ----
     naver = {}
     for code, e in active.items():
+        if time_left() < 120:
+            naver[code] = {}
+            continue
         try:
             nv = fetch_naver_analysis(h, code)
         except Exception as ex:  # noqa
@@ -554,6 +583,9 @@ def main():
     # 4. per-ETF price history ------------------------------------------------------
     hist = {}
     for code, e in active.items():
+        if time_left() < 60:
+            hist[code] = {}
+            continue
         try:
             hist[code] = fetch_hist(h, code)
         except Exception as ex:  # noqa
