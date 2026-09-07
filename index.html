@@ -61,6 +61,7 @@ th.sorted{color:var(--accent)}
 .pill.out{background:var(--out-bg);color:var(--out)}
 .pill.up{background:var(--up-bg);color:var(--up)}
 .pill.dn{background:var(--down-bg);color:var(--down)}
+.pill.est{background:var(--accent-soft);color:#9a4b00}
 /* matrix */
 .matrix th.stock,.matrix td.stock{position:sticky;left:0;background:var(--card);z-index:3;text-align:left;min-width:150px;max-width:210px;overflow:hidden;text-overflow:ellipsis;box-shadow:2px 0 0 var(--line)}
 .matrix th.stock{z-index:4;background:#fafbfc}
@@ -143,6 +144,7 @@ footer{color:var(--faint);font-size:11.5px;line-height:1.6;margin-top:20px}
     <span><span class="pill up">▲</span>/<span class="pill dn">▼</span> 비중 변화가 기준 이상</span>
     <span><b class="pos">+초과</b> / <b class="neg">−과소</b> = 비교지수(또는 그룹 평균) 대비</span>
     <span>셀 배경 진하기 = 비중 크기</span>
+    <span><span class="pill est">추정</span> 해외 ETF: 공시 비중이 없어 주식수×현재가로 추정한 비중</span>
   </div>
 </div>
 
@@ -226,7 +228,7 @@ function renderPerf(){
   for(const e of es){
     const s=e.summary;
     const chg=(s.new||s.out||s.up||s.down)?`${s.new?`<span class="pill new">N${s.new}</span>`:''}${s.out?`<span class="pill out">O${s.out}</span>`:''}${s.up?`<span class="pill up">▲${s.up}</span>`:''}${s.down?`<span class="pill dn">▼${s.down}</span>`:''}`:'<span class="meta">–</span>';
-    h+=`<tr><td class="l name"><div class="etfname" data-c="${e.code}">${e.name}</div><div class="meta">${e.manager} · ${e.code} · ${e.index||''}${e.premium!=null?` · 괴리 ${e.premium>0?'+':''}${e.premium}%`:''}</div></td>`+
+    h+=`<tr><td class="l name"><div class="etfname" data-c="${e.code}">${e.name}${e.weights_estimated?'<span class="pill est" title="해외 ETF는 공시 비중이 없어 주식수×가격으로 추정한 비중입니다">추정</span>':''}</div><div class="meta">${e.manager} · ${e.code} · ${e.index||''}${e.premium!=null?` · 괴리 ${e.premium>0?'+':''}${e.premium}%`:''}</div></td>`+
        `<td>${fmtAum(e.aum)}</td><td>${e.fee!=null?e.fee.toFixed(2)+'%':'–'}${e.total_cost!=null?`<span class="ex">실부담 ${e.total_cost.toFixed(2)}%</span>`:''}</td>`+
        PER.map(p=>`<td><span class="ret">${fmtPct(pv(e,p))}</span><span class="ex">${excess(e,p)==null?'':(excess(e,p)>0?'+':'')+excess(e,p).toFixed(2)+'p vs 지수'}</span></td>`).join('')+
        `<td>${s.n_holdings}</td><td>${s.top10}%</td><td class="l">${chg}</td></tr>`;
