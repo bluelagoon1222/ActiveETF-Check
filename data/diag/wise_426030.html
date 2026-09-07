@@ -1,0 +1,886 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+	<title>온라인기업정보 - ETF/ETN</title>
+	<link type="text/css" rel="shortcut icon" href="/favicon.ico" />
+	<script language="javascript" src="/include/domain.js" type="text/javascript"></script>
+	<link href="/v2/include/css?v=q7Pq73b9jj00gmFmOVUSxzXv_5FtLNW9qxkqFwJqh-g1" rel="stylesheet"/>
+
+	<link href="/v2/include/ETF?v=BiZyXYXVVFnyjoveBGiH4mCYzFvER0sUwNy-YnXFUf81" rel="stylesheet"/>
+
+	<script src="/v2/ETF/js?v=z4GWew1cV16CHWa_Sr9DuNTIEzw2K1tJt93rz_l9Wpw1"></script>
+
+	<link href="/v2/include/sitecss?v=NO2scjWyURrcKuALmuSFc8_aZjVlTCHcs6O-cPNOjtk1" rel="stylesheet"/>
+
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-74989022-7"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-74989022-7');
+	</script>
+
+	<script type="text/javascript">
+				
+		$(document).ready(function () {
+			var navUrl = location.href;
+			var url = $.url(navUrl);
+			if (5 == "25") {
+				$('#contentWrap .tab-menu .subMenu .sMenu').text('ETN');
+				$('#etf_path').text('ETN');
+			}
+			else {
+				$('#contentWrap .tab-menu .subMenu .sMenu').text('ETF');
+				$('#etf_path').text('ETF');
+			}
+
+			$('#hidden_cn').val(url.param('cn'));
+			$("#hpopupsearch").click(function () {
+				Main_OpenWindow('../ETF/lookup.aspx', 'm_invest', 460, 420, 0, 0, 0, 0);
+			});
+
+			$("#search").customAutocomplete({
+				source: function (request, response) {
+					//console.log(request.term);
+					$.ajax({
+						url: "../company/autocomplete.aspx",
+						dataType: "Json",
+						data: {
+							searchTyp: 'ETF',
+							searchVal: request.term
+						},
+						success: function (data) {
+							response($.map(data, function (item) {
+								return {
+									label: item.item_nm, //item.item + "(" + item.item_cd + ")",
+									value: item.item_cd,
+									desc: item.item_nm
+								}
+							}));
+						}
+					});
+				}
+                , select: function (event, ui) {
+                	document.location.href = "../ETF/ETF.aspx?cn=" + $('#hidden_cn').val() + "&cmp_cd=" + ui.item.value;
+                	return false;
+                }
+                , autoFocus: true
+			});
+			$('form').submit(function (e) {
+				e.preventDefault();
+				//#search value
+				var search = $(this).serializeArray()[0].value;
+			});
+
+
+			AjaxData.GetNAVData();
+			$("#txtStart,#txtEnd").datepicker({
+				duration: 0,
+				onClose: function (dateText, inst) {
+					setTimeout(function () {
+						if (!inst._keyEvent)
+							AjaxData.GetNAVData();
+					}, 0);
+					//$(this).trigger('blur');
+				}
+			});
+			$("#txtStart").datepicker("option", "defaultDate", '-3m').datepicker("option", "navigationAsDateFormat", true);
+			//            $("#NAV_TYPE input:radio").change(AjaxData.GetNAVData).change(function () {
+			//                $(this).next().addClass('selected').siblings('a').removeClass('selected');
+			//            });
+
+			$("#NAV_TYPE a").click(function (e) {
+				var eId = e.currentTarget.id;
+				$("#NAV_TYPE span").removeClass("selected");
+				switch (eId) {
+					case "aG31":
+						$("#hG3").val("D");
+						$("#aG31").parent().addClass("selected");
+						AjaxData.GetNAVData();
+						break;
+					case "aG32":
+						$("#hG3").val("W");
+						$("#aG32").parent().addClass("selected");
+						AjaxData.GetNAVData();
+						break;
+					case "aG33":
+						$("#hG3").val("M");
+						$("#aG33").parent().addClass("selected");
+						AjaxData.GetNAVData();
+						break;
+				}
+			});
+
+			//Masked Input 적용
+			$("#txtStart").mask("9999-99-99");
+			$("#txtEnd").mask("9999-99-99");
+
+			//의존성 있는 부분 체크해야함
+			//company_autocomplete();
+			Company_addr();
+			$(window).bind('resize', function () {
+				setTimeout(function () {
+					$("#frmCt1").css("width", $("#gHeadCt1").css("width"));
+				}, 100);
+			});
+			$(".viewCT").click(function (e) {
+				Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt1", "ct7", "426030" + ";" + "20260904");
+			});
+			dispalyCT();
+			$("#hrefHome").attr("title", "새창열기:[홈페이지] " + $("#hrefHome").text() + "\n* 클릭 시 " + $('.nm_k').text() + " 홈페이지로 이동합니다.");
+    		
+
+			var maxRow = 9;
+			var curLength = $('#volume_grid_body tr').length;
+			if(curLength < maxRow){
+				while(curLength++ < maxRow){
+					$('#volume_grid_body').append('<tr><th class="title" scope="row">&nbsp;</th><td>&nbsp;</td><td>&nbsp;</td></tr>');
+				}
+			}
+		});
+       
+			function fn_cmpSearch() {
+				if ($("#hiddencmp_cd").val() == '') {
+					jAlert('종목을 선택해 주세요', '메세지');
+					$("#cmpSearch").val("");
+					return;
+				}
+				var cmp_cd = $("#hiddencmp_cd").val();
+				document.location.href = "../ETF/ETF.aspx?cn=" + $('#hidden_cn').val() + "&cmp_cd=" + cmp_cd;
+			}
+			function dispalyCT() {
+				var url = document.URL;
+				if (url.indexOf("client=comp") != -1) {
+					$("#ct1").show();
+				}
+			}
+	</script>
+</head>
+<body oncontextmenu="return false">
+<div class="body-section">
+	<input type="hidden" id="hiddencmp_cd" value="426030" />
+	<input type="hidden" id="hidden_cn" />
+	<input type="hidden" id="cmp_typ" value="5" />
+	<div id="all_contentWrap">
+		<!--all_contentWrap-->
+		<div id="contentWrap">
+			<input type="hidden" id="printZone"><input type="hidden" id="cssZone">
+			<div id="pArea" class="MinWidthContainer">
+			<div id="summary_grid_body"></div>
+			<div class="tit-empty"></div>
+			<script id="summary_grid_template" type="text/x-jquery-tmpl">
+				<div class="wrapper-table">
+					<div class="cmp-table-div">
+						<table class="cmp-table">
+							<tr class="cmp-table-row">
+								<td class="cmp-table-cell td0101">
+									<dl>
+										<dt>
+											<span class="name">${ CMP_KOR }</span>
+											<a class="cEm" title="[홈페이지] ${ URL } %>" href="http://${ URL }" target="comPage"><img src="/images/icon_home.gif" hspace="3" align="absmiddle"></a>
+											<b class="num">${ CMP_CD }</b>
+										</dt>
+										<dt class="line-left">${ CMP_ENG }</dt>
+										<dt class="line-left">기초지수 : ${ BASE_IDX_NM_KOR}</dt>
+									</dl>
+								</td>
+							</tr>
+							<tr class="cmp-table-row">
+								<td class="cmp-table-cell td0201">
+									<div>&nbsp;</div>
+								</td>
+							</tr>
+							<tr class="cmp-table-row">
+								<td class="cmp-table-cell td0301">
+									<dl>
+										<dt>운용사: ${ISSUE_NM_KOR}</dt>
+                                        {{if CMP_TYP=="25"}} 
+                                            <dt class="line-left">제비용: ${EXPENSES}%</dt> 
+                                        {{else}} 
+                                            <dt class="line-left">총보수: ${FnGuideUtil.Format.currencyTrim(TOT_PAY, '')}%</dt> 
+                                        {{/if}}
+										<dt class="line-left">분류: ${ETF_TYP_SVC_NM}</dt>
+									</dl>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</script>
+			<script type="text/javascript">
+				(function(){
+					var summary_data = {"CMP_KOR":"TIME 미국나스닥100액티브","URL":"www.timefolio.co.kr","CMP_CD":"426030","CMP_ENG":"TIME US NASDAQ100 ACTIVE","BASE_IDX_NM_KOR":"NASDAQ 100","ISSUE_NM_KOR":"(주)타임폴리오자산운용","ETF_TYP_SVC_NM":"해외주식형, 시장대표","TOT_PAY":"0.800","CMP_TYP":"5"};
+					$("#summary_grid_template").tmpl(summary_data).appendTo($("#summary_grid_body"));
+				})();
+			</script>
+
+
+				<div class="PageContainer">
+					<div class="PageContentContainer">
+						<div id="wrapper" class="all">
+							<!-- 시세 및 주주현황 -->
+							<div class="fl_le half">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell"><h5><span>시세</span> 및 주주현황</h5></dd>
+										<dd class="header-table-cell unit">
+											<p>[기준:26.09.04]</p>
+										</dd>
+									</dl>
+								</div>
+								<div class="body">
+									<table class="gHead" id="cTB11" summary="기업의 기본적인 시세정보(주가/전일대비/수익률,52주최고/최저,액면가,거래량/거래대금,시가총액,유동주식비율,외국인지분율,52주베타,수익률(1M/3M/6M/1Y))를 제공합니다.">
+										<caption class="blind">시세정보</caption>
+										<colgroup>
+											<col width="160" />
+											<col width="*" />
+										</colgroup>
+										<tbody id="status_grid_body">
+									</table>
+								</div>
+							</div>
+							<script id="status_grid_template" type="text/x-jquery-tmpl">
+								<tr>
+									<th class="txt" scope="row">종가/전일대비/수익률</th>
+									<td class="num">${CLS_PRC}원 / 
+								{{if PRC_CHG>0}} <span class="cUp">+${PRC_CHG}원</span> {{else PRC_CHG==0}} <span class="">${PRC_CHG}원</span> {{else}} <span class="cDn">${PRC_CHG}원</span> {{/if}} / 
+								{{if ADJ_CHG>0}} <span class="cUp">+${ADJ_CHG}%</span> {{else ADJ_CHG==0}} <span class="">${ADJ_CHG}%</span> {{else}} <span class="cDn">${ADJ_CHG}%</span> {{/if}}
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">52주 최고/최저</th>
+									<td class="num">${YR_HIGH}원/ ${YR_LOW}원</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">상장주식수</th>
+									<td class="num">${LIST_STK_CNT}천주</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">거래량/거래대금</th>
+									<td class="num">${trD_QTY}주/ ${trD_AMT}백만원</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">20일평균 거래량/거래대금</th>
+									<td class="num">${AVG_TRD_QTY20} 주/ ${AVG_TRD_AMT20}백만원</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">시가총액</th>
+									<td class="num">${MKT_VAL}억원</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">52주베타</th>
+									<td class="num">${YR_BETA} </td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">외국인지분율</th>
+									<td class="num">${FRG_RT}%</td>
+								</tr>
+								<tr>
+									<th class="txt" scope="row">수익률<span class="span-sub">(1M/3M/6M/1Y)</span></th>
+									<td class="num">{{if ERN1>0}}<span class="cUp">+${ERN1}</span>{{else}}<span class="cDn">${ERN1}%</span>{{/if}} 
+								/ {{if ERN3>0}}<span class="cUp">+${ERN3}%</span>{{else}}<span class="cDn">${ERN3}%</span>{{/if}}
+								/ {{if ERN6>0}}<span class="cUp">+${ERN6}%</span>{{else}}<span class="cDn">${ERN6}%</span>{{/if}}
+								/ {{if ERN12>0}}<span class="cUp">+${ERN12}%</span>{{else}}<span class="cDn">${ERN12}%</span>{{/if}}
+									</td>
+								</tr>
+							</script>
+							<script type="text/javascript">
+								var status_data = {"CLS_PRC":"44,770","PRC_CHG":"1,165","ADJ_CHG":"2.67","YR_HIGH":"62,645","YR_LOW":"31,683","LIST_STK_CNT":"54,180","trD_QTY":"656,574","trD_AMT":"29,381","MKT_VAL":"24,256","YR_BETA":"0.60","AVG_TRD_QTY20":"692,754","AVG_TRD_AMT20":"31,769","FRG_RT":"0.08","ERN1":"-3.89","ERN3":"-24.10","ERN6":"22.86","ERN12":"42.54"};
+								if(status_data){
+									$("#status_grid_template").tmpl(status_data).appendTo($("#status_grid_body"));
+								}else{
+									$("#status_grid_body").html("<tr><td colspan='2' style='border:none; height:234px; text-align:center'>데이터가 존재하지 않습니다.</td></tr>");
+								}
+							</script>
+							<!-- 시세 및 주주현황 -->
+
+							<!-- 주가/상대 수익률 추이 차트 -->
+							<div class="fl_ri half">
+								<div class="header-table empty"></div>
+								<div class="body">
+									<div class='gHead'>
+										<h6 class="spanCT">주가/상대수익률</h6>
+										<div id='stock_price_relative_chart' class='chart-container full'></div>
+									</div>
+								</div>
+							</div>
+							<script type="text/javascript">
+								(function(){
+									var stock_price_relative_chart_data = {"name":[{"CMP_CD":"426030","CMP_NM":"TIME 미국나스닥100액티브","MKT_NM":"KOSPI"}],"CMP_CLS":[[1757030400000.0,31838.0],[1757289600000.0,31933.0],[1757376000000.0,32192.0],[1757462400000.0,32722.0],[1757548800000.0,33257.0],[1757635200000.0,33511.0],[1757894400000.0,33736.0],[1757980800000.0,34071.0],[1758067200000.0,34141.0],[1758153600000.0,34580.0],[1758240000000.0,35045.0],[1758499200000.0,35510.0],[1758585600000.0,35769.0],[1758672000000.0,35380.0],[1758758400000.0,35015.0],[1758844800000.0,34810.0],[1759104000000.0,34840.0],[1759190400000.0,35325.0],[1759276800000.0,35225.0],[1759363200000.0,36029.0],[1760054400000.0,37303.0],[1760313600000.0,36704.0],[1760400000000.0,36868.0],[1760486400000.0,36818.0],[1760572800000.0,36948.0],[1760659200000.0,35854.0],[1760918400000.0,36599.0],[1761004800000.0,36419.0],[1761091200000.0,35869.0],[1761177600000.0,35255.0],[1761264000000.0,36219.0],[1761523200000.0,37328.0],[1761609600000.0,37423.0],[1761696000000.0,37598.0],[1761782400000.0,37848.0],[1761868800000.0,37268.0],[1762128000000.0,37338.0],[1762214400000.0,36749.0],[1762300800000.0,35979.0],[1762387200000.0,36968.0],[1762473600000.0,35984.0],[1762732800000.0,36724.0],[1762819200000.0,37248.0],[1762905600000.0,36978.0],[1762992000000.0,36609.0],[1763078400000.0,34251.0],[1763337600000.0,34780.0],[1763424000000.0,33831.0],[1763510400000.0,33601.0],[1763596800000.0,35115.0],[1763683200000.0,32737.0],[1763942400000.0,33292.0],[1764028800000.0,34555.0],[1764115200000.0,34600.0],[1764201600000.0,34975.0],[1764288000000.0,35280.0],[1764547200000.0,35060.0],[1764633600000.0,34970.0],[1764720000000.0,35340.0],[1764806400000.0,35445.0],[1764892800000.0,35909.0],[1765152000000.0,36059.0],[1765238400000.0,35899.0],[1765324800000.0,36074.0],[1765411200000.0,35799.0],[1765497600000.0,36229.0],[1765756800000.0,34850.0],[1765843200000.0,33871.0],[1765929600000.0,34565.0],[1766016000000.0,33641.0],[1766102400000.0,34411.0],[1766361600000.0,35699.0],[1766448000000.0,35779.0],[1766534400000.0,35135.0],[1766707200000.0,35030.0],[1766966400000.0,34355.0],[1767052800000.0,34140.0],[1767312000000.0,34255.0],[1767571200000.0,35125.0],[1767657600000.0,35380.0],[1767744000000.0,36040.0],[1767830400000.0,35800.0],[1767916800000.0,35855.0],[1768176000000.0,36485.0],[1768262400000.0,37430.0],[1768348800000.0,37875.0],[1768435200000.0,37675.0],[1768521600000.0,37995.0],[1768780800000.0,37480.0],[1768867200000.0,37185.0],[1768953600000.0,37350.0],[1769040000000.0,37850.0],[1769126400000.0,37635.0],[1769385600000.0,36455.0],[1769472000000.0,36750.0],[1769558400000.0,37355.0],[1769644800000.0,38180.0],[1769731200000.0,37920.0],[1769990400000.0,36485.0],[1770076800000.0,38410.0],[1770163200000.0,38545.0],[1770249600000.0,36600.0],[1770336000000.0,35785.0],[1770595200000.0,37170.0],[1770681600000.0,37720.0],[1770768000000.0,36830.0],[1770854400000.0,37180.0],[1770940800000.0,36525.0],[1771459200000.0,37080.0],[1771545600000.0,37225.0],[1771804800000.0,37060.0],[1771891200000.0,37825.0],[1771977600000.0,37820.0],[1772064000000.0,38335.0],[1772150400000.0,37495.0],[1772496000000.0,38050.0],[1772582400000.0,36440.0],[1772668800000.0,37685.0],[1772755200000.0,37250.0],[1773014400000.0,34650.0],[1773100800000.0,36850.0],[1773187200000.0,37645.0],[1773273600000.0,37815.0],[1773360000000.0,37565.0],[1773619200000.0,38075.0],[1773705600000.0,38330.0],[1773792000000.0,39570.0],[1773878400000.0,39380.0],[1773964800000.0,40530.0],[1774224000000.0,38500.0],[1774310400000.0,39010.0],[1774396800000.0,39780.0],[1774483200000.0,39400.0],[1774569600000.0,37780.0],[1774828800000.0,36850.0],[1774915200000.0,35245.0],[1775001600000.0,37585.0],[1775088000000.0,37230.0],[1775174400000.0,38650.0],[1775433600000.0,38980.0],[1775520000000.0,38295.0],[1775606400000.0,40185.0],[1775692800000.0,40475.0],[1775779200000.0,41565.0],[1776038400000.0,41635.0],[1776124800000.0,43320.0],[1776211200000.0,43365.0],[1776297600000.0,44025.0],[1776384000000.0,43950.0],[1776643200000.0,44015.0],[1776729600000.0,44775.0],[1776816000000.0,44755.0],[1776902400000.0,45080.0],[1776988800000.0,45800.0],[1777248000000.0,46685.0],[1777334400000.0,46005.0],[1777420800000.0,45810.0],[1777507200000.0,46500.0],[1777852800000.0,49145.0],[1778025600000.0,50925.0],[1778112000000.0,51185.0],[1778198400000.0,50535.0],[1778457600000.0,52315.0],[1778544000000.0,54095.0],[1778630400000.0,54410.0],[1778716800000.0,55010.0],[1778803200000.0,53445.0],[1779062400000.0,52165.0],[1779148800000.0,51000.0],[1779235200000.0,51760.0],[1779321600000.0,53315.0],[1779408000000.0,55300.0],[1779753600000.0,55800.0],[1779840000000.0,55930.0],[1779926400000.0,54995.0],[1780012800000.0,57500.0],[1780272000000.0,58115.0],[1780358400000.0,58505.0],[1780531200000.0,58985.0],[1780617600000.0,58160.0],[1780876800000.0,54525.0],[1780963200000.0,56135.0],[1781049600000.0,53440.0],[1781136000000.0,53695.0],[1781222400000.0,55800.0],[1781481600000.0,58865.0],[1781568000000.0,60000.0],[1781654400000.0,59240.0],[1781740800000.0,60535.0],[1781827200000.0,61960.0],[1782086400000.0,62605.0],[1782172800000.0,59815.0],[1782259200000.0,59845.0],[1782345600000.0,61150.0],[1782432000000.0,57670.0],[1782691200000.0,58100.0],[1782777600000.0,60330.0],[1782864000000.0,61530.0],[1782950400000.0,57835.0],[1783036800000.0,55200.0],[1783296000000.0,55400.0],[1783382400000.0,54255.0],[1783468800000.0,51135.0],[1783555200000.0,53575.0],[1783641600000.0,54200.0],[1783900800000.0,52680.0],[1783987200000.0,52185.0],[1784073600000.0,53680.0],[1784160000000.0,50455.0],[1784505600000.0,47240.0],[1784592000000.0,48395.0],[1784678400000.0,49120.0],[1784764800000.0,49685.0],[1784851200000.0,48635.0],[1785110400000.0,48145.0],[1785196800000.0,44450.0],[1785283200000.0,42600.0],[1785369600000.0,40960.0],[1785456000000.0,45735.0],[1785715200000.0,44950.0],[1785801600000.0,46580.0],[1785888000000.0,48415.0],[1785974400000.0,46270.0],[1786060800000.0,46640.0],[1786320000000.0,47375.0],[1786406400000.0,46335.0],[1786492800000.0,46860.0],[1786579200000.0,48470.0],[1786665600000.0,48620.0],[1787011200000.0,49060.0],[1787097600000.0,45975.0],[1787184000000.0,46250.0],[1787270400000.0,45820.0],[1787529600000.0,44370.0],[1787616000000.0,44995.0],[1787702400000.0,44930.0],[1787788800000.0,45955.0],[1787875200000.0,44975.0],[1788134400000.0,44450.0],[1788220800000.0,44775.0],[1788307200000.0,43265.0],[1788393600000.0,43605.0],[1788480000000.0,44770.0]],"CMP_TO_MKT":[[1757030400000.0,0.0],[1757289600000.0,-0.15239158386588514],[1757376000000.0,-0.59179912643427812],[1757462400000.0,-0.61601609257886381],[1757548800000.0,0.11273904775062071],[1757635200000.0,-0.64789966225462514],[1757894400000.0,-0.32632848727730535],[1757980800000.0,-0.57121346009622043],[1758067200000.0,0.69028479057604564],[1758153600000.0,0.57366171740926841],[1758240000000.0,2.401212561366517],[1758499200000.0,3.0596606251354741],[1758585600000.0,3.2890449185909887],[1758672000000.0,2.5791547883121213],[1758758400000.0,1.551015278906176],[1758844800000.0,3.4925701108023732],[1759104000000.0,2.2184669384388123],[1759190400000.0,3.8414715547508971],[1759276800000.0,2.6117624668667849],[1759363200000.0,2.1925009075582258],[1760054400000.0,4.0070786818914517],[1760313600000.0,3.0806787043496264],[1760400000000.0,4.2023097656926689],[1760486400000.0,1.3445732200646487],[1760572800000.0,-0.76908467761612753],[1760659200000.0,-3.7205873084589669],[1760918400000.0,-3.415266868573219],[1761004800000.0,-4.12026598702544],[1761091200000.0,-7.0232532275392279],[1761177600000.0,-7.7089380984744711],[1761264000000.0,-7.4953586478762935],[1761523200000.0,-7.0503502771649629],[1761609600000.0,-6.0604791107466642],[1761696000000.0,-7.2570935470654518],[1761782400000.0,-6.7715417660585313],[1761868800000.0,-8.6608363849902563],[1762128000000.0,-10.968290821597559],[1762214400000.0,-10.244008542529636],[1762300800000.0,-9.55012262803332],[1762387200000.0,-7.5722968503099342],[1762473600000.0,-8.378446651825799],[1762732800000.0,-9.2370726670213283],[1762819200000.0,-8.6851771827451962],[1762905600000.0,-10.308140924799291],[1762992000000.0,-11.634097182158287],[1763078400000.0,-14.047720931023843],[1763337600000.0,-14.378184727389098],[1763424000000.0,-13.857310701960113],[1763510400000.0,-13.918005669586586],[1763596800000.0,-11.731665094749666],[1763683200000.0,-14.471849644004365],[1763942400000.0,-12.859038687989187],[1764028800000.0,-9.8279473680881857],[1764115200000.0,-12.060493128384863],[1764201600000.0,-11.687982401269892],[1764288000000.0,-9.5493825160858581],[1764547200000.0,-9.9708042799527714],[1764633600000.0,-11.877872387119004],[1764720000000.0,-11.858259310140717],[1764806400000.0,-11.425430452690188],[1764892800000.0,-11.831658036979665],[1765152000000.0,-12.631104596730813],[1765238400000.0,-12.781566331906525],[1765324800000.0,-12.175173028693553],[1765411200000.0,-12.327764564736921],[1765497600000.0,-12.478513196716701],[1765756800000.0,-14.23396243967413],[1765843200000.0,-14.736920824597455],[1765929600000.0,-14.218579768221273],[1766016000000.0,-15.217952614585052],[1766102400000.0,-13.839077144774482],[1766361600000.0,-12.472802014556173],[1766448000000.0,-12.519331714611548],[1766534400000.0,-13.912023909391158],[1766707200000.0,-14.607003664970829],[1766966400000.0,-18.055767859885542],[1767052800000.0,-18.445114663113493],[1767312000000.0,-19.98295630929945],[1767571200000.0,-20.672905408086883],[1767657600000.0,-21.296926180937692],[1767744000000.0,-20.279367279233252],[1767830400000.0,-20.83303611329783],[1767916800000.0,-21.298340628391255],[1768176000000.0,-20.581651981490857],[1768262400000.0,-19.702669985869925],[1768348800000.0,-19.272032838632359],[1768435200000.0,-20.944467718147774],[1768521600000.0,-20.984333515022758],[1768780800000.0,-23.071158669964653],[1768867200000.0,-23.381250261226107],[1768953600000.0,-23.420271654161017],[1769040000000.0,-23.062639176395983],[1769126400000.0,-24.075175230289524],[1769385600000.0,-25.85422776182217],[1769472000000.0,-27.242509180424367],[1769558400000.0,-27.274171664185765],[1769644800000.0,-26.386078865891317],[1769731200000.0,-26.9309015687868],[1769990400000.0,-25.794410186432447],[1770076800000.0,-26.87854808499899],[1770163200000.0,-27.755743221427476],[1770249600000.0,-28.644158480832505],[1770336000000.0,-29.212733992614236],[1770595200000.0,-29.372173091155329],[1770681600000.0,-28.376445571310725],[1770768000000.0,-30.756003967821144],[1770854400000.0,-32.221763565311335],[1770940800000.0,-33.231306953731341],[1771459200000.0,-34.249324000940504],[1771545600000.0,-35.484066520027326],[1771804800000.0,-36.182698857603121],[1771891200000.0,-36.213420993629143],[1771977600000.0,-37.41924063348511],[1772064000000.0,-38.813929775912115],[1772150400000.0,-39.549494424707618],[1772496000000.0,-33.864997833050069],[1772582400000.0,-27.979329041828784],[1772668800000.0,-32.05939602448953],[1772755200000.0,-32.855302057781557],[1773014400000.0,-33.581695132812094],[1773100800000.0,-32.948650886032247],[1773187200000.0,-32.446659956213175],[1773273600000.0,-31.81708792199187],[1773360000000.0,-31.082747818899904],[1773619200000.0,-30.935132570986468],[1773705600000.0,-31.589735213624294],[1773792000000.0,-32.7683124492535],[1773878400000.0,-31.212578640448065],[1773964800000.0,-29.42398617348211],[1774224000000.0,-28.302619580418366],[1774310400000.0,-29.290975410908949],[1774396800000.0,-29.023586833898829],[1774483200000.0,-27.36172743543538],[1774569600000.0,-30.0718899110745],[1774828800000.0,-29.705034090454053],[1774915200000.0,-29.774773800093868],[1775001600000.0,-30.938572628848949],[1775088000000.0,-28.393295838509005],[1775174400000.0,-27.642467631721313],[1775433600000.0,-28.002477478302],[1775520000000.0,-29.839886841316353],[1775606400000.0,-31.1107755082225],[1775692800000.0,-29.480847538585962],[1775779200000.0,-28.58121807117643],[1776038400000.0,-27.842061219412539],[1776124800000.0,-26.923734957297608],[1776211200000.0,-28.332631125436947],[1776297600000.0,-28.81552664493422],[1776384000000.0,-28.54509295470362],[1776643200000.0,-28.752048821892828],[1776729600000.0,-29.443464031878563],[1776816000000.0,-29.798708609137325],[1776902400000.0,-29.920930762657605],[1776988800000.0,-28.799676411148646],[1777248000000.0,-28.953275406711189],[1777334400000.0,-30.262116502772894],[1777420800000.0,-31.075397766858536],[1777507200000.0,-29.061517161973626],[1777852800000.0,-28.680746831215831],[1778025600000.0,-30.576751767374553],[1778112000000.0,-31.205058362749437],[1778198400000.0,-32.150703386681954],[1778457600000.0,-32.672326349479022],[1778544000000.0,-28.750264241125222],[1778630400000.0,-30.170472560959784],[1778716800000.0,-30.615807240791792],[1778803200000.0,-28.197522111838513],[1779062400000.0,-30.130337606604041],[1779148800000.0,-29.395053637118295],[1779235200000.0,-27.719562916496486],[1779321600000.0,-31.326977753269059],[1779408000000.0,-29.061712334961122],[1779753600000.0,-30.197465862802208],[1779840000000.0,-31.575425423806113],[1779926400000.0,-32.362483739709546],[1780012800000.0,-31.708330987133181],[1780272000000.0,-33.430095971424059],[1780358400000.0,-33.083179197077527],[1780531200000.0,-31.268469507611417],[1780617600000.0,-28.253395091912036],[1780876800000.0,-26.660723772787332],[1780963200000.0,-30.207001365183061],[1781049600000.0,-30.411190993712488],[1781136000000.0,-30.37749698757294],[1781222400000.0,-30.851444122886029],[1781481600000.0,-30.65841060116994],[1781568000000.0,-30.784287085852135],[1781654400000.0,-32.722156927994675],[1781740800000.0,-32.765398985482328],[1781827200000.0,-31.095873836284092],[1782086400000.0,-30.853165372909398],[1782172800000.0,-26.600780613026764],[1782259200000.0,-28.8801748908886],[1782345600000.0,-31.066722403203585],[1782432000000.0,-30.977610333791684],[1782691200000.0,-30.325789793907187],[1782777600000.0,-28.349982724156241],[1782864000000.0,-25.401696984169618],[1782950400000.0,-23.873429412418179],[1783036800000.0,-31.296605596293613],[1783296000000.0,-30.730723260339609],[1783382400000.0,-28.662354044404147],[1783468800000.0,-28.965210195158864],[1783555200000.0,-26.036169318779312],[1783641600000.0,-27.015271780405158],[1783900800000.0,-22.090037094846394],[1783987200000.0,-23.383762377751051],[1784073600000.0,-25.814907754608274],[1784160000000.0,-25.530207183204332],[1784505600000.0,-27.019079993727722],[1784592000000.0,-27.801669687035822],[1784678400000.0,-27.256384962679714],[1784764800000.0,-29.521648693699142],[1784851200000.0,-26.821909718885106],[1785110400000.0,-28.257561035555291],[1785196800000.0,-25.713511381029154],[1785283200000.0,-24.27432589387206],[1785369600000.0,-26.282573950018573],[1785456000000.0,-30.192390393175515],[1785715200000.0,-27.684594837004163],[1785801600000.0,-26.258394331487224],[1785888000000.0,-26.133243868008826],[1785974400000.0,-26.021233705056957],[1786060800000.0,-24.981553690884017],[1786320000000.0,-24.293942887396412],[1786406400000.0,-26.491124116583407],[1786492800000.0,-28.296843720775865],[1786579200000.0,-28.383766943120079],[1786665600000.0,-29.856692671969974],[1787011200000.0,-28.108082136111722],[1787097600000.0,-28.478363241485404],[1787184000000.0,-32.055213475209634],[1787270400000.0,-33.274753799495294],[1787529600000.0,-33.302394980091307],[1787616000000.0,-32.822110089158748],[1787702400000.0,-33.564227196710625],[1787788800000.0,-33.0725451816828],[1787875200000.0,-33.308335669901332],[1788134400000.0,-34.387795045388444],[1788220800000.0,-34.060634697290027],[1788307200000.0,-33.633128079775311],[1788393600000.0,-33.281966743558591],[1788480000000.0,-32.602987117760861]]};
+									if(stock_price_relative_chart_data.name){
+										var label = stock_price_relative_chart_data.name[0];
+
+										new Highcharts.Chart({
+											chart: {
+												renderTo: 'stock_price_relative_chart',
+												type: 'line'
+											}
+											, xAxis: {
+												labels: {
+													formatter: function () { return Highcharts.dateFormat('%y/%m/%d', this.value); }
+												}
+											}
+											,yAxis: [{
+												title: {
+													text: '[원]' ,align: 'high' ,y: -7 ,rotation:0, x:10 ,offset:20
+												},
+												opposite: true
+											},{
+												title: {
+													text: '[%]' ,align: 'high' ,y: -7 ,rotation:0, x:5 ,offset:10
+												},
+												labels: {
+													formatter: function () { return Highcharts.numberFormat(this.value, 2, '.'); }
+												}
+											}]
+											, tooltip: {
+												formatter: function () {
+													var tooltip = '<table class="chart-tooltip"><tr><td align="center" colspan="3">' + Highcharts.dateFormat('%Y/%m/%d', this.x) + '</td></tr>';
+													$.each(this.points, function (i, value) {
+														if(value.series.name.indexOf('좌') != -1)
+														{
+															tooltip += '<tr><td style="color:' + value.series.color + '">' + value.series.name + '</td><td> : </td><td class="right">' + Highcharts.numberFormat(value.y, 2, '.') +'%</td></tr>';
+														}
+														else
+														{
+															tooltip += '<tr><td style="color:' + value.series.color + '">' + value.series.name + '</td><td> : </td><td class="right">' + Highcharts.numberFormat(value.y, 0, '.') + ' 원</td></tr>';
+														}
+													});
+													tooltip += '</table>';
+													return tooltip;
+												}
+												, useHTML: true
+												, shared: true
+												, crosshairs: [true, true]
+											},
+											legend: { itemWidth: 150 },
+											series: [{
+												name: label.CMP_NM,
+												data: stock_price_relative_chart_data.CMP_CLS,
+												marker: {
+													enabled: false
+												}
+												,legendIndex:1
+											}, {
+												name: 'to ' + label.MKT_NM +'(좌)',
+												data: stock_price_relative_chart_data.CMP_TO_MKT,
+												yAxis: 1 ,
+												marker: {
+													enabled: false
+												}
+												,legendIndex:0
+											}]
+										});
+									}
+								})();
+							</script>
+							<div class="clear">
+							</div>
+							<!-- 주가/상대 수익률 추이 차트 -->
+							
+							<div class="tit-empty"></div>
+							<!-- 상품개요 -->
+							<div class="all-width">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell">
+											<h5><span>상품개요</span></h5>
+										</dd>
+										<dd class="header-table-cell unit"></dd>
+									</dl>
+								</div>
+								<div class="body">
+									<table class="gHead" summary="검색한 종목의 상품개요 표">
+										<caption class="blind">
+											상품개요표</caption>
+										<colgroup>
+											<col style="width: 110px">
+											<col style="width: *">
+										</colgroup>
+										<tbody id="product_summary_grid_body">
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<script id="product_summary_grid_template" type="text/x-jquery-tmpl">
+								
+								<tr>
+									<th class="txt" title="기초지수명" scope="row">기초지수명 </th>
+									<td class="txt">
+										<div class="scroll" title="${BASE_IDX_NM_KOR}">${BASE_IDX_NM_KOR}</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" title="최초설정일/상장일" scope="row">최초설정일/상장일 </th>
+									<td class="txt">
+										<div class="scroll" title="${FIRST_SETTLE_DT + ' / ' + LIST_DT}">${FIRST_SETTLE_DT + ' / ' + LIST_DT}</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" title="펀드형태" scope="row">펀드형태 </th>
+									<td class="txt">
+										<div class="scroll" title="${FUND_TYP}">${FUND_TYP}</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" title="총보수(%)" scope="row">총보수</th>
+									<td class="txt">
+										<div class="scroll" title="${FnGuideUtil.Format.currencyTrim(TOT_PAY, '')}">${FnGuideUtil.Format.currencyTrim(TOT_PAY, '')}%</div>
+									</td>
+								</tr>
+								
+								<tr>
+									<th class="txt" title="분배금기준일" scope="row">분배금기준일 </th>
+									<td class="txt">
+										<div tabindex="0" class="scroll" title="${DIV_BASE_DT}">${DIV_BASE_DT}</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" title="유동성공급자(LP)" scope="row">유동성공급자(LP) </th>
+									<td class="txt">
+										<div class="scroll" title="${LP_NM_KOR}">${LP_NM_KOR}</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="txt" title="자산운용사" scope="row">자산운용사 </th>
+									<td class="txt">
+										<div class="scroll" title="${ISSUE_NM_KOR}">${ISSUE_NM_KOR}</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="txt line-bottom" title="홈페이지" scope="row">홈페이지 </th>
+									<td class="txt line-bottom">
+										<a href="${URL}" target="_blank" class="cut" id="hrefHome">${URL}</a>
+									</td>
+								</tr>
+								
+							</script>
+							<script type="text/javascript">
+								(function(){
+									var product_summary_data = {"BASE_IDX_NM_KOR":"NASDAQ 100","FIRST_SETTLE_DT":"2022-05-09","LIST_DT":"2022-05-11","FUND_TYP":"수익증권형","TOT_PAY":"0.800","FIN_PRD":"최초설정일부터 해당년도 12월 31일까지로 하고, 이후에는 매년 1월 1일부터 12월 31일까지로 한다.","DIV_BASE_DT":"1, 4, 7, 10월의 마지막 영업일 및 회계기간 종료일","LP_NM_KOR":"교보증권, 신한증권, 한국증권, 대신증권, 미래에셋증권, 유진증권, 메리츠, NH투자증권, KB증권, SK증권, 삼성증권, DB증권, iM증권, 키움증권, LS증권, BNK증권","ISSUE_NM_KOR":"(주)타임폴리오자산운용","URL":"http://www.timefolio.co.kr"};
+									if(product_summary_data){
+										$("#product_summary_grid_template").tmpl(product_summary_data).appendTo($("#product_summary_grid_body"));
+									}else{
+										$("#product_summary_grid_body").html("<tr><td colspan='2' style='border:none; height:234px; text-align:center'>데이터가 존재하지 않습니다.</td></tr>");
+									}
+								})();
+							</script>
+							<!-- 상품개요 -->
+							
+							<div class="tit-empty"></div>
+							<!-- 상품설명 -->
+							<div class="all-width">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell">
+											<h5><span>상품설명</span></h5>
+										</dd>
+										<dd class="header-table-cell unit"></dd>
+									</dl>
+								</div>
+								<div class="cmp_comment" style=" margin-bottom:15px;">
+									<div style="padding: 10px 5px; line-height:20px;">
+										- 이 투자신탁은 액티브상장지수펀드로 NASDAQ Inc.<br/>에서 산출, 발표하는 NASDAQ100 Index(PR: Price Return)<br/>(원화환산) 지수를 비교지수로 하여 비교 지수 대비 초과 성과<br/>를 창출하는 것을 목표로 하는 액티브 ETF 입니다.<br/>- 이를 위해, 비교지수의 성과를 추종하는 포트폴리오와 타임<br/>폴리오자산운용의 주식운용역량이 발휘되는 포트폴리오를 배합<br/>하되, 상관계수 조건의 충족을 위한 사전적 사후적 관리를 <br/>진행할 것입니다.<br/>- 비교지수의 성과를 추종하는 포트폴리오는 NASDAQ100 Index<br/>를 기초지수로 하는 ETF, NASDAQ100 Index 추종 주식 포트<br/>폴리오 등의 배합으로 구성할 계획 입니다.<br/>타임폴리오자산운용의 주식운용역량이 발휘되는 포트폴리오는<br/>당사 주식운용본부 멀티매니저 포트폴리오가 갖고 있는 섹터,<br/>테마 및 종목에 대한 특성을 체계적으로 반영하여 구성할<br/>계획입니다.<br/>상기 두 종류의 포트폴리오는 50:50의 배합비율을 기준으로<br/>상관계수의 추이를 감안하여 조정할 계획입니다.
+									</div>
+								</div>
+							</div>
+							<div class="clear"></div>
+							
+							<!--  순자산가치(NAV) 추이 -->
+							<!-- 상품설명 -->
+							
+							<div class="tit-empty"></div>
+							<div class="all-width">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell"><h5 id="nav_more" class="sub_title sub_title4"><span>순자산가치(NAV)</span>추이</h5></dd>
+										<dd id="divDateCont" class="header-table-cell unit">
+										<ul class="lst">
+											<li class="lst-button" id="NAV_TYPE">
+												<div class="radio">
+													<dl class="search-opt-lst">
+														<dt class="col01">
+															<span class="selected"><a id="aG31" class="radio1" title="순자산가치(NAV) 일간추이 검색" href="javascript:;">일간</a></span>
+														</dt>
+														<dt class="col02">
+															<span><a id="aG32" class="radio2" title="순자산가치(NAV) 주간추이 검색" href="javascript:;">주간</a></span>
+														</dt>
+														<dt class="col03">
+															<span><a id="aG33" class="radio3" title="순자산가치(NAV) 월간추이 검색" href="javascript:;">월간</a></span>
+														</dt>
+													</dl>
+													<input type="hidden" id="hG3" value="D" />
+												</div>
+											</li>
+											<li class="list-date" >
+												<label for="txtStart" class="blind">순자산가치(NAV)추이 검색시작일 - 년월일 직접입력가능(예:2013-05-16)</label><input class="rptInput01 calendarInput" id="txtStart" type="text" name="txtStart" value="2026-06-07">
+												~
+									<label for="txtEnd" class="blind">순자산가치(NAV)추이 검색종료일 - 년월일 직접입력가능(예:2013-08-16)</label><input class="rptInput01 calendarInput" id="txtEnd" type="text" name="txtEnd" value="2026-09-07">
+											</li>
+										</ul>
+										</dd>
+									</dl>
+								</div>
+							</div>
+							<div class="fl_le half">
+								<div class="height255 border_box" style="display: block; margin-bottom:0px;">
+									<div class="fixed-table-container">
+										<div class="header-background">
+										</div>
+										<div class="fixed-table-container-inner" style="height: 100%; overflow-x: hidden; overflow-y: auto">
+											<table tabindex="0" id="NAV_grid" class="table" cellspacing="0" summary="검색한 종목의 순자산가치(NAV) 추이">
+												<caption class="blind">순자산가치(NAV) 추이</caption>
+												<colgroup>
+													<col style="width: 22%" />
+													<col style="width: 33%" />
+													<col style="width: 22%" />
+													<col style="width: 23%" />
+												</colgroup>
+												<thead>
+													<tr>
+														<th class="first" scope="col">
+															<div class="th-inner" style="width: 22%">
+																날짜
+															</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 32%">순자산가치(NAV)</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 22%">ETF종가</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 23%">괴리율(%)</div>
+														</th>
+													</tr>
+												</thead>
+												<tbody id="NAV_grid_body">
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+								<script id="NAV_grid_template" type="text/x-jquery-tmpl">
+									<tr>
+										<th class="title" scope="row">${TRD_DT ? TRD_DT.replace(/-/g,'/'):'-'}</th>
+										<td class="num">${NAV ? Highcharts.numberFormat(NAV,2,'.'):'-'}</td>
+										<td class="num">${CLOSE_PRC ? Highcharts.numberFormat(CLOSE_PRC,0,'.'):'-'}</td>
+										<td class="num">${DIFF_RATE ? Highcharts.numberFormat(DIFF_RATE,2,'.'):'-'}</td>
+									</tr>
+								</script>
+							</div>
+							<div class="fl_ri half">
+								<div class='gHead mb-0'>
+								<div id="NAV_chart" class="chart">
+								</div>
+								</div>
+							</div>
+							<p class="disc table" style="text-align:left;">* 기초자산 종가 확정시간의 차이로 실제 시장 괴리율과 차이가 발생할 수 있음</p>
+							<div class="clear">
+							</div>
+							<!--  순자산가치(NAV) 추이 -->
+							
+							<div class="tit-empty"></div>
+							<!-- CU당 구성종목 -->
+							<div class="fl_le half">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell"><h5 id="cu_more"><span>CU당 구성종목</span></h5></dd>
+										<dd class="header-table-cell unit">
+											<p>[기준:26.09.04]</p>
+										</dd>
+									</dl>
+								</div>
+								<div class="height255 border_box" style="display: block; margin-bottom:0px;">
+									<div class="fixed-table-container">
+										<div class="header-background">
+										</div>
+										<div class="fixed-table-container-inner" style="height: 100%; overflow-x: hidden; overflow-y: auto">
+											<table tabindex="0" id="CU_grid" class="table" zzz cellspacing="0" summary="26.09.04 기준 CU당 구성종목" style="table-layout: fixed">
+												<caption class="blind">
+													CU당 구성종목</caption>
+												<colgroup>
+													<col width="*">
+													<col width="30%">
+													<col width="30%">
+												</colgroup>
+												<thead>
+													<tr>
+														<th scope="col">
+															<div class="th-inner" style="width: 40%">
+																구성종목명
+															</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 30%">
+																주식수(계약수)
+															</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 30%">
+																구성비중(%)
+															</div>
+														</th>
+													</tr>
+												</thead>
+												<tbody id="CU_grid_body">
+												</tbody>
+											</table>
+										</div>
+									</div>
+									<script id="CU_grid_template" type="text/x-jquery-tmpl">
+										<tr>
+											<td class="txt" title="${STK_NM_KOR}">
+												<div class="cut">${STK_NM_KOR}</div>
+											</td>
+											<td class="num">${AGMT_STK_CNT ? Highcharts.numberFormat(AGMT_STK_CNT,0):'-'}</td>
+											<td class="num">${ETF_WEIGHT ? Highcharts.numberFormat(ETF_WEIGHT,2):'-'}</td>
+										</tr>
+									</script>
+								</div>
+								<p class="disc table">* CU : 설정단위(Creation unit)</p>
+                                <p class="disc table">* 구성비중이 없는 경우 주식수로 정렬됨</p>
+							</div>
+							<div class="fl_ri half">
+								<div class="header-table empty"></div>
+								<div class="body">
+									<div class='gHead'>
+										<h6 class="spanCT">CU당 구성종목 TOP 10</h6>
+										<div id="CU_chart" class="chart"></div>
+									</div>
+								</div>
+								<script type="text/javascript">
+									(function(){
+										var CU_data = {"grid_data":[{"TRD_DT":"2026-09-04","AGMT_STK_CNT":229.00,"STK_NM_KOR":"NVIDIA CORP","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":210.00,"STK_NM_KOR":"INTEL CORP","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":193.00,"STK_NM_KOR":"ROBINHOOD MARKETS INC - A","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":144.00,"STK_NM_KOR":"SK HYNIX INC-ADR","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":141.00,"STK_NM_KOR":"APPLIED OPTOELECTRONICS INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":118.00,"STK_NM_KOR":"COREWEAVE INC-CL A","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":109.00,"STK_NM_KOR":"STRATEGY INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":108.00,"STK_NM_KOR":"COINBASE GLOBAL INC -CLASS A","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":105.00,"STK_NM_KOR":"AMAZON.COM INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":96.00,"STK_NM_KOR":"BLOOM ENERGY CORP- A","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":78.00,"STK_NM_KOR":"NEBIUS GROUP NV","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":75.00,"STK_NM_KOR":"PALANTIR TECHNOLOGIES INC-A","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":74.00,"STK_NM_KOR":"MARVELL TECHNOLOGY INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":71.00,"STK_NM_KOR":"SPACE EXPLORATION TECHN-CL A","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":64.00,"STK_NM_KOR":"DELL TECHNOLOGIES -C","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":64.00,"STK_NM_KOR":"TESLA INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":59.00,"STK_NM_KOR":"SNOWFLAKE INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":51.00,"STK_NM_KOR":"ALPHABET INC-CL A","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":45.00,"STK_NM_KOR":"CORNING INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":45.00,"STK_NM_KOR":"CREDO TECHNOLOGY GROUP HOLDI","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":45.00,"STK_NM_KOR":"MICROSOFT CORP","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":45.00,"STK_NM_KOR":"TOWER SEMICONDUCTOR LTD","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":44.00,"STK_NM_KOR":"SERVICENOW INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":40.00,"STK_NM_KOR":"VERTIV HOLDINGS CO-A","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":32.00,"STK_NM_KOR":"QUALCOMM INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":30.00,"STK_NM_KOR":"APPLE INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":29.00,"STK_NM_KOR":"ADVANCED MICRO DEVICES","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":28.00,"STK_NM_KOR":"BROADCOM INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":26.00,"STK_NM_KOR":"TERADYNE INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":25.00,"STK_NM_KOR":"ARM HOLDINGS PLC-ADR","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":23.00,"STK_NM_KOR":"MICRON TECHNOLOGY INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":22.00,"STK_NM_KOR":"LUMENTUM HOLDINGS INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":20.00,"STK_NM_KOR":"SANDISK CORP","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":19.00,"STK_NM_KOR":"ASTERA LABS INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":19.00,"STK_NM_KOR":"WESTERN DIGITAL CORP","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":17.00,"STK_NM_KOR":"PALO ALTO NETWORKS INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":15.00,"STK_NM_KOR":"META PLATFORMS INC-CLASS A","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":13.00,"STK_NM_KOR":"TAIWAN SEMICONDUCTOR-SP ADR","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":11.00,"STK_NM_KOR":"SEAGATE TECHNOLOGY HOLDINGS","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":6.00,"STK_NM_KOR":"GE VERNOVA INC","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":5.00,"STK_NM_KOR":"ELI LILLY & CO","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":0.04,"STK_NM_KOR":"NASDAQ 100 E-MINI INDEX SEPT 2026","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":0.00,"STK_NM_KOR":"설정현금액","ETF_WEIGHT":null},{"TRD_DT":"2026-09-04","AGMT_STK_CNT":0.00,"STK_NM_KOR":"원화현금","ETF_WEIGHT":null}],"chart_data":[["NVIDIA CORP",null],["INTEL CORP",null],["ROBINHOOD MARKETS INC - A",null],["SK HYNIX INC-ADR",null],["APPLIED OPTOELECTRONICS INC",null],["COREWEAVE INC-CL A",null],["STRATEGY INC",null],["COINBASE GLOBAL INC -CLASS A",null],["AMAZON.COM INC",null],["BLOOM ENERGY CORP- A",null]]};
+										var chartDraw = false;
+
+										//console.log(CU_data.grid_data);
+
+										if(CU_data.grid_data){
+											chartDraw = true;
+											$("#CU_grid_template").tmpl(CU_data.grid_data).appendTo($("#CU_grid_body"));
+
+											$.each(CU_data.grid_data,function(i,value){
+												// 차트 Top 10 안에 비중 및 주식수 값 널값인 경우
+												if(!value.ETF_WEIGHT && i < 10){
+													chartDraw = false;
+												}	
+											});
+										}else{
+											$("#CU_grid_body").html("<tr><td colspan='3' style='border:none; height:220px; text-align:center'>데이터가 존재하지 않습니다.</td></tr>");
+										}
+            
+										if(chartDraw){
+											new Highcharts.Chart({
+												chart: {
+													renderTo: 'CU_chart'
+													, marginTop: 20
+												},
+												plotOptions: {
+													pie: {
+														dataLabels: {
+															distance: 10,
+															formatter: function(){
+																if(this.key.length > 7)
+																{
+																	return this.key.substr(0, 5) + '...(' + this.y + '%)' 									
+																}
+																else
+																{
+																	return this.key + '('+ this.y +'%)'
+																}
+															}
+														}
+														, size: 120
+													}
+												},
+												tooltip: {
+													formatter: function () {
+														return this.point.name + ' : ' + this.y + ' %';
+													}
+												},
+												series: [{
+													type: 'pie',
+													data: CU_data.chart_data
+												}]
+											});
+										}else{
+											//var table = $("<div style='line-height:250px; text-align:center'>데이터가 존재하지 않습니다.</div>");
+											var table = $("<div style='height:100%; text-align:center; padding-top:100px'>일부 구성종목에 대한 구성비중이 공시되지 않아<br/>그래프를 제공하지 않습니다.</div>");
+											$("#CU_chart").empty().append(table);
+										}
+									})();
+								</script>
+							</div>
+							<div class="clear">
+							</div>
+							<!-- CU당 구성종목 -->
+							
+							<div class="tit-empty"></div>
+							<!-- 거래량, 거래대금(1개월,평균) -->
+							<div class="fl_le half">
+								<div class="header-table">
+									<dl class="header-table-row">
+										<dd class="header-table-cell"><h5><span>거래량,</span> 거래대금(1개월,평균)</h5></dd>
+										<dd class="header-table-cell unit"></dd>
+									</dl>
+								</div>
+								<div class="height255 border_box" style="display: block;">
+									<div class="fixed-table-container">
+										<div class="header-background">
+										</div>
+										<div class="fixed-table-container-inner" style="height: 100%; overflow-x: hidden; overflow-y: auto">
+											<table tabindex="0" id="volume_grid" class="table" cellspacing="0" summary="검색 종목 1개월 평균 거래량, 거래대금">
+												<caption class="blind">
+													거래량, 거래대금(1개월, 평균)</caption>
+												<colgroup>
+													<col width="*">
+													<col width="40%">
+													<col width="40%">
+												</colgroup>
+												<thead>
+													<tr>
+														<th class="first" scope="col">
+															<div class="th-inner" style="width: 20%">
+																날짜
+															</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 40%">
+																거래량(천주)
+															</div>
+														</th>
+														<th scope="col">
+															<div class="th-inner" style="width: 40%">
+																거래대금(백만원)
+															</div>
+														</th>
+													</tr>
+												</thead>
+												<tbody id="volume_grid_body">
+												</tbody>
+											</table>
+										</div>
+										<script id="volume_grid_template" type="text/x-jquery-tmpl">
+											<tr>
+												<th class="title" scope="row">${TRD_DT ? TRD_DT.substring(0,7).replace(/-/g,'/'):'-'}</th>
+												<td class="num">${AVG_TRD_QTY ? Highcharts.numberFormat(AVG_TRD_QTY,0):'-'}</td>
+												<td class="num">${AVG_TRD_AMT ? Highcharts.numberFormat(AVG_TRD_AMT,0):'-'}</td>
+											</tr>
+										</script>
+									</div>
+								</div>
+							</div>
+							<div class="fl_ri half">
+								<div class="header-table empty"></div>
+								<div class='gHead'>
+								<div id="volume_chart" class="chart" style="height: 255px; width: 100%">
+								</div>
+								</div>
+							</div>
+							<script type="text/javascript">
+								(function(){
+									var volume_chart_data = {"grid_data":[{"TRD_DT":"2025-09-30","AVG_TRD_QTY":535.0,"AVG_TRD_AMT":18404.0},{"TRD_DT":"2025-10-31","AVG_TRD_QTY":758.0,"AVG_TRD_AMT":27802.0},{"TRD_DT":"2025-11-28","AVG_TRD_QTY":566.0,"AVG_TRD_AMT":20100.0},{"TRD_DT":"2025-12-30","AVG_TRD_QTY":353.0,"AVG_TRD_AMT":12446.0},{"TRD_DT":"2026-01-30","AVG_TRD_QTY":592.0,"AVG_TRD_AMT":21894.0},{"TRD_DT":"2026-02-27","AVG_TRD_QTY":585.0,"AVG_TRD_AMT":21799.0},{"TRD_DT":"2026-03-31","AVG_TRD_QTY":774.0,"AVG_TRD_AMT":29401.0},{"TRD_DT":"2026-04-30","AVG_TRD_QTY":818.0,"AVG_TRD_AMT":35447.0},{"TRD_DT":"2026-05-29","AVG_TRD_QTY":1529.0,"AVG_TRD_AMT":80854.0},{"TRD_DT":"2026-06-30","AVG_TRD_QTY":1832.0,"AVG_TRD_AMT":107555.0},{"TRD_DT":"2026-07-31","AVG_TRD_QTY":1726.0,"AVG_TRD_AMT":90376.0},{"TRD_DT":"2026-08-31","AVG_TRD_QTY":726.0,"AVG_TRD_AMT":33611.0},{"TRD_DT":"2026-09-04","AVG_TRD_QTY":648.0,"AVG_TRD_AMT":28544.0}],"AVG_TRD_QTY":[[1759190400000.0,535.0],[1761868800000.0,758.0],[1764288000000.0,566.0],[1767052800000.0,353.0],[1769731200000.0,592.0],[1772150400000.0,585.0],[1774915200000.0,774.0],[1777507200000.0,818.0],[1780012800000.0,1529.0],[1782777600000.0,1832.0],[1785456000000.0,1726.0],[1788134400000.0,726.0],[1788480000000.0,648.0]],"AVG_TRD_AMT":[[1759190400000.0,18404.0],[1761868800000.0,27802.0],[1764288000000.0,20100.0],[1767052800000.0,12446.0],[1769731200000.0,21894.0],[1772150400000.0,21799.0],[1774915200000.0,29401.0],[1777507200000.0,35447.0],[1780012800000.0,80854.0],[1782777600000.0,107555.0],[1785456000000.0,90376.0],[1788134400000.0,33611.0],[1788480000000.0,28544.0]]};
+									if(volume_chart_data.grid_data){
+										$("#volume_grid_template").tmpl(volume_chart_data.grid_data.reverse()).appendTo($("#volume_grid_body"));
+										new Highcharts.Chart({
+											chart: {
+												renderTo: 'volume_chart'
+											},
+											xAxis:{
+												labels:{
+													formatter: function () { return Highcharts.dateFormat('%Y/%m', this.value); }
+												}
+											},
+											yAxis: [{
+												title: {
+													text: '(천주)' ,align: 'high' ,y: -7 ,rotation:0 ,offset:15, x:5
+												}
+											},{
+												title: {
+													text: '(백만원)' ,align: 'high' ,y: -7 ,rotation:0 ,offset:15, x:25
+											}
+								,opposite: true
+										}]
+							, tooltip: {
+								formatter: function () {
+									var tooltip = '<table class="chart-tooltip"><tr><td align="center" colspan="3">' + Highcharts.dateFormat('%Y/%m/%d', this.x) + '</td></tr>';
+									$.each(this.points, function (i, value) {
+										if(value.series.name.indexOf('거래량') != -1)
+										{
+											tooltip += '<tr><td style="color:' + value.series.color + '">' + value.series.name + '</td><td> : </td><td class="right">' + Highcharts.numberFormat(value.y, 0, '.') +' 천주</td></tr>';
+										}
+										else
+										{
+											tooltip += '<tr><td style="color:' + value.series.color + '">' + value.series.name + '</td><td> : </td><td class="right">' + Highcharts.numberFormat(value.y, 0, '.') + ' 백만원</td></tr>';
+										}
+									});
+									tooltip += '</table>';
+									return tooltip;
+								}
+								, useHTML: true
+								, shared: true
+								, crosshairs: [true, true]
+							},
+											legend: {itemWidth: 140 },
+											series: [{
+												name: '월간평균거래량(좌)', data: volume_chart_data.AVG_TRD_QTY ,type: 'column'
+											}, {
+												name: '월간평균거래대금', data: volume_chart_data.AVG_TRD_AMT ,yAxis: 1
+											}]
+										});
+					}else{
+						$("#volume_grid_body").html("<tr><td colspan='3' style='border:none; height:220px; text-align:center'>데이터가 존재하지 않습니다.</td></tr>");
+					}
+								})();
+							</script>
+							<div class="clear">
+							</div>
+							<!-- 거래량, 거래대금(1개월,평균) -->
+						</div>
+					</div>
+				</div>
+			</div>
+			<script>
+				$(document).ajaxComplete(function() {
+					var targetvalue = '';
+					var moretop = (targetvalue === 'cu_more') ? ($('#cu_more').offset() || {top: 0}).top : (targetvalue === 'nav_more') ? ($('#nav_more').offset() || {top: 0}).top : ({top: 0}).top;
+					setTimeout(function () { autoResize({ moretop: moretop }); }, 1000);
+				});
+				$(window).load(function () {
+					
+					var targetvalue = '';
+					var moretop = (targetvalue === 'cu_more') ? ($('#cu_more').offset() || {top: 0}).top : (targetvalue === 'nav_more') ? ($('#nav_more').offset() || {top: 0}).top : ({top: 0}).top;
+					setTimeout(function () { autoResize({ moretop: moretop }); }, 1000);
+				});
+			</script>
+			
+	<div class="clr">&nbsp;</div> <!-- 여백 -->
+    <div class="foot-wrap">
+        <div></div>
+        <div id="foot-section">
+            <div>
+                <span></span>
+            </div>
+            <div>
+                <p>
+                    FnGuide에서 제공하는 정보는 신뢰할 만한 자료 및 정보로부터 얻어진 것이나 그 정확성이나 완전성을 보장 할 수 없으며, 시간이 경과함에 따라 변경될 수 있습니다.
+                    따라서 정보의 오류, 누락에 대하여 FnGuide 또는FnGuide에 자료를 제공하는 회사에서는 그 결과에 대해 법적인 책임을 지지 않습니다.
+                    모든 콘텐츠에 대한 저작권은 FnGuide에 있으며 사전 허가없이 이를 무단으로 사용하거나, 데이터 베이스화 할 경우 민형사상 책임을 물을 수 있습니다.
+                </p>
+            </div>
+        </div>
+        <div></div>
+    </div>
+	<div class="clr">&nbsp;</div> <!-- 여백 -->
+
+		</div>
+	</div>
+</div>
+</body>
+</html>
+
