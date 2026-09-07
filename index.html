@@ -5,21 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>액티브 ETF CHECK — 국내 액티브 ETF 구성종목·성과 비교</title>
 <meta name="description" content="같은 섹터에 투자하는 국내 액티브 ETF의 구성종목과 성과를 한 페이지에서 매일 비교합니다. 전일 대비 신규편입·제외·비중변화, 지수 대비 초과·과소 비중 표시.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
   --bg:#f5f6f8; --card:#ffffff; --line:#e3e6ea; --text:#1b1f24; --muted:#6b7280; --faint:#9ca3af;
-  --accent:#1f4fd8; --up:#15803d; --up-bg:#dcfce7; --down:#c02626; --down-bg:#fee2e2;
+  --accent:#F58220; --accent-soft:#FDE7D3; --navy:#043B72; --up:#15803d; --up-bg:#dcfce7; --down:#c02626; --down-bg:#fee2e2;
   --new:#0f766e; --new-bg:#ccfbf1; --out:#6b7280; --out-bg:#f1f2f4; --hi:#fff7d6;
   --heat0:#ffffff; --heat1:#eaf0fb;
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",Segoe UI,Roboto,sans-serif;font-size:14px;line-height:1.45}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:"Nanum Gothic","NanumGothic","나눔고딕",Dotum,"돋움","Apple SD Gothic Neo",sans-serif;font-size:14px;line-height:1.45}
 a{color:var(--accent);text-decoration:none}
 .wrap{max-width:1500px;margin:0 auto;padding:14px 14px 60px}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 18px;margin-bottom:12px}
 header h1{font-size:22px;margin:0;letter-spacing:-.3px}
 header h1 span{color:var(--accent)}
+header h1{color:var(--navy)}
+.card h2{color:var(--navy)}
 .asof{color:var(--muted);font-size:13px}
 .asof b{color:var(--text)}
 .banner{background:#fff3cd;border:1px solid #f1d27a;color:#7a5a00;padding:8px 12px;border-radius:8px;margin-bottom:12px;font-size:13px}
@@ -28,8 +32,8 @@ header h1 span{color:var(--accent)}
 .tab{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:13px;color:var(--text);white-space:nowrap}
 .tab .n{color:var(--faint);margin-left:4px;font-size:12px}
 .tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.tab.on .n{color:#dbe4ff}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.tab.on .n{color:#ffe3c9}
+.card{background:var(--card);border:1px solid var(--line);border-top:2px solid var(--accent);border-radius:12px;padding:14px;margin-bottom:14px}
 .card h2{font-size:16px;margin:0 0 4px}
 .sub{color:var(--muted);font-size:12.5px;margin-bottom:10px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:6px 0 10px;font-size:13px}
@@ -234,7 +238,7 @@ function renderPerf(){
 }
 
 /* ---------------- chart ---------------- */
-const PALETTE=['#1f4fd8','#d97706','#0f766e','#c02626','#7c3aed','#0891b2','#be185d','#4d7c0f','#92400e','#334155','#db2777','#059669'];
+const PALETTE=['#F58220','#043B72','#0f766e','#c02626','#7c3aed','#0891b2','#be185d','#4d7c0f','#92400e','#334155','#db2777','#059669'];
 function renderChart(){
   const es=E(); if(!window.Chart){ $('#chart').parentElement.style.display='none'; return; }
   const days={'1M':30,'3M':91,'6M':182,'1Y':365}[period];
