@@ -1,24 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Active ETF CHECK - daily data collector (v2: ETF CHECK + Naver Finance)
-=======================================================================
-KRX data portal now requires login, so data comes from public endpoints that
-work from GitHub Actions runners:
+Active ETF CHECK - daily data collector (v4: Naver Finance + WiseReport)
+========================================================================
+All data comes from public, login-free endpoints reachable from GitHub Actions:
 
-  ETF CHECK (Koscom)  /user/common/getEtpMast                 all listed ETFs: code, ISIN, name, manager,
-                                                               benchmark index name, price, NAV, AUM, list date
-                      /stock/etp/getEtfTotalExpenseRatio      TER / total cost per ETF
-                      /api/user/etp/getEtfPdfRankListWeightAll?code=X   full PDF (holdings + weights)
-                      /user/etp/getEtpTermHist?F16013=X&gubun=1Y        1Y daily price history
-  Naver Finance       /api/sise/etfItemList.nhn                ETF list with tab code (domestic equity filter)
-                      m.stock.naver.com/api/stock/X/etfAnalysis  price/NAV period returns, sector weights, base index
+  Naver Finance   finance.naver.com/api/sise/etfItemList.nhn          all listed ETFs (tab code, price, NAV, AUM)
+                  m.stock.naver.com/api/stock/{code}/etfAnalysis      issuer, base index, fee, tracking error,
+                                                                       period returns (price & NAV), sector weights
+  WiseReport      navercomp.wisereport.co.kr/v2/ETF/index.aspx?cmp_cd={code}
+                                                                       FULL creation-unit holdings (CU_data JSON)
+                  navercomp.wisereport.co.kr/ETF/GetNAVData.aspx      daily NAV / close history
 
-Computes day-over-day holding changes, active weight vs benchmark (benchmark = PDF of the largest
-passive ETF tracking the same index), performance and excess return vs index proxy, sector grouping.
-Writes data/latest.json (used by index.html), data/pdf/<date>.json snapshots, data/status.json.
-
-Usage:  python scripts/collect.py [--max-etfs N]
+Computes day-over-day holding changes, active weight vs benchmark (benchmark = holdings of the largest
+passive ETF tracking the same index), performance and excess return vs the index proxy, sector grouping.
+Writes data/latest.json (used by index.html), data/pdf/<date>.json snapshots, data/status.json, data/run_log.txt
 """
 import argparse
 import datetime as dt
@@ -36,35 +32,55 @@ DATA_DIR = os.path.join(ROOT, "data")
 PDF_DIR = os.path.join(DATA_DIR, "pdf")
 LATEST_PATH = os.path.join(DATA_DIR, "latest.json")
 STATUS_PATH = os.path.join(DATA_DIR, "status.json")
+LOG_PATH = os.path.join(DATA_DIR, "run_log.txt")
 KST = dt.timezone(dt.timedelta(hours=9))
 
-EC = "https://www.etfcheck.co.kr"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
-EC_HEADERS = {"User-Agent": UA, "Accept": "application/json, text/plain, */*", "Accept-Language": "ko-KR,ko;q=0.9",
-              "Referer": EC + "/", "X-Requested-With": "XMLHttpRequest"}
-EC_RATE_PER_MIN = 14          # ETF CHECK answers ~30 requests/minute per IP, then returns 403 for a while
-EC_BLOCK_WAIT = 75            # seconds to wait after a 403 before trying again
 NV_HEADERS = {"User-Agent": UA, "Accept": "application/json, text/plain, */*", "Accept-Language": "ko-KR,ko;q=0.9",
               "Referer": "https://m.stock.naver.com/"}
+WR_HEADERS = {"User-Agent": UA, "Accept": "text/html,application/xhtml+xml,*/*;q=0.8", "Accept-Language": "ko-KR,ko;q=0.9",
+              "Referer": "https://finance.naver.com/"}
+WR_PAGE = "https://navercomp.wisereport.co.kr/v2/ETF/index.aspx"
+WR_NAV = "https://navercomp.wisereport.co.kr/ETF/GetNAVData.aspx"
 
 PDF_KEEP_DAYS = 70
-SLEEP = 0.3
-DEADLINE_SEC = 30 * 60   # stay well under the 40-minute job timeout; optional steps are skipped past this
+SLEEP = 0.5
+DEADLINE_SEC = 30 * 60
 STARTED = time.time()
+_LOG = []
 
-
-def time_left():
-    return DEADLINE_SEC - (time.time() - STARTED)
-CASH_WORDS = ("현금", "예금", "설정현금", "원화", "CASH")
+CASH_RE = re.compile(r"현금|예금|설정현금|원화|CASH|예치금", re.I)
+DERIV_RE = re.compile(r"선물|옵션|콜|풋|스왑|\d{4}년\s?\d{1,2}월물|F\d{6}|C\d{6}|P\d{6}", re.I)
 # active ETFs whose name matches this are NOT domestic equity (bonds, money market, overseas, commodities...)
 EXCLUDE_RE = re.compile(r"채권|국공채|국채|회사채|은행채|금융채|CD금리|KOFR|머니마켓|MMF|단기채|단기자금|혼합|TDF|TRF|금리|달러|"
                         r"엔화|위안|원자재|골드|미국|글로벌|차이나|중국|일본|인도|나스닥|S&P|선진국|신흥국|유로|월드|해외|"
                         r"아시아|베트남|유럽|빅테크|테슬라|엔비디아|팔란티어|리츠부동산|리츠|부동산|비트코인|채\(", re.I)
+# benchmark index -> representative passive ETF (holdings + price used as the index proxy)
+STATIC_PROXY = {"KOSPI200": "069500", "KOSDAQ150": "229200", "KOSDAQ": "229200", "KRX반도체": "091160", "KRX300": "292190",
+                "KOSPI": "226490", "KRX바이오K뉴딜": "364970", "KRX2차전지K뉴딜": "364980", "KRXBBIGK뉴딜": "364960",
+                "KOSPI200커버드콜5OTM": "069500", "KOSPI200커버드콜": "069500", "KOSDAQ150커버드콜": "229200",
+                "KOSPI200고배당": "069500", "KOSPI200중소형주": "069500", "KOSPI중형주": "226490", "KRX정보기술": "266370",
+                "KRX헬스케어": "266420", "KRX기술이전바이오": None}
+
+
+def time_left():
+    return DEADLINE_SEC - (time.time() - STARTED)
 
 
 def log(*a):
-    print(dt.datetime.now(KST).strftime("%H:%M:%S"), *a, flush=True)
+    line = dt.datetime.now(KST).strftime("%H:%M:%S") + " " + " ".join(str(x) for x in a)
+    print(line, flush=True)
+    _LOG.append(line)
+
+
+def flush_log():
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        with open(LOG_PATH, "w", encoding="utf-8") as f:
+            f.write("\n".join(_LOG[-400:]))
+    except Exception:  # noqa
+        pass
 
 
 def to_num(x, default=None):
@@ -95,82 +111,6 @@ def save_json(path, obj, compact=True):
             json.dump(obj, f, ensure_ascii=False, indent=1)
 
 
-class Http:
-    """Plain per-request connections (ETF CHECK drops reused keep-alive sockets) + a per-minute rate limiter."""
-
-    def __init__(self):
-        self.calls = 0
-        self.ec_times = []
-        self.blocked_until = 0.0
-
-    def _throttle(self):
-        now = time.time()
-        if now < self.blocked_until:
-            time.sleep(self.blocked_until - now)
-        self.ec_times = [t for t in self.ec_times if time.time() - t < 60]
-        if len(self.ec_times) >= EC_RATE_PER_MIN:
-            wait = 60 - (time.time() - self.ec_times[0]) + 0.5
-            if wait > 0:
-                time.sleep(wait)
-        self.ec_times.append(time.time())
-
-    def get_json(self, url, headers, params=None, tries=2):
-        last = None
-        for i in range(tries):
-            try:
-                self.calls += 1
-                r = requests.get(url, headers=headers, params=params, timeout=25)
-                if r.status_code == 403:
-                    raise PermissionError("HTTP 403")
-                if r.status_code != 200:
-                    raise RuntimeError("HTTP %s" % r.status_code)
-                js = r.json()
-                time.sleep(SLEEP)
-                return js
-            except PermissionError as e:
-                last = e
-                if i < tries - 1:
-                    log("  403 from %s -> cooling down %ds" % (url.split("/")[-1], EC_BLOCK_WAIT))
-                    self.blocked_until = time.time() + EC_BLOCK_WAIT
-                    time.sleep(EC_BLOCK_WAIT)
-                    self.ec_times = []
-            except Exception as e:  # noqa
-                last = e
-                time.sleep(2 * (i + 1))
-        raise RuntimeError("GET failed %s %s: %s" % (url, params, last))
-
-    def ec(self, path, _tries=2, **params):
-        self._throttle()
-        js = self.get_json(EC + path, EC_HEADERS, params or None, tries=_tries)
-        if not js.get("success", True):
-            raise RuntimeError("ETF CHECK error %s: %s" % (path, js.get("message")))
-        return js.get("results", [])
-
-
-# ---------------------------------------------------------------- collectors
-
-def fetch_ec_master(h):
-    rows = h.ec("/user/common/getEtpMast", _tries=1)
-    out = {}
-    for r in rows:
-        code = (r.get("F16013") or "").strip()
-        if not code:
-            continue
-        aum_m = to_num(r.get("F15015"))  # 백만원
-        out[code] = {
-            "code": code, "isin": r.get("F16012"), "name": (r.get("F16002") or "").strip(),
-            "manager": r.get("F33961") or "", "index": (r.get("F34777") or "").strip(),
-            "listed": re.sub(r"[^0-9]", "", r.get("F16017") or ""),
-            "close": to_num(r.get("F15001")), "nav": to_num(r.get("F15301")),
-            "aum": (aum_m * 1_000_000) if aum_m is not None else None,
-            "val": to_num(r.get("F15023")),  # 거래대금
-            "date": r.get("F12506"),
-            "ec_ret": {"1W": to_num(r.get("W01001")), "1M": to_num(r.get("W01002")), "3M": to_num(r.get("W01003")),
-                       "6M": to_num(r.get("W01004")), "1Y": to_num(r.get("W01005")), "3Y": to_num(r.get("W01006"))},
-        }
-    return out
-
-
 def krw_text_to_won(t):
     """'2조 4,500억' -> 2450000000000"""
     if not t:
@@ -186,68 +126,73 @@ def krw_text_to_won(t):
     return won or None
 
 
-# benchmark index -> representative passive ETF (used when the ETF CHECK master list is unavailable)
-STATIC_PROXY = {"KOSPI200": "069500", "KOSDAQ150": "229200", "KOSDAQ": "229200", "KRX반도체": "091160", "KRX300": "292190",
-                "KOSPI": "226490", "KRX바이오K뉴딜": "364970", "KRX2차전지K뉴딜": "364980", "KRXBBIGK뉴딜": "364960",
-                "KOSPI200커버드콜5OTM": "069500", "KOSPI200커버드콜": "069500", "KOSDAQ150커버드콜": "229200"}
+class Http:
+    def __init__(self):
+        self.calls = 0
+
+    def get(self, url, headers, params=None, tries=3, as_json=True):
+        last = None
+        for i in range(tries):
+            try:
+                self.calls += 1
+                r = requests.get(url, headers=headers, params=params, timeout=30)
+                if r.status_code != 200:
+                    raise RuntimeError("HTTP %s" % r.status_code)
+                out = r.json() if as_json else r.text
+                time.sleep(SLEEP)
+                return out
+            except Exception as e:  # noqa
+                last = e
+                time.sleep(3 * (i + 1))
+        raise RuntimeError("GET failed %s %s: %s" % (url, params, last))
 
 
-def fetch_naver_master(h, naver_list):
-    """Fallback universe built from Naver's ETF list (no benchmark index yet; filled from etfAnalysis later)."""
-    out = {}
-    for code, i in naver_list.items():
-        aum = to_num(i.get("marketSum"))
-        out[code] = {"code": code, "isin": None, "name": (i.get("itemname") or "").strip(), "manager": "", "index": "",
-                     "listed": "", "close": to_num(i.get("nowVal")), "nav": to_num(i.get("nav")),
-                     "aum": aum * 1e8 if aum is not None else None, "val": None, "date": None, "ec_ret": {}}
-    return out
-
-
-def fetch_ec_fees(h):
-    out = {}
-    for r in h.ec("/stock/etp/getEtfTotalExpenseRatio", _tries=1):
-        code = r.get("F16013")
-        if code:
-            out[code] = {"fee": to_num(r.get("F35188")), "ter": to_num(r.get("F35190")), "total": to_num(r.get("F35192"))}
-    return out
-
+# ---------------------------------------------------------------- collectors
 
 def fetch_naver_list(h):
-    js = h.get_json("https://finance.naver.com/api/sise/etfItemList.nhn", NV_HEADERS)
+    js = h.get("https://finance.naver.com/api/sise/etfItemList.nhn", NV_HEADERS)
     items = js.get("result", {}).get("etfItemList", [])
     return {i["itemcode"]: i for i in items}
 
 
 def fetch_naver_analysis(h, code):
-    return h.get_json("https://m.stock.naver.com/api/stock/%s/etfAnalysis" % code, NV_HEADERS)
+    return h.get("https://m.stock.naver.com/api/stock/%s/etfAnalysis" % code, NV_HEADERS)
 
 
-def fetch_pdf(h, code):
-    rows = h.ec("/api/user/etp/getEtfPdfRankListWeightAll", code=code, start=0, limit=3000)
-    holdings, date = [], None
-    for r in rows:
-        date = date or r.get("F12506")
-        scode = (r.get("F16013_PDF") or "").strip()
-        name = (r.get("NAME") or r.get("F16004") or "").strip()
-        w = to_num(r.get("WEIGHT"), 0.0)
-        px = to_num(r.get("F15001"))
-        chg = to_num(r.get("F15004"))
-        if not scode and not name:
+def fetch_wise_pdf(h, code):
+    """Full CU holdings from the WiseReport ETF page. Returns (rows, date). rows: [key, name, weight, shares, None]"""
+    html = h.get(WR_PAGE, WR_HEADERS, params={"cmp_cd": code}, as_json=False)
+    m = re.search(r"var\s+CU_data\s*=\s*(\{.*?\});", html, flags=re.S)
+    if not m:
+        raise RuntimeError("CU_data not found for %s" % code)
+    grid = json.loads(m.group(1)).get("grid_data", [])
+    rows, date = [], None
+    for g in grid:
+        name = (g.get("STK_NM_KOR") or "").strip()
+        if not name:
             continue
-        # [code, name, weight, price, day_change_pct]
-        holdings.append([scode, name, round(w, 4), px, chg])
-    return holdings, date
+        w = to_num(g.get("ETF_WEIGHT"), 0.0) or 0.0
+        date = date or re.sub(r"[^0-9]", "", g.get("TRD_DT") or "")
+        rows.append(["N:" + name, name, round(w, 4), to_num(g.get("AGMT_STK_CNT")), None])
+    return rows, (date or None)
 
 
-def fetch_hist(h, code):
-    rows = h.ec("/user/etp/getEtpTermHist", F16013=code, gubun="1Y")
-    out = {}
-    for r in rows:
-        d = re.sub(r"[^0-9]", "", r.get("F12506") or "")
-        p = to_num(r.get("F15001"))
-        if len(d) == 8 and p:
-            out[d] = p
-    return out
+def fetch_wise_hist(h, code, days=400):
+    end = dt.datetime.now(KST).date()
+    start = end - dt.timedelta(days=days)
+    js = h.get(WR_NAV, WR_HEADERS, params={"startDT": start.isoformat(), "endDT": end.isoformat(), "dataType": "D",
+                                          "cmp_cd": code, "cmp_typ": "5"})
+    close, nav = {}, {}
+    for g in js.get("grid_data", []):
+        d = re.sub(r"[^0-9]", "", g.get("TRD_DT") or "")
+        if len(d) != 8:
+            continue
+        c, n = to_num(g.get("CLOSE_PRC")), to_num(g.get("NAV"))
+        if c:
+            close[d] = c
+        if n:
+            nav[d] = n
+    return close, nav
 
 
 # ---------------------------------------------------------------- grouping
@@ -336,21 +281,19 @@ def perf_block(price_series, idx_series, asof, naver):
     return out
 
 
-def is_stock_code(c):
-    return bool(re.fullmatch(r"[0-9A-Z]{6}", c or ""))
+def is_security(name):
+    return not (CASH_RE.search(name or "") or DERIV_RE.search(name or ""))
 
 
 def compare_holdings(today, prev, bm_weights, bm_names):
-    """today/prev rows: [code, name, w, price, chg%]"""
-    def key(hrow):
-        return hrow[0] or ("NAME:" + hrow[1])
-    t = {key(x): x for x in today}
-    p = {key(x): x for x in prev} if prev else {}
+    """today/prev rows: [key, name, w, shares, _]. Keys are 'N:<name>' (WiseReport has no codes)."""
+    t = {x[0]: x for x in today}
+    p = {x[0]: x for x in prev} if prev else {}
     rows = []
     n_new = n_out = n_up = n_down = 0
     for k, x in t.items():
-        code, name, w = x[0], x[1], x[2]
-        is_cash = (not is_stock_code(code)) or any(cw in name.upper() for cw in CASH_WORDS)
+        name, w = x[1], x[2]
+        is_cash = not is_security(name)
         pw = p[k][2] if k in p else None
         status = "same"
         if prev and k not in p:
@@ -363,21 +306,17 @@ def compare_holdings(today, prev, bm_weights, bm_names):
                 n_up += 1
             elif chg <= -0.2:
                 n_down += 1
-        bw = bm_weights.get(code) if bm_weights else None
+        bw = bm_weights.get(k) if bm_weights else None
         active = None if not bm_weights or is_cash else round(w - (bw or 0.0), 4)
-        rows.append({"code": code, "name": name, "w": w, "pw": pw, "chg": chg, "status": status,
-                     "bw": bw, "active": active, "cash": is_cash, "px": x[3], "dchg": x[4]})
+        rows.append({"code": k, "name": name, "w": w, "pw": pw, "chg": chg, "status": status,
+                     "bw": bw, "active": active, "cash": is_cash, "shares": x[3]})
     for k, x in p.items():
-        if k in t:
-            continue
-        code, name = x[0], x[1]
-        if (not is_stock_code(code)) or any(cw in name.upper() for cw in CASH_WORDS):
+        if k in t or not is_security(x[1]):
             continue
         n_out += 1
-        bw = bm_weights.get(code) if bm_weights else None
-        rows.append({"code": code, "name": name, "w": 0.0, "pw": x[2], "chg": round(-x[2], 4), "status": "out",
-                     "bw": bw, "active": (None if not bm_weights else round(-(bw or 0.0), 4)), "cash": False,
-                     "px": None, "dchg": None})
+        bw = bm_weights.get(k) if bm_weights else None
+        rows.append({"code": k, "name": x[1], "w": 0.0, "pw": x[2], "chg": round(-x[2], 4), "status": "out",
+                     "bw": bw, "active": (None if not bm_weights else round(-(bw or 0.0), 4)), "cash": False, "shares": 0})
     rows.sort(key=lambda r: (-r["w"], r["name"]))
     stocks = [r for r in rows if not r["cash"] and r["status"] != "out"]
     top10 = round(sum(r["w"] for r in stocks[:10]), 2)
@@ -385,9 +324,10 @@ def compare_holdings(today, prev, bm_weights, bm_names):
     turnover = round(sum(abs(r["chg"] or 0) for r in rows if not r["cash"]) / 2, 2) if prev else None
     missing = []
     if bm_weights:
-        for code, bw in sorted(bm_weights.items(), key=lambda kv: -kv[1]):
-            if code not in {r["code"] for r in stocks} and bw >= 0.5:
-                missing.append({"code": code, "name": bm_names.get(code, code), "bw": bw})
+        held = {r["code"] for r in stocks}
+        for k, bw in sorted(bm_weights.items(), key=lambda kv: -kv[1]):
+            if k not in held and bw >= 0.5:
+                missing.append({"code": k, "name": bm_names.get(k, k), "bw": bw})
             if len(missing) >= 15:
                 break
     summary = {"n_holdings": len(stocks), "top10": top10, "cash": cash_w, "new": n_new, "out": n_out,
@@ -402,92 +342,78 @@ def main():
     ap.add_argument("--max-etfs", type=int, default=0)
     ap.add_argument("--date", default="", help="ignored (kept for workflow compatibility)")
     args = ap.parse_args()
-    started = time.time()
     h = Http()
 
-    # 1. universe -----------------------------------------------------------
-    naver_list = {}
-    try:
-        naver_list = fetch_naver_list(h)
-        log("Naver list:", len(naver_list))
-    except Exception as e:  # noqa
-        log("naver list failed:", e)
-    master_src = "etfcheck"
-    try:
-        master = fetch_ec_master(h)
-        log("ETF CHECK master:", len(master))
-    except Exception as e:  # noqa
-        log("ETF CHECK master failed -> using Naver list as universe:", str(e)[:160])
-        if not naver_list:
-            raise
-        master = fetch_naver_master(h, naver_list)
-        master_src = "naver"
-    fees = {}
-    try:
-        fees = fetch_ec_fees(h)
-    except Exception as e:  # noqa
-        log("fees failed:", str(e)[:120])
-
+    # 1. universe: Naver ETF list -> domestic equity ACTIVE ---------------------------------
+    naver_list = fetch_naver_list(h)
+    log("Naver ETF list:", len(naver_list))
     active = {}
-    for code, e in master.items():
-        if "액티브" not in e["name"]:
+    for code, i in naver_list.items():
+        name = (i.get("itemname") or "").strip()
+        if "액티브" not in name or EXCLUDE_RE.search(name):
             continue
-        if EXCLUDE_RE.search(e["name"]):
+        if i.get("etfTabCode") not in (1, 2):   # 1=국내시장지수 2=국내업종/테마 (4=해외주식 5=원자재 6=채권 7=기타)
             continue
-        nv = naver_list.get(code)
-        if nv and nv.get("etfTabCode") not in (1, 2):   # 4=해외주식, 5=원자재, 6=채권, 7=기타
-            continue
-        active[code] = e
+        aum = to_num(i.get("marketSum"))
+        active[code] = {"code": code, "name": name, "close": to_num(i.get("nowVal")), "nav": to_num(i.get("nav")),
+                        "aum": aum * 1e8 if aum is not None else None, "manager": "", "index": "", "listed": ""}
     log("domestic equity ACTIVE ETFs:", len(active))
     if not active:
         raise RuntimeError("no active ETFs matched")
     if args.max_etfs:
         active = dict(sorted(active.items(), key=lambda kv: -(kv[1]["aum"] or 0))[: args.max_etfs])
 
-    # 2. PDFs ---------------------------------------------------------------
+    # 2. Naver analysis (meta + period returns) ------------------------------------------------
+    naver = {}
+    for code, e in active.items():
+        try:
+            nv = fetch_naver_analysis(h, code)
+        except Exception as ex:  # noqa
+            log("naver analysis failed", code, str(ex)[:100])
+            nv = {}
+        naver[code] = nv
+        e["index"] = re.sub(r"\((?:PR|TR|NTR|Price Return|Total Return)[^)]*\)", "", nv.get("etfBaseIndex") or "").replace("지수", "").strip()
+        e["manager"] = nv.get("issuerName") or ""
+        e["listed"] = nv.get("listedDate") or ""
+        if e["aum"] is None:
+            e["aum"] = krw_text_to_won(nv.get("totalNav"))
+    flush_log()
+
+    # 3. full holdings (WiseReport) -------------------------------------------------------------
     os.makedirs(PDF_DIR, exist_ok=True)
     pdf_today, pdf_dates = {}, defaultdict(int)
     for code, e in active.items():
-        if time_left() < 300:
-            log("deadline near - skipping remaining PDFs")
+        if time_left() < 240:
+            log("deadline near - skipping remaining holdings")
             break
         try:
-            rows, d = fetch_pdf(h, code)
+            rows, d = fetch_wise_pdf(h, code)
             pdf_today[code] = rows
             if d:
                 pdf_dates[d] += 1
         except Exception as ex:  # noqa
-            log("PDF failed", code, e["name"], ex)
-            pdf_today[code] = []
+            log("holdings failed", code, e["name"], str(ex)[:100])
     for code in active:
         pdf_today.setdefault(code, [])
-    missing_codes = [c for c, v in pdf_today.items() if not v]
-    if missing_codes and time_left() > 240:
-        log("second pass for %d empty PDFs after cool-down" % len(missing_codes))
-        time.sleep(15)
-        for code in missing_codes:
-            try:
-                rows, d = fetch_pdf(h, code)
-                pdf_today[code] = rows
-                if d:
-                    pdf_dates[d] += 1
-            except Exception as ex:  # noqa
-                log("PDF failed again", code, str(ex)[:100])
     asof = max(pdf_dates.items(), key=lambda kv: kv[1])[0] if pdf_dates else dt.datetime.now(KST).strftime("%Y%m%d")
     n_ok = sum(1 for v in pdf_today.values() if v)
-    log("PDF ok: %d/%d  asof=%s" % (n_ok, len(active), asof))
+    log("holdings ok: %d/%d  asof=%s" % (n_ok, len(active), asof))
+    flush_log()
 
-    # merge with an existing snapshot of the same date (re-runs), then save
     path_today = os.path.join(PDF_DIR, asof + ".json")
     existing = load_json(path_today, {})
     for code, rows in pdf_today.items():
         if not rows and existing.get(code):
             pdf_today[code] = existing[code]
     save_json(path_today, pdf_today)
-    snaps = sorted(f[:-5] for f in os.listdir(PDF_DIR) if f.endswith(".json") and re.fullmatch(r"\d{8}\.json", f))
+    snaps = sorted(f[:-5] for f in os.listdir(PDF_DIR) if re.fullmatch(r"\d{8}\.json", f))
     prev_dates = [d for d in snaps if d < asof]
     prev_date = prev_dates[-1] if prev_dates else None
     pdf_prev = load_json(os.path.join(PDF_DIR, prev_date + ".json"), {}) if prev_date else {}
+    # snapshots written by earlier versions used stock codes as keys -> not comparable; require name keys
+    if pdf_prev and not any(str(r[0]).startswith("N:") for rows in pdf_prev.values() for r in rows[:1]):
+        log("previous snapshot uses old key format - skipping day-over-day diff for today")
+        pdf_prev = {}
     log("previous snapshot:", prev_date)
     for f in snaps[:-PDF_KEEP_DAYS]:
         try:
@@ -495,98 +421,69 @@ def main():
         except OSError:
             pass
 
-    # 3a. Naver per-ETF analysis (also fills index/manager when master came from Naver) ----
-    naver = {}
-    for code, e in active.items():
-        if time_left() < 120:
-            naver[code] = {}
-            continue
-        try:
-            nv = fetch_naver_analysis(h, code)
-        except Exception as ex:  # noqa
-            log("naver analysis failed", code, ex)
-            nv = {}
-        naver[code] = nv
-        if not e["index"]:
-            e["index"] = re.sub(r"\(.*?지수\)$", "", (nv.get("etfBaseIndex") or "")).strip()
-        if not e["manager"]:
-            e["manager"] = nv.get("issuerName") or ""
-        if not e["listed"]:
-            e["listed"] = nv.get("listedDate") or ""
-        if e["aum"] is None:
-            e["aum"] = krw_text_to_won(nv.get("totalNav"))
-
-    # 3b. benchmark proxies: largest passive ETF with same benchmark index --------
-    passive_by_index = defaultdict(list)
-    for code, e in master.items():
-        if "액티브" in e["name"] or not e["index"]:
-            continue
-        if re.search(r"레버리지|인버스|2X|선물|합성|커버드콜|채권혼합|TR\b", e["name"]):
-            continue
-        passive_by_index[norm_index(e["index"])].append(e)
+    # 4. benchmark proxies ---------------------------------------------------------------------
     benchmarks = {}
     for code, e in active.items():
         key = norm_index(e["index"])
         if not key or key in benchmarks:
             continue
         if time_left() < 180:
-            log("deadline near - skipping remaining benchmarks")
             break
         entry = {"name": e["index"], "source": None, "weights": {}, "names": {}, "proxy": None, "series": {}}
-        cands = sorted(passive_by_index.get(key, []), key=lambda p: -(p["aum"] or 0))
-        if not cands:
-            sp = STATIC_PROXY.get(key) or next((v for k, v in STATIC_PROXY.items() if k and k in key), None)
-            if sp:
-                cands = [master.get(sp) or {"code": sp, "name": (naver_list.get(sp) or {}).get("itemname", sp), "aum": 0}]
-        for p in cands[:1]:
+        proxy = STATIC_PROXY.get(key) or next((v for k, v in STATIC_PROXY.items() if v and k in key), None)
+        if proxy:
             try:
-                rows, _ = fetch_pdf(h, p["code"])
-                stock_rows = [r for r in rows if is_stock_code(r[0]) and not any(cw in r[1].upper() for cw in CASH_WORDS)]
+                rows, _ = fetch_wise_pdf(h, proxy)
+                stock_rows = [r for r in rows if is_security(r[1])]
                 tot = sum(r[2] for r in stock_rows)
                 if tot > 0:
                     entry["weights"] = {r[0]: round(r[2] / tot * 100, 4) for r in stock_rows}
                     entry["names"] = {r[0]: r[1] for r in stock_rows}
-                    entry["source"] = "%s PDF 기준 (지수 대용)" % p["name"]
-                    entry["proxy"] = p["code"]
-                    entry["series"] = fetch_hist(h, p["code"])
+                    pname = (naver_list.get(proxy) or {}).get("itemname", proxy)
+                    entry["source"] = "%s 구성종목 기준 (지수 대용)" % pname
+                    entry["proxy"] = proxy
+                    entry["series"], _nav = fetch_wise_hist(h, proxy)
             except Exception as ex:  # noqa
-                log("benchmark proxy failed", e["index"], ex)
+                log("benchmark proxy failed", e["index"], str(ex)[:100])
         benchmarks[key] = entry
         log("benchmark", e["index"], "->", entry["source"], len(entry["weights"]))
+    flush_log()
 
-    # 4. per-ETF price history ------------------------------------------------------
-    hist = {}
+    # 5. price / NAV history --------------------------------------------------------------------
+    hist, navh = {}, {}
     for code, e in active.items():
-        if time_left() < 60:
-            hist[code] = {}
+        if time_left() < 90:
+            hist[code], navh[code] = {}, {}
             continue
         try:
-            hist[code] = fetch_hist(h, code)
+            hist[code], navh[code] = fetch_wise_hist(h, code)
         except Exception as ex:  # noqa
             log("hist failed", code, str(ex)[:100])
-            hist[code] = {}
+            hist[code], navh[code] = {}, {}
 
-    # 5. assemble -------------------------------------------------------------------
+    # 6. assemble --------------------------------------------------------------------------------
     etf_out, groups = {}, defaultdict(list)
     for code, e in active.items():
         bm = benchmarks.get(norm_index(e["index"]), {})
         rows, summary, missing = compare_holdings(pdf_today.get(code, []), pdf_prev.get(code, []),
                                                   bm.get("weights", {}), bm.get("names", {}))
         nv = naver.get(code) or {}
-        ps, idx = hist.get(code, {}), bm.get("series", {})
+        ps, ns, idx = hist.get(code, {}), navh.get(code, {}), bm.get("series", {})
         perf = perf_block(ps, idx, asof, nv)
+        # NAV-based returns computed from our own series when Naver did not provide them
+        for label in list(PERIODS) + ["YTD"]:
+            if perf.get(label + "_nav") is None and ns:
+                kw = {"ytd": True} if label == "YTD" else {"back_days": PERIODS[label]}
+                perf[label + "_nav"] = ret_between(ns, asof, **kw)
         g = classify(e["name"], e["index"])
         groups[g].append(code)
         dates = sorted(ps)
         series = [[d, ps[d], idx.get(d, 0)] for d in dates][-260:]
-        fee = fees.get(code, {})
         etf_out[code] = {
-            "code": code, "name": e["name"], "manager": e["manager"] or nv.get("issuerName", ""),
-            "index": e["index"] or nv.get("etfBaseIndex", ""),
-            "fee": fee.get("fee") if fee.get("fee") is not None else to_num(nv.get("totalFee")),
-            "ter": fee.get("ter"), "total_cost": fee.get("total"),
-            "listed": e["listed"] or nv.get("listedDate", ""), "group": g,
-            "close": e["close"], "nav": e["nav"], "aum": e["aum"], "val": e["val"],
+            "code": code, "name": e["name"], "manager": e["manager"], "index": e["index"],
+            "fee": to_num(nv.get("totalFee")), "ter": None, "total_cost": None,
+            "listed": e["listed"], "group": g,
+            "close": e["close"], "nav": e["nav"], "aum": e["aum"], "val": None,
             "premium": (round((e["close"] / e["nav"] - 1) * 100, 2) if e["close"] and e["nav"] else None),
             "tracking_err": to_num(nv.get("chaseErrorRate")),
             "inflow": nv.get("cumulativeNetInflowList") or {},
@@ -601,15 +498,14 @@ def main():
             codes = sorted(groups[g], key=lambda c: -(etf_out[c]["aum"] or 0))
             group_list.append({"key": g, "name": GROUP_NAMES[g], "etfs": codes})
 
-    # events timeline across kept snapshots
     events = []
     snaps = sorted(f[:-5] for f in os.listdir(PDF_DIR) if re.fullmatch(r"\d{8}\.json", f))
     for a, b in zip(snaps[:-1], snaps[1:]):
         pa = load_json(os.path.join(PDF_DIR, a + ".json"), {})
         pb = load_json(os.path.join(PDF_DIR, b + ".json"), {})
         for code in active:
-            ta = {r[0]: r for r in pa.get(code, []) if is_stock_code(r[0])}
-            tb = {r[0]: r for r in pb.get(code, []) if is_stock_code(r[0])}
+            ta = {r[0]: r for r in pa.get(code, []) if str(r[0]).startswith("N:") and is_security(r[1])}
+            tb = {r[0]: r for r in pb.get(code, []) if str(r[0]).startswith("N:") and is_security(r[1])}
             if not ta or not tb:
                 continue
             for k in tb.keys() - ta.keys():
@@ -619,68 +515,19 @@ def main():
     events.sort(key=lambda x: (x["date"], x["etf"]), reverse=True)
 
     latest = {
-        "asof": asof, "prev": prev_date,
+        "asof": asof, "prev": prev_date if pdf_prev else None,
         "generated_at": dt.datetime.now(KST).strftime("%Y-%m-%d %H:%M KST"),
         "sample": False, "groups": group_list, "etfs": etf_out,
         "benchmarks": {k: {"name": v["name"], "source": v["source"], "n": len(v["weights"])} for k, v in benchmarks.items()},
         "events": events[:600],
-        "stats": {"n_active": len(active), "n_pdf_ok": n_ok, "calls": h.calls, "seconds": round(time.time() - started)},
-        "sources": "ETF CHECK(코스콤) · 네이버 금융", "master_src": master_src,
+        "stats": {"n_active": len(active), "n_pdf_ok": n_ok, "calls": h.calls, "seconds": round(time.time() - STARTED)},
+        "sources": "네이버 금융 · WiseReport(FnGuide)",
     }
     save_json(LATEST_PATH, latest)
     save_json(STATUS_PATH, {"ok": True, "asof": asof, "generated_at": latest["generated_at"],
                             "n_active": len(active), "n_pdf_ok": n_ok}, compact=False)
-    log("DONE asof=%s active=%d pdf_ok=%d calls=%d %.0fs" % (asof, len(active), n_ok, h.calls, time.time() - started))
-    try:
-        probe_full_pdf(h)
-    except Exception as ex:  # noqa
-        log("probe skipped:", str(ex)[:100])
-
-
-def probe_full_pdf(h):
-    """Find a source that returns the FULL holdings list (ETF CHECK anonymous API caps at 20 rows)."""
-    out_dir = os.path.join(DATA_DIR, "probe4")
-    os.makedirs(out_dir, exist_ok=True)
-    X = "0163Y0"
-    res = []
-    def rec(name, fn):
-        try:
-            v = fn()
-            res.append({"name": name, "ok": True, "info": v})
-            log("probe", name, str(v)[:120])
-        except Exception as e:  # noqa
-            res.append({"name": name, "ok": False, "err": str(e)[:200]})
-            log("probe", name, "ERR", str(e)[:100])
-    variants = [("/api/user/etp/getEtfPdfRankListWeightAll", {"code": X, "limit": "all"}),
-                ("/api/user/etp/getEtfPdfRankListWeightAll", {"code": X, "showAll": "true"}),
-                ("/api/user/etp/getEtfPdfRankListWeightAll", {"code": X, "start": 0, "limit": 100, "showAll": 1}),
-                ("/api/user/etp/getEtfPdfRankListWeightAll", {"code": X, "page": 2}),
-                ("/api/user/etp/getEtfPdfRankListWeightAll", {"code": X, "start": 20, "limit": 20}),
-                ("/user/etp/getEtfPdfRankListWeight", {"code": X}),
-                ("/user/etp/getEtfPdfRankListWeight", {"code": X, "start": 0, "limit": 500}),
-                ("/user/etp/getEtfPdfRankListWeight", {"F16013": X, "limit": 500}),
-                ("/user/etp/getEtfPdfRate", {"code": X}),
-                ("/user/etp/getEtpSector", {"code": X})]
-    for path, params in variants:
-        if time_left() < 60:
-            break
-        rec("ec %s %s" % (path.split("/")[-1], json.dumps(params)),
-            lambda path=path, params=params: (lambda rows: {"n": len(rows), "first": rows[:1], "last": rows[-1:]} )(h.ec(path, **params)))
-    # other public pages that may list the full PDF
-    pages = {"fnguide": "https://comp.fnguide.com/SVO2/ASP/etf_snapshot.asp?pGB=1&gicode=A%s" % X,
-             "naver_pc": "https://finance.naver.com/item/main.naver?code=%s" % X,
-             "wisereport": "https://navercomp.wisereport.co.kr/v2/ETF/index.aspx?cmp_cd=%s" % X,
-             "kodex_api_pdf": "https://m.samsungfund.com/api/v1/kodex/product/pdf.do?fundId=%s" % X,
-             "koact_search": "https://www.samsungactive.co.kr/search/recommend.do?keyword=%s" % "코스닥"}
-    for name, url in pages.items():
-        def fetch(url=url, name=name):
-            r = requests.get(url, headers={"User-Agent": UA, "Accept-Language": "ko-KR,ko;q=0.9"}, timeout=25)
-            t = r.text
-            with open(os.path.join(out_dir, name + ".html"), "w", encoding="utf-8") as f:
-                f.write(t[:400000])
-            return {"status": r.status_code, "len": len(t), "n_tr": t.count("<tr"), "has_pdf_word": ("구성종목" in t) or ("PDF" in t)}
-        rec(name, fetch)
-    save_json(os.path.join(out_dir, "probe4.json"), res, compact=False)
+    log("DONE asof=%s active=%d holdings_ok=%d calls=%d %.0fs" % (asof, len(active), n_ok, h.calls, time.time() - STARTED))
+    flush_log()
 
 
 if __name__ == "__main__":
@@ -692,4 +539,5 @@ if __name__ == "__main__":
         traceback.print_exc()
         save_json(STATUS_PATH, {"ok": False, "error": repr(e),
                                 "generated_at": dt.datetime.now(KST).strftime("%Y-%m-%d %H:%M KST")}, compact=False)
+        flush_log()
         sys.exit(1)
