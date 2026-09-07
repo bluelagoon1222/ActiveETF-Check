@@ -46,7 +46,7 @@ WR_NAV = "https://navercomp.wisereport.co.kr/ETF/GetNAVData.aspx"
 
 PDF_KEEP_DAYS = 70
 SLEEP = 0.5
-DEADLINE_SEC = 30 * 60
+DEADLINE_SEC = 33 * 60
 STARTED = time.time()
 _LOG = []
 
@@ -134,23 +134,35 @@ def krw_text_to_won(t):
 
 
 class Http:
+    """requests wrapper with per-host fail-fast: after 4 consecutive failures on a host (slow/blocking server)
+    later calls to that host use 1 try x 12s so the run can still finish and fall back to cached data."""
+
     def __init__(self):
         self.calls = 0
+        self.fails = {}
 
-    def get(self, url, headers, params=None, tries=3, as_json=True):
+    def get(self, url, headers, params=None, tries=3, as_json=True, timeout=25):
+        host = url.split("/")[2] if "//" in url else url
+        streak = self.fails.get(host, 0)
+        if streak >= 4 and streak % 8 != 0:      # degraded host: fail fast (every 8th call probes with full timeout)
+            tries, timeout = 1, 12
         last = None
         for i in range(tries):
             try:
                 self.calls += 1
-                r = requests.get(url, headers=headers, params=params, timeout=30)
+                r = requests.get(url, headers=headers, params=params, timeout=timeout)
                 if r.status_code != 200:
                     raise RuntimeError("HTTP %s" % r.status_code)
                 out = r.json() if as_json else r.text
+                self.fails[host] = 0
                 time.sleep(SLEEP)
                 return out
             except Exception as e:  # noqa
                 last = e
-                time.sleep(3 * (i + 1))
+                time.sleep(2 * (i + 1))
+        self.fails[host] = streak + 1
+        if self.fails[host] == 4:
+            log("host degraded (fail-fast mode):", host)
         raise RuntimeError("GET failed %s %s: %s" % (url, params, last))
 
 
@@ -228,6 +240,8 @@ def fetch_wise_pdf(h, code):
 CACHE_DIR = os.path.join(DATA_DIR, "cache")
 TICKER_CACHE = os.path.join(CACHE_DIR, "tickers.json")
 PRICE_CACHE = os.path.join(CACHE_DIR, "prices.json")
+BM_CACHE = os.path.join(CACHE_DIR, "benchmarks.json")
+EST_CACHE = os.path.join(CACHE_DIR, "est_flags.json")
 YH = {"User-Agent": UA, "Accept": "application/json"}
 _FX = {}
 
@@ -563,10 +577,13 @@ def main():
     flush_log()
 
     # 3. full holdings (WiseReport) -------------------------------------------------------------
+    prev_latest = load_json(LATEST_PATH, {})           # last successful output -> fallback for anything we cannot refresh today
+    prev_etfs = prev_latest.get("etfs", {}) if isinstance(prev_latest, dict) else {}
     os.makedirs(PDF_DIR, exist_ok=True)
+    os.makedirs(CACHE_DIR, exist_ok=True)
     pdf_today, pdf_dates, src_count = {}, defaultdict(int), defaultdict(int)
     for code, e in active.items():
-        if time_left() < 240:
+        if time_left() < 300:
             log("deadline near - skipping remaining holdings")
             break
         try:
@@ -579,38 +596,94 @@ def main():
             log("holdings failed", code, e["name"], str(ex)[:100])
     for code in active:
         pdf_today.setdefault(code, [])
-    asof = max(pdf_dates.items(), key=lambda kv: kv[1])[0] if pdf_dates else dt.datetime.now(KST).strftime("%Y%m%d")
-    n_ok = sum(1 for v in pdf_today.values() if v)
-    log("holdings ok: %d/%d  asof=%s  sources=%s" % (n_ok, len(active), asof, dict(src_count)))
+    asof = max(pdf_dates.items(), key=lambda kv: kv[1])[0] if pdf_dates else (prev_latest.get("asof") or dt.datetime.now(KST).strftime("%Y%m%d"))
+    n_fetched = sum(1 for v in pdf_today.values() if v)
+    log("holdings fetched today: %d/%d  asof=%s  sources=%s" % (n_fetched, len(active), asof, dict(src_count)))
+    flush_log()
+
+    # same-day snapshot written by an earlier run today (e.g. 08:50) fills what failed now
+    path_today = os.path.join(PDF_DIR, asof + ".json")
+    existing = load_json(path_today, {})
+    for code, rows in pdf_today.items():
+        if not rows and existing.get(code):
+            pdf_today[code] = existing[code]
+
+    # 4. price / NAV history (cheap: one call per ETF) ------------------------------------------
+    hist, navh = {}, {}
+    for code, e in active.items():
+        if time_left() < 240:
+            hist[code], navh[code] = {}, {}
+            continue
+        try:
+            hist[code], navh[code] = fetch_wise_hist(h, code)
+        except Exception as ex:  # noqa
+            log("hist failed", code, str(ex)[:100])
+            hist[code], navh[code] = {}, {}
+    log("history ok: %d/%d" % (sum(1 for v in hist.values() if v), len(active)))
     flush_log()
 
     # overseas ETFs: WiseReport/Naver carry share counts only -> estimate weights from shares x price (Yahoo)
-    os.makedirs(CACHE_DIR, exist_ok=True)
     tickers = load_json(TICKER_CACHE, {})
     prices = load_json(PRICE_CACHE, {})
+    est_cache = load_json(EST_CACHE, {})
     est_flags, n_est = {}, 0
+
+    # 5. benchmark proxies (cached across runs; refreshed when time permits) ------------------------
+    bm_cache = load_json(BM_CACHE, {})
+    benchmarks = {}
+    for code, e in active.items():
+        key = norm_index(e["index"])
+        if not key or key in benchmarks:
+            continue
+        entry = {"name": e["index"], "source": None, "weights": {}, "names": {}, "proxy": None, "series": {}}
+        proxy = STATIC_PROXY.get(key) or next((v for k, v in STATIC_PROXY.items() if v and k in key), None)
+        if proxy and time_left() > 200:
+            try:
+                rows, _, _src = fetch_holdings(h, proxy)
+                if rows and not any(r[2] > 0 for r in rows if is_security(r[1])) and time_left() > 240:
+                    estimate_weights(h, rows, tickers, prices, budget_sec=200)
+                    save_json(TICKER_CACHE, tickers); save_json(PRICE_CACHE, prices)
+                stock_rows = [r for r in rows if is_security(r[1]) and r[2] > 0]
+                tot = sum(r[2] for r in stock_rows)
+                if tot > 0:
+                    entry["weights"] = {r[0]: round(r[2] / tot * 100, 4) for r in stock_rows}
+                    entry["names"] = {r[0]: r[1] for r in stock_rows}
+                    pname = (naver_list.get(proxy) or {}).get("itemname", proxy)
+                    entry["source"] = "%s 구성종목 기준 (지수 대용)" % pname
+                    entry["proxy"] = proxy
+                    entry["series"], _nav = fetch_wise_hist(h, proxy)
+                    entry["asof"] = asof
+            except Exception as ex:  # noqa
+                log("benchmark proxy failed", e["index"], str(ex)[:100])
+        if proxy and not entry["weights"] and bm_cache.get(key, {}).get("weights"):
+            entry = bm_cache[key]
+            entry["stale"] = True
+            log("benchmark", e["index"], "-> cached", entry.get("asof"))
+        elif entry["weights"]:
+            bm_cache[key] = {k: v for k, v in entry.items() if k != "stale"}
+        benchmarks[key] = entry
+        log("benchmark", e["index"], "->", entry["source"], len(entry["weights"]))
+    save_json(BM_CACHE, bm_cache)
+    flush_log()
+
+    # 6. weight estimation for overseas ETFs (whatever time is left; cache makes later runs fast) ----
     for code, e in active.items():
         rows = pdf_today.get(code) or []
         if not rows or any(r[2] > 0 for r in rows if is_security(r[1])):
             continue
-        if time_left() < 300:
+        if time_left() < 150:
             log("deadline near - skipping remaining weight estimation")
             break
-        ok, tot = estimate_weights(h, rows, tickers, prices, budget_sec=300)
+        ok, tot = estimate_weights(h, rows, tickers, prices, budget_sec=120)
         est_flags[code] = {"estimated": True, "resolved": ok, "total": tot}
         n_est += 1
         if n_est % 10 == 0:
             save_json(TICKER_CACHE, tickers); save_json(PRICE_CACHE, prices); flush_log()
     save_json(TICKER_CACHE, tickers)
     save_json(PRICE_CACHE, prices)
-    log("weights estimated for %d ETFs (tickers cached: %d, prices cached: %d, yahoo calls so far: %d)" % (n_est, len(tickers), len(prices), h.calls))
+    log("weights estimated for %d ETFs (tickers cached: %d, prices cached: %d, http calls total: %d)" % (n_est, len(tickers), len(prices), h.calls))
     flush_log()
 
-    path_today = os.path.join(PDF_DIR, asof + ".json")
-    existing = load_json(path_today, {})
-    for code, rows in pdf_today.items():
-        if not rows and existing.get(code):
-            pdf_today[code] = existing[code]
     save_json(path_today, pdf_today)
     snaps = sorted(f[:-5] for f in os.listdir(PDF_DIR) if re.fullmatch(r"\d{8}\.json", f))
     prev_dates = [d for d in snaps if d < asof]
@@ -628,48 +701,20 @@ def main():
         except OSError:
             pass
 
-    # 4. benchmark proxies ---------------------------------------------------------------------
-    benchmarks = {}
-    for code, e in active.items():
-        key = norm_index(e["index"])
-        if not key or key in benchmarks:
-            continue
-        if time_left() < 180:
-            break
-        entry = {"name": e["index"], "source": None, "weights": {}, "names": {}, "proxy": None, "series": {}}
-        proxy = STATIC_PROXY.get(key) or next((v for k, v in STATIC_PROXY.items() if v and k in key), None)
-        if proxy:
-            try:
-                rows, _, _src = fetch_holdings(h, proxy)
-                if rows and not any(r[2] > 0 for r in rows if is_security(r[1])) and time_left() > 200:
-                    estimate_weights(h, rows, tickers, prices, budget_sec=200)
-                    save_json(TICKER_CACHE, tickers); save_json(PRICE_CACHE, prices)
-                stock_rows = [r for r in rows if is_security(r[1]) and r[2] > 0]
-                tot = sum(r[2] for r in stock_rows)
-                if tot > 0:
-                    entry["weights"] = {r[0]: round(r[2] / tot * 100, 4) for r in stock_rows}
-                    entry["names"] = {r[0]: r[1] for r in stock_rows}
-                    pname = (naver_list.get(proxy) or {}).get("itemname", proxy)
-                    entry["source"] = "%s 구성종목 기준 (지수 대용)" % pname
-                    entry["proxy"] = proxy
-                    entry["series"], _nav = fetch_wise_hist(h, proxy)
-            except Exception as ex:  # noqa
-                log("benchmark proxy failed", e["index"], str(ex)[:100])
-        benchmarks[key] = entry
-        log("benchmark", e["index"], "->", entry["source"], len(entry["weights"]))
-    flush_log()
-
-    # 5. price / NAV history --------------------------------------------------------------------
-    hist, navh = {}, {}
-    for code, e in active.items():
-        if time_left() < 90:
-            hist[code], navh[code] = {}, {}
-            continue
-        try:
-            hist[code], navh[code] = fetch_wise_hist(h, code)
-        except Exception as ex:  # noqa
-            log("hist failed", code, str(ex)[:100])
-            hist[code], navh[code] = {}, {}
+    # carry-forward: ETFs whose holdings could not be fetched today keep the previous snapshot (flagged stale)
+    stale_holdings = {}
+    for code in active:
+        if not pdf_today.get(code) and pdf_prev.get(code):
+            pdf_today[code] = pdf_prev[code]
+            stale_holdings[code] = prev_date
+            if code in est_cache and code not in est_flags:
+                est_flags[code] = est_cache[code]
+    n_ok = sum(1 for v in pdf_today.values() if v)
+    if stale_holdings:
+        log("holdings carried forward from %s for %d ETFs" % (prev_date, len(stale_holdings)))
+    for code, fl in est_flags.items():
+        est_cache[code] = fl
+    save_json(EST_CACHE, est_cache)
 
     # 6. assemble --------------------------------------------------------------------------------
     etf_out, groups = {}, defaultdict(list)
@@ -689,6 +734,9 @@ def main():
         groups[g].append(code)
         dates = sorted(ps)
         series = [[d, ps[d], idx.get(d, 0)] for d in dates][-260:]
+        stale_series = False
+        if not series and (prev_etfs.get(code) or {}).get("series"):
+            series, stale_series = prev_etfs[code]["series"], True
         etf_out[code] = {
             "code": code, "name": e["name"], "manager": e["manager"], "index": e["index"], "region": e["region"],
             "fee": to_num(nv.get("totalFee")), "ter": None, "total_cost": None,
@@ -701,6 +749,7 @@ def main():
             "perf": perf, "summary": summary, "holdings": rows, "bm_missing": missing,
             "bm_source": bm.get("source"), "bm_proxy": bm.get("proxy"), "series": series,
             "weights_estimated": est_flags.get(code),
+            "stale": {"holdings": stale_holdings.get(code), "series": stale_series, "bm": bool(bm.get("stale"))},
         }
 
     group_list = []
@@ -731,15 +780,16 @@ def main():
         "sample": False, "groups": group_list, "etfs": etf_out,
         "benchmarks": {k: {"name": v["name"], "source": v["source"], "n": len(v["weights"])} for k, v in benchmarks.items()},
         "events": events[:600],
-        "stats": {"n_active": len(active), "n_pdf_ok": n_ok, "calls": h.calls, "seconds": round(time.time() - STARTED),
+        "stats": {"n_active": len(active), "n_pdf_ok": n_ok, "n_fetched": n_fetched, "n_stale": len(stale_holdings),
+                  "calls": h.calls, "seconds": round(time.time() - STARTED),
                   "n_domestic": sum(1 for e in active.values() if e["region"] == "domestic"),
                   "n_global": sum(1 for e in active.values() if e["region"] == "global")},
         "sources": "네이버 금융 · WiseReport(FnGuide)",
     }
     save_json(LATEST_PATH, latest)
     save_json(STATUS_PATH, {"ok": True, "asof": asof, "generated_at": latest["generated_at"],
-                            "n_active": len(active), "n_pdf_ok": n_ok}, compact=False)
-    log("DONE asof=%s active=%d holdings_ok=%d calls=%d %.0fs" % (asof, len(active), n_ok, h.calls, time.time() - STARTED))
+                            "n_active": len(active), "n_pdf_ok": n_ok, "n_fetched": n_fetched, "n_stale": len(stale_holdings)}, compact=False)
+    log("DONE asof=%s active=%d holdings_ok=%d fetched=%d stale=%d calls=%d %.0fs" % (asof, len(active), n_ok, n_fetched, len(stale_holdings), h.calls, time.time() - STARTED))
     flush_log()
 
 
