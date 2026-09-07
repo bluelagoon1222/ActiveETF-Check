@@ -104,6 +104,7 @@ footer{color:var(--faint);font-size:11.5px;line-height:1.6;margin-top:20px}
   <div class="asof" id="asof">데이터 불러오는 중…</div>
 </header>
 <div id="banner"></div>
+<div class="toolbar" id="regionBar" style="margin:4px 0 0"><span class="seg" id="regionSeg"><button data-r="domestic" class="on">국내 주식형</button><button data-r="global">해외 주식형</button></span><span class="meta" id="regionNote"></span></div>
 <div class="tabs" id="tabs"></div>
 
 <div class="card">
@@ -157,7 +158,8 @@ footer{color:var(--faint);font-size:11.5px;line-height:1.6;margin-top:20px}
 (function(){
 'use strict';
 const $=s=>document.querySelector(s);
-let D=null, grp=null, basis='close', period='3M', filt='all', sortKey='aum', sortDir=-1, chart=null;
+let D=null, grp=null, region='domestic', basis='close', period='3M', filt='all', sortKey='aum', sortDir=-1, chart=null;
+const regionGroups=()=>D.groups.filter(g=>(g.region||'domestic')===region);
 
 const fmtPct=(v,pp)=>v==null?'<span class="meta">–</span>':`<span class="${v>0?'pos':v<0?'neg':''}">${v>0?'+':''}${v.toFixed(2)}${pp?'p':'%'}</span>`;
 const fmtNum=v=>v==null?'–':v.toLocaleString('ko-KR');
@@ -181,15 +183,18 @@ async function load(){
   if(D.sample) b+=`<div class="banner">현재 표시되는 값은 <b>화면 확인용 샘플 데이터</b>입니다. GitHub Actions 첫 수집이 끝나면 실제 데이터로 자동 교체됩니다.</div>`;
   if(st && st.ok===false) b+=`<div class="banner err">최근 자동 수집이 실패했습니다 (${st.generated_at}). 아래 데이터는 마지막 성공 시점 기준입니다. 오류: ${st.error||''}</div>`;
   $('#banner').innerHTML=b;
-  $('#asof').innerHTML=`기준일 <b>${fmtDate(D.asof)}</b> · 전일 <b>${fmtDate(D.prev)}</b> · 갱신 ${D.generated_at} · 국내 주식형 액티브 ETF <b>${D.stats.n_active}</b>종 (PDF 수집 ${D.stats.n_pdf_ok}종)`;
+  $('#asof').innerHTML=`기준일 <b>${fmtDate(D.asof)}</b> · 전일 <b>${fmtDate(D.prev)}</b> · 갱신 ${D.generated_at} · 주식형 액티브 ETF <b>${D.stats.n_active}</b>종 (구성종목 수집 ${D.stats.n_pdf_ok}종)`;
   const h=location.hash.replace('#','');
-  grp=(D.groups.find(g=>g.key===h)||D.groups[0]).key;
+  const hg=D.groups.find(g=>g.key===h); if(hg) region=hg.region||'domestic';
+  $('#regionSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.r===region));
+  grp=(hg||regionGroups()[0]||D.groups[0]).key;
+  const nd=D.stats.n_domestic, ng=D.stats.n_global; $('#regionNote').textContent=(nd!=null?`국내 ${nd}종`:'')+(ng!=null?` · 해외 ${ng}종`:'');
   renderTabs(); renderAll();
-  $('#foot').innerHTML=`데이터: ETF CHECK(코스콤) ETF 기본정보·시세·NAV·순자산·구성종목(PDF)·총보수, 네이버 금융 기간수익률(가격·NAV)·추적오차·섹터비중. 구성종목 비중은 당일 PDF 기준(순자산 대비). '지수 대비' 비중과 초과수익은 동일 비교지수를 추종하는 최대 규모 패시브 ETF의 PDF와 가격을 지수 대용으로 사용한 근사치입니다. 수익률은 분배금 미반영 단순 등락률. 매 영업일 18:40 KST 자동 갱신.<br>본 사이트는 공시 데이터를 정리한 참고자료이며 특정 상품의 매수·매도를 권유하지 않습니다. 투자 판단과 책임은 투자자 본인에게 있습니다.`;
+  $('#foot').innerHTML=`데이터: 네이버 금융(ETF 목록·기간수익률·추적오차·섹터비중)과 WiseReport/FnGuide(CU 구성종목 전체, 일별 NAV·종가). 구성종목 비중은 당일 공시 PDF(CU) 기준. '지수 대비' 비중과 초과수익은 동일 비교지수를 추종하는 대표 패시브 ETF의 구성종목·가격을 지수 대용으로 사용한 근사치이며, 대용 ETF가 없는 테마형은 같은 그룹 평균 대비로 표시합니다. 수익률은 분배금 미반영 단순 등락률. 평일 08:50(당일 PDF)·18:40(종가) 자동 갱신.<br>본 사이트는 공시 데이터를 정리한 참고자료이며 특정 상품의 매수·매도를 권유하지 않습니다. 투자 판단과 책임은 투자자 본인에게 있습니다.`;
 }
 
 function renderTabs(){
-  $('#tabs').innerHTML=D.groups.map(g=>`<button class="tab ${g.key===grp?'on':''}" data-g="${g.key}">${g.name}<span class="n">${g.etfs.length}</span></button>`).join('');
+  $('#tabs').innerHTML=regionGroups().map(g=>`<button class="tab ${g.key===grp?'on':''}" data-g="${g.key}">${g.name}<span class="n">${g.etfs.length}</span></button>`).join('');
   $('#tabs').querySelectorAll('.tab').forEach(t=>t.onclick=()=>{grp=t.dataset.g;location.hash=grp;renderTabs();renderAll();});
 }
 function G(){return D.groups.find(g=>g.key===grp);}
@@ -338,7 +343,9 @@ function closeDrawer(){ $('#drawer').classList.remove('open'); $('#overlay').cla
 $('#overlay').onclick=closeDrawer;
 
 /* ---------------- controls ---------------- */
-$('#basisSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{basis=b.dataset.b;$('#basisSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderPerf();});
+$('#regionSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{region=b.dataset.r;$('#regionSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));const gs=regionGroups(); if(!gs.length){$('#tabs').innerHTML='<span class="meta">해당 지역 액티브 ETF 데이터가 없습니다 (다음 수집부터 표시)</span>';return;} grp=gs[0].key;location.hash=grp;renderTabs();renderAll();});
+$('#basisSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{basis=b.dataset.b;$('#regionSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{region=b.dataset.r;$('#regionSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));const gs=regionGroups(); if(!gs.length){$('#tabs').innerHTML='<span class="meta">해당 지역 액티브 ETF 데이터가 없습니다 (다음 수집부터 표시)</span>';return;} grp=gs[0].key;location.hash=grp;renderTabs();renderAll();});
+$('#basisSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderPerf();});
 $('#periodSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{period=b.dataset.p;$('#periodSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderChart();});
 $('#filterSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{filt=b.dataset.f;$('#filterSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderMatrix();});
 ['q','thr','showCash','showBm'].forEach(id=>$('#'+id).addEventListener('input',renderMatrix));
