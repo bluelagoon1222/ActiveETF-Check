@@ -188,8 +188,9 @@ async function load(){
   let b='';
   if(D.sample) b+=`<div class="banner">현재 표시되는 값은 <b>화면 확인용 샘플 데이터</b>입니다. GitHub Actions 첫 수집이 끝나면 실제 데이터로 자동 교체됩니다.</div>`;
   if(st && st.ok===false) b+=`<div class="banner err">최근 자동 수집이 실패했습니다 (${st.generated_at}). 아래 데이터는 마지막 성공 시점 기준입니다. 오류: ${st.error||''}</div>`;
+  if(D.stats && D.stats.n_fetched!=null && D.stats.n_fetched<D.stats.n_active*0.5) b+=`<div class="banner err">이번 수집에서 데이터 제공 서버 응답이 불안정해 일부 항목은 직전 수집값을 유지했습니다 (신규 수집 ${D.stats.n_fetched}/${D.stats.n_active}종). 다음 정기 실행에서 자동으로 갱신됩니다.</div>`;
   $('#banner').innerHTML=b;
-  $('#asof').innerHTML=`기준일 <b>${fmtDate(D.asof)}</b> · 전일 <b>${fmtDate(D.prev)}</b> · 갱신 ${D.generated_at} · 주식형 액티브 ETF <b>${D.stats.n_active}</b>종 (구성종목 수집 ${D.stats.n_pdf_ok}종)`;
+  $('#asof').innerHTML=`기준일 <b>${fmtDate(D.asof)}</b> · 전일 <b>${fmtDate(D.prev)}</b> · 갱신 ${D.generated_at} · 주식형 액티브 ETF <b>${D.stats.n_active}</b>종 (구성종목 수집 ${D.stats.n_pdf_ok}종${D.stats.n_stale?` · 전일자 유지 ${D.stats.n_stale}종`:''})`;
   const h=location.hash.replace('#','');
   const hg=D.groups.find(g=>g.key===h); if(hg) region=hg.region||'domestic';
   $('#regionSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.r===region));
