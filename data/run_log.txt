@@ -1,0 +1,69 @@
+10:21:53 Naver ETF list: 1167
+10:21:53 domestic equity ACTIVE ETFs: 85
+10:25:27 holdings ok: 85/85  asof=20260904
+10:25:27 previous snapshot: None
+10:25:30 benchmark 코스피 200 커버드콜 5% OTM -> KODEX 200 구성종목 기준 (지수 대용) 201
+10:25:30 benchmark iSelect K-로봇테마 -> None 0
+10:25:33 benchmark 코스피 200 -> KODEX 200 구성종목 기준 (지수 대용) 201
+10:25:33 benchmark FnGuide 반도체 TOP10 Capped -> None 0
+10:25:33 benchmark KEDI 메가테크 -> None 0
+10:25:36 benchmark 코스닥 -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
+10:25:39 benchmark 코스피 -> KODEX 코스피 구성종목 기준 (지수 대용) 713
+10:25:39 benchmark iSelect 바이오헬스케어 PR -> None 0
+10:25:39 benchmark FnGuide 반도체 밸류체인 -> None 0
+10:25:39 benchmark FnGuide K-신재생에너지플러스 -> None 0
+10:25:42 benchmark KRX 정보기술 -> KODEX IT 구성종목 기준 (지수 대용) 45
+10:25:42 benchmark 코리아 밸류업 -> None 0
+10:25:42 benchmark iSelect 비메모리반도체 (시장가격) -> None 0
+10:25:42 benchmark iSelect 2차전지  (시장가격) -> None 0
+10:25:44 benchmark KRX 헬스케어 -> KODEX 헬스케어 구성종목 기준 (지수 대용) 67
+10:25:44 benchmark FnGuide 기업가치 (시장가격) -> None 0
+10:25:44 benchmark FnGuide SK하이닉스밸류체인 -> None 0
+10:25:44 benchmark KAP 코리아전략산업 -> None 0
+10:25:44 benchmark KRX-Akros 고배당주 20 위클리 고정 30% 커버드콜 -> None 0
+10:25:44 benchmark KRX 기술이전바이오 -> None 0
+10:25:44 benchmark KEDI K수출핵심기업TOP30 -> None 0
+10:25:44 benchmark FnGuide AI반도체&인프라 -> None 0
+10:25:47 benchmark 코스닥150 위클리고정30% 커버드콜 -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
+10:25:50 benchmark 코스피 200 위클리 고정 30% 커버드콜 -> KODEX 200 구성종목 기준 (지수 대용) 201
+10:25:50 benchmark Akros K제조업 50 -> None 0
+10:25:50 benchmark FnGuide K-메타버스 -> None 0
+10:25:50 benchmark MSCI Korea Country ESG Leaders Custom Capped Price return Index -> None 0
+10:25:50 benchmark FnGuide K-친환경선박 -> None 0
+10:25:50 benchmark KRX 바이오 TOP 10 -> None 0
+10:25:50 benchmark FnGuide 올라운드 가치주 시장가격 -> None 0
+10:25:50 benchmark FnGuide 대장장이 -> None 0
+10:25:50 benchmark Solactive AI인프라 -> None 0
+10:25:50 benchmark FnGuide K-미래차 -> None 0
+10:25:50 benchmark FnGuide 수소전력ESS인프라 -> None 0
+10:25:54 benchmark 코스닥 150 -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
+10:25:54 benchmark FnGuide 배당성향탑픽 -> None 0
+10:25:54 benchmark KRX 기후변화 솔루션 -> None 0
+10:25:54 benchmark FnGuide 친환경자동차밸류체인 -> None 0
+10:25:54 benchmark FnGuide 주주가치 -> None 0
+10:25:57 benchmark 코스닥 150 타겟 15% 위클리 커버드콜 -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
+10:25:57 benchmark FnGuide K-주주가치 -> None 0
+10:25:57 benchmark MK-iSelect AI ESG (시장가격) -> None 0
+10:25:57 benchmark FnGuide 퓨처모빌리티 -> None 0
+10:25:59 benchmark 코스피 200 고배당 -> KODEX 200 구성종목 기준 (지수 대용) 201
+10:25:59 benchmark FnGuide K-이노베이션 -> None 0
+10:25:59 benchmark FnGuide K-컬처 -> None 0
+10:25:59 benchmark FnGuide 한화 ESG Growth -> None 0
+10:26:02 benchmark KRX K-AI 바이오테크코스닥 (시장가격) -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
+10:26:02 benchmark FnGuide 플랫폼 -> None 0
+10:26:02 benchmark KRX BBIG -> None 0
+10:26:02 benchmark FnGuide 바이오시밀러&CDMO -> None 0
+10:26:02 benchmark iSelect K-바이오헬스케어 -> None 0
+10:26:02 benchmark FnGuide 피지컬AI TOP2플러스 -> None 0
+10:26:02 benchmark iSelect 반도체&2차전지핵심소재 -> None 0
+10:26:02 benchmark iSelect 미래전략기술 -> None 0
+10:26:02 benchmark FnGuide 저궤도위성 & 광통신 인프라 -> None 0
+10:26:02 benchmark FnGuide 한화 ESG Value -> None 0
+10:26:02 benchmark iSelect K수출핵심산업  (시장가격) -> None 0
+10:26:06 benchmark 코스피 중형주 -> KODEX 코스피 구성종목 기준 (지수 대용) 713
+10:26:06 benchmark FnGuide K-바이오 밸런스드 -> None 0
+10:26:06 benchmark FnGuide 신약포커스바이오 -> None 0
+10:26:08 benchmark 코스피 200 중소형주 -> KODEX 200 구성종목 기준 (지수 대용) 201
+10:26:08 benchmark iSelect AI -> None 0
+10:26:08 benchmark iSelect 포스트 IPO -> None 0
+10:28:04 DONE asof=20260904 active=85 holdings_ok=85 calls=284 373s
