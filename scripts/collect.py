@@ -50,18 +50,25 @@ DEADLINE_SEC = 30 * 60
 STARTED = time.time()
 _LOG = []
 
-CASH_RE = re.compile(r"현금|예금|설정현금|원화|CASH|예치금", re.I)
-DERIV_RE = re.compile(r"선물|옵션|콜|풋|스왑|\d{4}년\s?\d{1,2}월물|F\d{6}|C\d{6}|P\d{6}", re.I)
-# active ETFs whose name matches this are NOT domestic equity (bonds, money market, overseas, commodities...)
-EXCLUDE_RE = re.compile(r"채권|국공채|국채|회사채|은행채|금융채|CD금리|KOFR|머니마켓|MMF|단기채|단기자금|혼합|TDF|TRF|금리|달러|"
-                        r"엔화|위안|원자재|골드|미국|글로벌|차이나|중국|일본|인도|나스닥|S&P|선진국|신흥국|유로|월드|해외|"
-                        r"아시아|베트남|유럽|빅테크|테슬라|엔비디아|팔란티어|리츠부동산|리츠|부동산|비트코인|채\(", re.I)
+CASH_RE = re.compile(r"현금|예금|설정현금|원화|CASH|예치금|달러|USD|EUR|JPY|CNY|HKD|외화|MMF|RP\b", re.I)
+DERIV_RE = re.compile(r"선물|옵션|콜|풋|스왑|선물환|FUTURE|OPTION|SWAP|\d{4}년\s?\d{1,2}월물|F\d{6}|C\d{6}|P\d{6}", re.I)
+# active ETFs whose name matches this are NOT equity funds (bonds, money market, commodities, FX, mixed...)
+EXCLUDE_RE = re.compile(r"채권|국공채|국채|회사채|은행채|금융채|CD금리|KOFR|SOFR|머니마켓|MMF|단기채|단기자금|혼합|TDF|TRF|금리|"
+                        r"달러선물|엔선물|위안선물|엔화|원자재|골드|금현물|은현물|원유|비트코인|이더리움|리츠부동산|리츠|부동산|채\(|"
+                        r"하이일드|크레딧|코인", re.I)
+# Naver ETF tab: 1=국내시장지수 2=국내업종/테마 4=해외주식 (5=원자재 6=채권 7=기타)
+REGION_BY_TAB = {1: "domestic", 2: "domestic", 4: "global"}
 # benchmark index -> representative passive ETF (holdings + price used as the index proxy)
 STATIC_PROXY = {"KOSPI200": "069500", "KOSDAQ150": "229200", "KOSDAQ": "229200", "KRX반도체": "091160", "KRX300": "292190",
                 "KOSPI": "226490", "KRX바이오K뉴딜": "364970", "KRX2차전지K뉴딜": "364980", "KRXBBIGK뉴딜": "364960",
                 "KOSPI200커버드콜5OTM": "069500", "KOSPI200커버드콜": "069500", "KOSDAQ150커버드콜": "229200",
                 "KOSPI200고배당": "069500", "KOSPI200중소형주": "069500", "KOSPI중형주": "226490", "KRX정보기술": "266370",
-                "KRX헬스케어": "266420", "KRX기술이전바이오": None}
+                "KRX헬스케어": "266420", "KRX기술이전바이오": None,
+                # overseas index proxies
+                "SP500": "360750", "S&P500": "360750", "NASDAQ100": "133690", "나스닥100": "133690", "DOWJONES30": "245340",
+                "RUSSELL2000": "280930", "PHLXSEMICONDUCTOR": "381180", "필라델피아반도체": "381180", "MSCIWORLD": "251350",
+                "MSCIACWI": "251350", "CSI300": "192090", "NIKKEI225": "241180", "NIFTY50": "453810", "EUROSTOXX50": "195930",
+                "HANGSENG": "245360", "TOPIX": "195920", "NASDAQ100커버드콜": "133690", "SP500커버드콜": "360750"}
 
 
 def time_left():
@@ -200,7 +207,7 @@ def fetch_wise_hist(h, code, days=400):
 GROUP_RULES = [
     ("kosdaq", "코스닥", r"코스닥|KOSDAQ"),
     ("semicon", "반도체", r"반도체|SEMICON|파운드리|HBM|메모리|SK하이닉스"),
-    ("ai_tech", "AI·테크·소프트웨어", r"\bAI\b|인공지능|테크|소프트웨어|SW|플랫폼|인터넷|디지털|데이터센터|클라우드|메타버스|이노베이션|혁신기술|R&D|광통신|위성"),
+    ("ai_tech", "AI·테크·소프트웨어", r"(?<![A-Za-z])AI(?![A-Za-z])|인공지능|테크|소프트웨어|SW|플랫폼|인터넷|디지털|데이터센터|클라우드|메타버스|이노베이션|혁신기술|R&D|광통신|위성"),
     ("robot", "로봇·자동화·모빌리티", r"로봇|자동화|우주|항공|드론|휴머노이드|피지컬|자율주행|모빌리티|자동차"),
     ("battery", "2차전지·에너지·소재", r"2차전지|이차전지|배터리|전기차|에너지|태양광|수소|풍력|원자력|원전|전력|송전|신재생|ESS|소재"),
     ("bio", "바이오·헬스케어", r"바이오|헬스케어|제약|의료|헬스|시밀러|CDMO|신약"),
@@ -211,9 +218,35 @@ GROUP_RULES = [
     ("smallmid", "중소형·성장·퀀트", r"중소형|스몰캡|성장|그로스|퀀트|모멘텀|포스트IPO|강소기업|메가트렌드|미래전략|대장장이|포커스|일레븐"),
     ("broad", "코스피·전체시장", r"코스피|KOSPI|200|KRX\s?300|코리아|KOREA|대형|TOP|전체|종합|메가테크"),
 ]
-GROUP_ORDER = [g[0] for g in GROUP_RULES] + ["other"]
+GLOBAL_RULES = [
+    ("g_income", "미국·글로벌 배당·커버드콜", r"배당|커버드콜|인컴|프리미엄|위클리|데일리|월배당|타겟"),
+    ("g_semi", "글로벌 반도체", r"반도체|SEMICON|필라델피아|SOX|엔비디아|TSMC"),
+    ("g_ai", "글로벌 AI·테크·소프트웨어", r"(?<![A-Za-z])AI(?![A-Za-z])|인공지능|테크|소프트웨어|클라우드|빅테크|데이터센터|로봇|휴머노이드|양자|사이버|인터넷|플랫폼|팔란티어|테슬라|매그니피센트|FANG"),
+    ("g_bio", "글로벌 바이오·헬스케어", r"바이오|헬스케어|제약|비만|메디컬"),
+    ("g_asia", "중국·일본·인도·신흥국", r"차이나|중국|항셍|홍콩|일본|니케이|TOPIX|인도|베트남|신흥국|이머징|아시아|대만"),
+    ("g_us_broad", "미국 대표지수(S&P500·나스닥·다우)", r"S&P|나스닥|NASDAQ|다우|러셀|미국대형|미국500|미국주식|미국\s?TOP|미국성장|미국가치"),
+    ("g_theme", "글로벌 테마(에너지·우주·소비 등)", r"에너지|원자력|우주|방산|전력|인프라|소비|럭셔리|여행|친환경|배터리|리튬|채굴|금융|은행|모빌리티|자율주행|드론"),
+    ("g_world", "글로벌·선진국 전체시장", r"글로벌|월드|WORLD|ACWI|선진국|유럽|유로|해외"),
+]
+GROUP_ORDER = [g[0] for g in GROUP_RULES] + ["other"] + [g[0] for g in GLOBAL_RULES] + ["g_other"]
 GROUP_NAMES = {g[0]: g[1] for g in GROUP_RULES}
+GROUP_NAMES.update({g[0]: g[1] for g in GLOBAL_RULES})
 GROUP_NAMES["other"] = "기타"
+GROUP_NAMES["g_other"] = "해외 기타"
+GROUP_REGION = {g[0]: "domestic" for g in GROUP_RULES}
+GROUP_REGION.update({g[0]: "global" for g in GLOBAL_RULES})
+GROUP_REGION.update({"other": "domestic", "g_other": "global"})
+
+
+def classify_global(name, index_name):
+    for key, _, pat in GLOBAL_RULES:
+        if re.search(pat, name, flags=re.I):
+            return key
+    text = "%s | %s" % (name, index_name or "")
+    for key, _, pat in GLOBAL_RULES:
+        if re.search(pat, text, flags=re.I):
+            return key
+    return "g_other"
 
 
 def classify(name, index_name):
@@ -233,7 +266,8 @@ def classify(name, index_name):
 
 
 def norm_index(s):
-    s = (s or "").upper().replace("지수", "").replace("INDEX", "")
+    s = (s or "").upper().replace("지수", "").replace("INDEX", "").replace("TOTAL RETURN", "").replace("PRICE RETURN", "")
+    s = s.replace("S&P 500", "SP500").replace("S&P500", "SP500")
     s = re.sub(r"\(.*?\)", "", s)
     s = s.replace("코스피", "KOSPI").replace("코스닥", "KOSDAQ")
     return re.sub(r"[^0-9A-Z가-힣]", "", s)
@@ -352,12 +386,14 @@ def main():
         name = (i.get("itemname") or "").strip()
         if "액티브" not in name or EXCLUDE_RE.search(name):
             continue
-        if i.get("etfTabCode") not in (1, 2):   # 1=국내시장지수 2=국내업종/테마 (4=해외주식 5=원자재 6=채권 7=기타)
+        region = REGION_BY_TAB.get(i.get("etfTabCode"))
+        if not region:
             continue
         aum = to_num(i.get("marketSum"))
-        active[code] = {"code": code, "name": name, "close": to_num(i.get("nowVal")), "nav": to_num(i.get("nav")),
+        active[code] = {"code": code, "name": name, "region": region, "close": to_num(i.get("nowVal")), "nav": to_num(i.get("nav")),
                         "aum": aum * 1e8 if aum is not None else None, "manager": "", "index": "", "listed": ""}
-    log("domestic equity ACTIVE ETFs:", len(active))
+    log("equity ACTIVE ETFs:", len(active), "| domestic:", sum(1 for e in active.values() if e["region"] == "domestic"),
+        "| global:", sum(1 for e in active.values() if e["region"] == "global"))
     if not active:
         raise RuntimeError("no active ETFs matched")
     if args.max_etfs:
@@ -475,12 +511,12 @@ def main():
             if perf.get(label + "_nav") is None and ns:
                 kw = {"ytd": True} if label == "YTD" else {"back_days": PERIODS[label]}
                 perf[label + "_nav"] = ret_between(ns, asof, **kw)
-        g = classify(e["name"], e["index"])
+        g = classify_global(e["name"], e["index"]) if e["region"] == "global" else classify(e["name"], e["index"])
         groups[g].append(code)
         dates = sorted(ps)
         series = [[d, ps[d], idx.get(d, 0)] for d in dates][-260:]
         etf_out[code] = {
-            "code": code, "name": e["name"], "manager": e["manager"], "index": e["index"],
+            "code": code, "name": e["name"], "manager": e["manager"], "index": e["index"], "region": e["region"],
             "fee": to_num(nv.get("totalFee")), "ter": None, "total_cost": None,
             "listed": e["listed"], "group": g,
             "close": e["close"], "nav": e["nav"], "aum": e["aum"], "val": None,
@@ -496,7 +532,7 @@ def main():
     for g in GROUP_ORDER:
         if groups.get(g):
             codes = sorted(groups[g], key=lambda c: -(etf_out[c]["aum"] or 0))
-            group_list.append({"key": g, "name": GROUP_NAMES[g], "etfs": codes})
+            group_list.append({"key": g, "name": GROUP_NAMES[g], "region": GROUP_REGION.get(g, "domestic"), "etfs": codes})
 
     events = []
     snaps = sorted(f[:-5] for f in os.listdir(PDF_DIR) if re.fullmatch(r"\d{8}\.json", f))
@@ -520,7 +556,9 @@ def main():
         "sample": False, "groups": group_list, "etfs": etf_out,
         "benchmarks": {k: {"name": v["name"], "source": v["source"], "n": len(v["weights"])} for k, v in benchmarks.items()},
         "events": events[:600],
-        "stats": {"n_active": len(active), "n_pdf_ok": n_ok, "calls": h.calls, "seconds": round(time.time() - STARTED)},
+        "stats": {"n_active": len(active), "n_pdf_ok": n_ok, "calls": h.calls, "seconds": round(time.time() - STARTED),
+                  "n_domestic": sum(1 for e in active.values() if e["region"] == "domestic"),
+                  "n_global": sum(1 for e in active.values() if e["region"] == "global")},
         "sources": "네이버 금융 · WiseReport(FnGuide)",
     }
     save_json(LATEST_PATH, latest)
