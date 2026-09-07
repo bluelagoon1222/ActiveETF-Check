@@ -50,12 +50,12 @@ DEADLINE_SEC = 30 * 60
 STARTED = time.time()
 _LOG = []
 
-CASH_RE = re.compile(r"현금|예금|설정현금|원화|CASH|예치금|달러|USD|EUR|JPY|CNY|HKD|외화|MMF|RP\b", re.I)
+CASH_RE = re.compile(r"현금|예금|설정현금|원화|예치금|외화|달러(?!\s*트리)|\bCASH\b|\bUSD\b|\bEUR\b|\bJPY\b|\bCNY\b|\bHKD\b|\bMMF\b", re.I)
 DERIV_RE = re.compile(r"선물|옵션|콜|풋|스왑|선물환|FUTURE|OPTION|SWAP|\d{4}년\s?\d{1,2}월물|F\d{6}|C\d{6}|P\d{6}", re.I)
 # active ETFs whose name matches this are NOT equity funds (bonds, money market, commodities, FX, mixed...)
 EXCLUDE_RE = re.compile(r"채권|국공채|국채|회사채|은행채|금융채|CD금리|KOFR|SOFR|머니마켓|MMF|단기채|단기자금|혼합|TDF|TRF|금리|"
                         r"달러선물|엔선물|위안선물|엔화|원자재|골드|금현물|은현물|원유|비트코인|이더리움|리츠부동산|리츠|부동산|채\(|"
-                        r"하이일드|크레딧|코인", re.I)
+                        r"하이일드|크레딧|코인|합성|국제금|금커버드콜|은커버드콜", re.I)
 # Naver ETF tab: 1=국내시장지수 2=국내업종/테마 4=해외주식 (5=원자재 6=채권 7=기타)
 REGION_BY_TAB = {1: "domestic", 2: "domestic", 4: "global"}
 # benchmark index -> representative passive ETF (holdings + price used as the index proxy)
@@ -166,6 +166,47 @@ def fetch_naver_analysis(h, code):
     return h.get("https://m.stock.naver.com/api/stock/%s/etfAnalysis" % code, NV_HEADERS)
 
 
+_SUFFIX_RE = re.compile(r"\b(INC|INCORPORATED|CORP|CORPORATION|LTD|LIMITED|PLC|CO|COMPANY|HOLDINGS?|HLDGS?|SA|NV|AG|SE|ADR|ADS|SHS|ORD|NPV|THE|REG|REGISTERED|SPONSORED|NEW)\b", re.I)
+
+
+def norm_stock_name(name):
+    """Key used to match the same security across ETFs (managers spell foreign names differently)."""
+    n = (name or "").upper().strip()
+    if re.search(r"[가-힣]", n) and not re.search(r"[A-Z]{3,}", n):
+        return "N:" + re.sub(r"\s+", "", n)           # Korean names are already canonical
+    n = re.sub(r"\(.*?\)", " ", n)
+    n = n.replace("&", " AND ").replace("-", " ").replace(".", " ").replace(",", " ").replace("'", "")
+    n = re.sub(r"\bCLASS\s+([A-C])\b|\bCL\s+([A-C])\b", lambda m: " " + (m.group(1) or m.group(2)), n)
+    n = _SUFFIX_RE.sub(" ", n)
+    n = re.sub(r"\s+", " ", n).strip()
+    return "N:" + n.replace(" ", "")
+
+
+def fetch_naver_pc_pdf(h, code):
+    """Holdings table ('ETF 주요 구성자산') on the Naver PC ETF page - carries weights for overseas ETFs."""
+    html = h.get("https://finance.naver.com/item/main.naver", {"User-Agent": UA, "Accept-Language": "ko-KR,ko;q=0.9"},
+                 params={"code": code}, as_json=False)
+    i = html.find("ETF 주요 구성자산")
+    if i < 0:
+        return [], None
+    seg = html[i:]
+    j = seg.find("<h4", 10)
+    if j > 0:
+        seg = seg[:j]
+    rows = []
+    for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", seg, flags=re.S):
+        cells = [re.sub(r"<[^>]+>", " ", c) for c in re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", tr, flags=re.S)]
+        cells = [re.sub(r"\s+", " ", c).strip() for c in cells]
+        if len(cells) < 3 or not cells[0] or cells[0].startswith("구성종목"):
+            continue
+        name = cells[0]
+        w = to_num(cells[2].replace("%", "")) if "%" in cells[2] else None
+        shares = to_num(cells[1])
+        px = to_num(cells[3]) if len(cells) > 3 else None
+        rows.append([norm_stock_name(name), name, round(w or 0.0, 4), shares, px])
+    return rows, None
+
+
 def fetch_wise_pdf(h, code):
     """Full CU holdings from the WiseReport ETF page. Returns (rows, date). rows: [key, name, weight, shares, None]"""
     html = h.get(WR_PAGE, WR_HEADERS, params={"cmp_cd": code}, as_json=False)
@@ -180,8 +221,22 @@ def fetch_wise_pdf(h, code):
             continue
         w = to_num(g.get("ETF_WEIGHT"), 0.0) or 0.0
         date = date or re.sub(r"[^0-9]", "", g.get("TRD_DT") or "")
-        rows.append(["N:" + name, name, round(w, 4), to_num(g.get("AGMT_STK_CNT")), None])
+        rows.append([norm_stock_name(name), name, round(w, 4), to_num(g.get("AGMT_STK_CNT")), None])
     return rows, (date or None)
+
+
+def fetch_holdings(h, code):
+    """WiseReport CU (full list, weights for domestic); when weights are missing (overseas ETFs) use Naver PC table."""
+    rows, date = fetch_wise_pdf(h, code)
+    if rows and not any(r[2] > 0 for r in rows if is_security(r[1])):
+        try:
+            nrows, _ = fetch_naver_pc_pdf(h, code)
+            if nrows and any(r[2] > 0 for r in nrows if is_security(r[1])):
+                return nrows, date, "naver"
+        except Exception as ex:  # noqa
+            log("naver pc holdings failed", code, str(ex)[:80])
+        return rows, date, "wise-noweight"
+    return rows, date, "wise"
 
 
 def fetch_wise_hist(h, code, days=400):
@@ -219,14 +274,17 @@ GROUP_RULES = [
     ("broad", "코스피·전체시장", r"코스피|KOSPI|200|KRX\s?300|코리아|KOREA|대형|TOP|전체|종합|메가테크"),
 ]
 GLOBAL_RULES = [
-    ("g_income", "미국·글로벌 배당·커버드콜", r"배당|커버드콜|인컴|프리미엄|위클리|데일리|월배당|타겟"),
-    ("g_semi", "글로벌 반도체", r"반도체|SEMICON|필라델피아|SOX|엔비디아|TSMC"),
-    ("g_ai", "글로벌 AI·테크·소프트웨어", r"(?<![A-Za-z])AI(?![A-Za-z])|인공지능|테크|소프트웨어|클라우드|빅테크|데이터센터|로봇|휴머노이드|양자|사이버|인터넷|플랫폼|팔란티어|테슬라|매그니피센트|FANG"),
-    ("g_bio", "글로벌 바이오·헬스케어", r"바이오|헬스케어|제약|비만|메디컬"),
+    ("g_income", "미국·글로벌 배당·커버드콜", r"배당|커버드콜|인컴|프리미엄|위클리|데일리|월배당|타겟|버퍼"),
+    ("g_semi", "글로벌 반도체", r"반도체|SEMICON|필라델피아|SOX|엔비디아|브로드컴|TSMC|ASML"),
+    ("g_asia_tech", "중국·아시아 테크", r"(차이나|중국|일본|아시아|샤오미|BYD|알리바바|텐센트|홍콩|대만).*(AI|테크|밸류체인|빅테크|플랫폼|기업)|샤오미|BYD"),
+    ("g_robot", "글로벌 로봇·모빌리티·우주·방산", r"로봇|휴머노이드|피지컬|자율주행|모빌리티|우주|방산|드론|테슬라|전기차|EV\b"),
+    ("g_energy", "글로벌 에너지·전력인프라", r"전력|에너지|천연가스|원자력|원전|인프라|친환경|유틸리티"),
+    ("g_bio", "글로벌 바이오·헬스케어", r"바이오|헬스케어|제약|비만|메디컬|치료제|질환|의료"),
+    ("g_consumer", "글로벌 소비·컨슈머·IP", r"소비|컨슈머|트렌드|럭셔리|저작권|여행|레저|엔터|미디어|영에이지|시니어"),
     ("g_asia", "중국·일본·인도·신흥국", r"차이나|중국|항셍|홍콩|일본|니케이|TOPIX|인도|베트남|신흥국|이머징|아시아|대만"),
-    ("g_us_broad", "미국 대표지수(S&P500·나스닥·다우)", r"S&P|나스닥|NASDAQ|다우|러셀|미국대형|미국500|미국주식|미국\s?TOP|미국성장|미국가치"),
-    ("g_theme", "글로벌 테마(에너지·우주·소비 등)", r"에너지|원자력|우주|방산|전력|인프라|소비|럭셔리|여행|친환경|배터리|리튬|채굴|금융|은행|모빌리티|자율주행|드론"),
-    ("g_world", "글로벌·선진국 전체시장", r"글로벌|월드|WORLD|ACWI|선진국|유럽|유로|해외"),
+    ("g_ai", "글로벌 AI·빅테크·소프트웨어", r"(?<![A-Za-z])AI(?![A-Za-z])|인공지능|테크|소프트웨어|클라우드|빅테크|데이터센터|양자|사이버|인터넷|플랫폼|생성형|밸류체인|넥스트|이노베이션|매그니피센트|FANG"),
+    ("g_us_broad", "미국 대표지수·대형주", r"S&P|나스닥|NASDAQ|다우|러셀|미국대형|미국500|미국주식|미국성장|미국가치|성장기업|대형성장|대형가치"),
+    ("g_world", "글로벌·선진국 전체시장", r"글로벌|월드|WORLD|ACWI|선진국|유럽|유로|해외|탑픽|분산|일등기업|대장장이"),
 ]
 GROUP_ORDER = [g[0] for g in GROUP_RULES] + ["other"] + [g[0] for g in GLOBAL_RULES] + ["g_other"]
 GROUP_NAMES = {g[0]: g[1] for g in GROUP_RULES}
@@ -417,14 +475,15 @@ def main():
 
     # 3. full holdings (WiseReport) -------------------------------------------------------------
     os.makedirs(PDF_DIR, exist_ok=True)
-    pdf_today, pdf_dates = {}, defaultdict(int)
+    pdf_today, pdf_dates, src_count = {}, defaultdict(int), defaultdict(int)
     for code, e in active.items():
         if time_left() < 240:
             log("deadline near - skipping remaining holdings")
             break
         try:
-            rows, d = fetch_wise_pdf(h, code)
+            rows, d, src = fetch_holdings(h, code)
             pdf_today[code] = rows
+            src_count[src] += 1
             if d:
                 pdf_dates[d] += 1
         except Exception as ex:  # noqa
@@ -433,7 +492,7 @@ def main():
         pdf_today.setdefault(code, [])
     asof = max(pdf_dates.items(), key=lambda kv: kv[1])[0] if pdf_dates else dt.datetime.now(KST).strftime("%Y%m%d")
     n_ok = sum(1 for v in pdf_today.values() if v)
-    log("holdings ok: %d/%d  asof=%s" % (n_ok, len(active), asof))
+    log("holdings ok: %d/%d  asof=%s  sources=%s" % (n_ok, len(active), asof, dict(src_count)))
     flush_log()
 
     path_today = os.path.join(PDF_DIR, asof + ".json")
@@ -446,6 +505,7 @@ def main():
     prev_dates = [d for d in snaps if d < asof]
     prev_date = prev_dates[-1] if prev_dates else None
     pdf_prev = load_json(os.path.join(PDF_DIR, prev_date + ".json"), {}) if prev_date else {}
+    pdf_prev = {c: [[norm_stock_name(r[1])] + list(r[1:]) for r in rows if len(r) >= 3] for c, rows in pdf_prev.items()}
     # snapshots written by earlier versions used stock codes as keys -> not comparable; require name keys
     if pdf_prev and not any(str(r[0]).startswith("N:") for rows in pdf_prev.values() for r in rows[:1]):
         log("previous snapshot uses old key format - skipping day-over-day diff for today")
@@ -469,7 +529,7 @@ def main():
         proxy = STATIC_PROXY.get(key) or next((v for k, v in STATIC_PROXY.items() if v and k in key), None)
         if proxy:
             try:
-                rows, _ = fetch_wise_pdf(h, proxy)
+                rows, _, _src = fetch_holdings(h, proxy)
                 stock_rows = [r for r in rows if is_security(r[1])]
                 tot = sum(r[2] for r in stock_rows)
                 if tot > 0:
