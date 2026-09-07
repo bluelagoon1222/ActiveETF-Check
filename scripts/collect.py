@@ -225,21 +225,99 @@ def fetch_wise_pdf(h, code):
     return rows, (date or None)
 
 
+CACHE_DIR = os.path.join(DATA_DIR, "cache")
+TICKER_CACHE = os.path.join(CACHE_DIR, "tickers.json")
+PRICE_CACHE = os.path.join(CACHE_DIR, "prices.json")
+YH = {"User-Agent": UA, "Accept": "application/json"}
+_FX = {}
+
+
+def yahoo_search(h, name):
+    q = re.sub(r"\s*-\s*(CL|CLASS)\s*([A-C])\b", " CLASS \\2", name, flags=re.I)
+    q = re.sub(r"\bADR\b|\bADS\b|\bSPONSORED\b|\bREG\b|\bSHS\b|\bNPV\b|\bORD\b", " ", q, flags=re.I)
+    q = re.sub(r"\s+", " ", q).strip()
+    try:
+        js = h.get("https://query2.finance.yahoo.com/v1/finance/search", YH,
+                   params={"q": q, "quotesCount": 6, "newsCount": 0, "listsCount": 0}, tries=2)
+    except Exception:  # noqa
+        return None
+    quotes = [x for x in js.get("quotes", []) if x.get("quoteType") in ("EQUITY", "ETF")]
+    if not quotes:
+        return None
+    # prefer US listings for names without an exchange hint, otherwise first hit
+    quotes.sort(key=lambda x: 0 if x.get("exchange") in ("NMS", "NYQ", "NGM", "NCM", "ASE", "PCX") else 1)
+    x = quotes[0]
+    return {"symbol": x.get("symbol"), "exch": x.get("exchange"), "yname": x.get("shortname") or x.get("longname")}
+
+
+def yahoo_price(h, symbol):
+    js = h.get("https://query1.finance.yahoo.com/v8/finance/chart/%s" % symbol, YH,
+               params={"range": "5d", "interval": "1d"}, tries=2)
+    meta = (js.get("chart", {}).get("result") or [{}])[0].get("meta", {})
+    px = meta.get("regularMarketPrice") or meta.get("previousClose")
+    return (float(px) if px else None), (meta.get("currency") or "USD").upper()
+
+
+def fx_to_usd(h, cur):
+    """multiplier converting 1 unit of `cur` into USD (cached per run)."""
+    if cur in ("USD", None, ""):
+        return 1.0
+    if cur == "GBP" or cur == "GBp":
+        pass
+    if cur not in _FX:
+        try:
+            px, _ = yahoo_price(h, "%s=X" % cur)   # e.g. JPY=X = JPY per USD
+            _FX[cur] = (1.0 / px) if px else None
+        except Exception:  # noqa
+            _FX[cur] = None
+    return _FX.get(cur)
+
+
+def estimate_weights(h, rows, tickers, prices, budget_sec=None):
+    """Fill missing weights for overseas holdings from shares x Yahoo price. Mutates rows; returns (n_ok, n_total)."""
+    today = dt.datetime.now(KST).strftime("%Y%m%d")
+    vals = {}
+    secs = [r for r in rows if is_security(r[1]) and (r[3] or 0) > 0]
+    for r in secs:
+        if budget_sec is not None and time_left() < budget_sec:
+            break
+        key = r[0]
+        t = tickers.get(key)
+        if t is None:
+            t = yahoo_search(h, r[1]) or {"symbol": None}
+            tickers[key] = t
+        sym = t.get("symbol")
+        if not sym:
+            continue
+        pr = prices.get(sym)
+        if not pr or pr.get("date") != today:
+            try:
+                px, cur = yahoo_price(h, sym)
+                if px:
+                    pr = {"px": px, "cur": cur, "date": today}
+                    prices[sym] = pr
+            except Exception:  # noqa
+                pass
+        if not pr or not pr.get("px"):
+            continue
+        cur = pr.get("cur", "USD")
+        mult = fx_to_usd(h, "GBP" if cur == "GBp" else cur)
+        if mult is None:
+            continue
+        px_usd = pr["px"] * mult * (0.01 if cur == "GBp" else 1.0)
+        vals[key] = (r[3] or 0) * px_usd
+    tot = sum(vals.values())
+    if tot > 0:
+        for r in rows:
+            if r[0] in vals:
+                r[2] = round(vals[r[0]] / tot * 100, 4)
+    return len(vals), len(secs)
+
+
 def fetch_holdings(h, code):
     """WiseReport CU (full list, weights for domestic); when weights are missing (overseas ETFs) use Naver PC table."""
     rows, date = fetch_wise_pdf(h, code)
     if rows and not any(r[2] > 0 for r in rows if is_security(r[1])):
-        if not os.path.exists(os.path.join(DATA_DIR, "diag", "wise_%s.html" % code)) and len(os.listdir(os.path.join(DATA_DIR, "diag"))) < 4 if os.path.isdir(os.path.join(DATA_DIR, "diag")) else True:
-            try:  # save raw pages once so the weight source for overseas ETFs can be inspected
-                os.makedirs(os.path.join(DATA_DIR, "diag"), exist_ok=True)
-                wh = h.get(WR_PAGE, WR_HEADERS, params={"cmp_cd": code}, as_json=False)
-                open(os.path.join(DATA_DIR, "diag", "wise_%s.html" % code), "w", encoding="utf-8").write(wh[:300000])
-                nh = h.get("https://finance.naver.com/item/main.naver", {"User-Agent": UA, "Accept-Language": "ko-KR,ko;q=0.9"}, params={"code": code}, as_json=False)
-                open(os.path.join(DATA_DIR, "diag", "naverpc_%s.html" % code), "w", encoding="utf-8").write(nh[:300000])
-                mh = h.get("https://m.stock.naver.com/api/stock/%s/etfAnalysis" % code, NV_HEADERS)
-                save_json(os.path.join(DATA_DIR, "diag", "naverm_%s.json" % code), mh)
-            except Exception as ex:  # noqa
-                log("diag save failed", str(ex)[:80])
         try:
             nrows, _ = fetch_naver_pc_pdf(h, code)
             if nrows and any(r[2] > 0 for r in nrows if is_security(r[1])):
@@ -506,6 +584,28 @@ def main():
     log("holdings ok: %d/%d  asof=%s  sources=%s" % (n_ok, len(active), asof, dict(src_count)))
     flush_log()
 
+    # overseas ETFs: WiseReport/Naver carry share counts only -> estimate weights from shares x price (Yahoo)
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    tickers = load_json(TICKER_CACHE, {})
+    prices = load_json(PRICE_CACHE, {})
+    est_flags, n_est = {}, 0
+    for code, e in active.items():
+        rows = pdf_today.get(code) or []
+        if not rows or any(r[2] > 0 for r in rows if is_security(r[1])):
+            continue
+        if time_left() < 300:
+            log("deadline near - skipping remaining weight estimation")
+            break
+        ok, tot = estimate_weights(h, rows, tickers, prices, budget_sec=300)
+        est_flags[code] = {"estimated": True, "resolved": ok, "total": tot}
+        n_est += 1
+        if n_est % 10 == 0:
+            save_json(TICKER_CACHE, tickers); save_json(PRICE_CACHE, prices); flush_log()
+    save_json(TICKER_CACHE, tickers)
+    save_json(PRICE_CACHE, prices)
+    log("weights estimated for %d ETFs (tickers cached: %d, prices cached: %d, yahoo calls so far: %d)" % (n_est, len(tickers), len(prices), h.calls))
+    flush_log()
+
     path_today = os.path.join(PDF_DIR, asof + ".json")
     existing = load_json(path_today, {})
     for code, rows in pdf_today.items():
@@ -541,7 +641,10 @@ def main():
         if proxy:
             try:
                 rows, _, _src = fetch_holdings(h, proxy)
-                stock_rows = [r for r in rows if is_security(r[1])]
+                if rows and not any(r[2] > 0 for r in rows if is_security(r[1])) and time_left() > 200:
+                    estimate_weights(h, rows, tickers, prices, budget_sec=200)
+                    save_json(TICKER_CACHE, tickers); save_json(PRICE_CACHE, prices)
+                stock_rows = [r for r in rows if is_security(r[1]) and r[2] > 0]
                 tot = sum(r[2] for r in stock_rows)
                 if tot > 0:
                     entry["weights"] = {r[0]: round(r[2] / tot * 100, 4) for r in stock_rows}
@@ -597,6 +700,7 @@ def main():
             "sectors": [{"k": s.get("detailTypeCode"), "w": s.get("weight")} for s in (nv.get("sectorPortfolioList") or []) if s.get("weight")],
             "perf": perf, "summary": summary, "holdings": rows, "bm_missing": missing,
             "bm_source": bm.get("source"), "bm_proxy": bm.get("proxy"), "series": series,
+            "weights_estimated": est_flags.get(code),
         }
 
     group_list = []
