@@ -229,6 +229,17 @@ def fetch_holdings(h, code):
     """WiseReport CU (full list, weights for domestic); when weights are missing (overseas ETFs) use Naver PC table."""
     rows, date = fetch_wise_pdf(h, code)
     if rows and not any(r[2] > 0 for r in rows if is_security(r[1])):
+        if not os.path.exists(os.path.join(DATA_DIR, "diag", "wise_%s.html" % code)) and len(os.listdir(os.path.join(DATA_DIR, "diag"))) < 4 if os.path.isdir(os.path.join(DATA_DIR, "diag")) else True:
+            try:  # save raw pages once so the weight source for overseas ETFs can be inspected
+                os.makedirs(os.path.join(DATA_DIR, "diag"), exist_ok=True)
+                wh = h.get(WR_PAGE, WR_HEADERS, params={"cmp_cd": code}, as_json=False)
+                open(os.path.join(DATA_DIR, "diag", "wise_%s.html" % code), "w", encoding="utf-8").write(wh[:300000])
+                nh = h.get("https://finance.naver.com/item/main.naver", {"User-Agent": UA, "Accept-Language": "ko-KR,ko;q=0.9"}, params={"code": code}, as_json=False)
+                open(os.path.join(DATA_DIR, "diag", "naverpc_%s.html" % code), "w", encoding="utf-8").write(nh[:300000])
+                mh = h.get("https://m.stock.naver.com/api/stock/%s/etfAnalysis" % code, NV_HEADERS)
+                save_json(os.path.join(DATA_DIR, "diag", "naverm_%s.json" % code), mh)
+            except Exception as ex:  # noqa
+                log("diag save failed", str(ex)[:80])
         try:
             nrows, _ = fetch_naver_pc_pdf(h, code)
             if nrows and any(r[2] > 0 for r in nrows if is_security(r[1])):
