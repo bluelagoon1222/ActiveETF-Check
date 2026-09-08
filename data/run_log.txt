@@ -1,136 +1,140 @@
-10:25:04 Naver ETF list: 1167
-10:25:04 equity ACTIVE ETFs: 155 | domestic: 86 | global: 69
-10:34:38 holdings fetched today: 155/155  asof=20260907  sources={'wise': 85, 'wise-noweight': 70}
-10:39:56 history ok: 155/155
-10:39:59 benchmark 코스피 200 커버드콜 5% OTM -> KODEX 200 구성종목 기준 (지수 대용) 193
-10:40:06 benchmark NASDAQ 100 -> TIGER 미국나스닥100 구성종목 기준 (지수 대용) 88
-10:40:06 benchmark Solactive Global Artificial Intelligence -> None 0
-10:40:11 benchmark S&P 500 -> TIGER 미국S&P500 구성종목 기준 (지수 대용) 454
-10:40:14 benchmark 코스피 200 -> KODEX 200 구성종목 기준 (지수 대용) 193
-10:40:14 benchmark iSelect K-로봇테마 -> None 0
-10:40:14 benchmark FnGuide 반도체 TOP10 Capped -> None 0
-10:40:14 benchmark Bloomberg EV Supporters Plus Tesla Price Return Index -> None 0
-10:40:14 benchmark CRSP US Large Cap Growth Index -> None 0
-10:40:14 benchmark Mirae Asset AI Infrastructure -> None 0
-10:40:14 benchmark 나스닥 종합주가 -> None 0
-10:40:14 benchmark Indxx Artificial Intelligence and Big Data -> None 0
-10:40:14 benchmark KEDI 메가테크 -> None 0
-10:40:17 benchmark 코스닥 -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
-10:40:20 benchmark 코스피 -> KODEX 코스피 구성종목 기준 (지수 대용) 384
-10:40:20 benchmark FTSE Global All Cap Index -> None 0
-10:40:20 benchmark iSelect 바이오헬스케어 PR -> None 0
-10:40:20 benchmark FnGuide 반도체 밸류체인 -> None 0
-10:40:20 benchmark Solactive China Artificial Intelligence (원화환산) -> None 0
-10:40:20 benchmark FnGuide K-신재생에너지플러스 -> None 0
-10:40:20 benchmark KEDI 글로벌AI반도체 -> None 0
-10:40:23 benchmark KRX 정보기술 -> KODEX IT 구성종목 기준 (지수 대용) 45
-10:40:23 benchmark S&P Global Semiconductor Korea Tilted Index -> None 0
-10:40:23 benchmark iSelect 글로벌AI&로봇PR -> None 0
-10:40:23 benchmark 코리아 밸류업 -> None 0
-10:40:23 benchmark iSelect 비메모리반도체 (시장가격) -> None 0
-10:40:23 benchmark KEDI 글로벌 AI 클라우드 -> None 0
-10:40:23 benchmark Solactive Aerospace and Defense USD Index PR -> None 0
-10:40:23 benchmark iSelect 2차전지  (시장가격) -> None 0
-10:40:26 benchmark KRX 헬스케어 -> KODEX 헬스케어 구성종목 기준 (지수 대용) 67
-10:40:26 benchmark FnGuide 기업가치 (시장가격) -> None 0
-10:40:26 benchmark FnGuide SK하이닉스밸류체인 -> None 0
-10:40:26 benchmark KAP 코리아전략산업 -> None 0
-10:40:26 benchmark FnGuide 미국스페이스테크 (시장가격) -> None 0
-10:40:26 benchmark CRSP US Large Cap Value Index -> None 0
-10:40:26 benchmark KRX-Akros 고배당주 20 위클리 고정 30% 커버드콜 -> None 0
-10:40:26 benchmark KEDI K수출핵심기업TOP30 -> None 0
-10:40:26 benchmark KRX 기술이전바이오 -> None 0
-10:40:26 benchmark Nasdaq CB Insights Metaverse US Index -> None 0
-10:40:26 benchmark Solactive US AI Electricity Infrastructure Index PR -> None 0
-10:40:26 benchmark FnGuide AI반도체&인프라 -> None 0
-10:40:26 benchmark Bloomberg WisdomTree U.S. Quality Dividend & B500 Premium Decrement 50:50 Index -> None 0
-10:40:29 benchmark 코스닥150 위클리고정30% 커버드콜 -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
-10:40:32 benchmark 코스피 200 위클리 고정 30% 커버드콜 -> KODEX 200 구성종목 기준 (지수 대용) 193
-10:40:32 benchmark Indxx Global Metaverse Index -> None 0
-10:40:32 benchmark Bloomberg World Large, Mid & Small cap PR Index -> None 0
-10:40:32 benchmark Akros K제조업 50 -> None 0
-10:40:32 benchmark Solactive US AI Tech Active Index PR -> None 0
-10:40:32 benchmark Solactive Physical AI Index -> None 0
-10:40:32 benchmark MSCI Korea Country ESG Leaders Custom Capped Price return Index -> None 0
-10:40:32 benchmark FnGuide K-메타버스 -> None 0
-10:40:32 benchmark FnGuide K-친환경선박 -> None 0
-10:40:32 benchmark Akros U.S. AI Innovator Price Return Index -> None 0
-10:40:32 benchmark KRX 바이오 TOP 10 -> None 0
-10:40:32 benchmark Solactive Global AI Humanoid Robotics (원화환산) -> None 0
-10:40:32 benchmark KEDI 미국넥스트테크TOP10 -> None 0
-10:40:32 benchmark FnGuide 올라운드 가치주 시장가격 -> None 0
-10:40:32 benchmark FactSet 글로벌양자컴퓨팅 PR -> None 0
-10:40:32 benchmark FnGuide 대장장이 -> None 0
-10:40:32 benchmark Solactive United States Technology 100 Index -> None 0
-10:40:32 benchmark Solactive AI인프라 -> None 0
-10:40:32 benchmark Bloomberg China Media & Tech Index -> None 0
-10:40:32 benchmark FnGuide K-미래차 -> None 0
-10:40:32 benchmark Solactive 글로벌친환경전력인프라 PR -> None 0
-10:40:32 benchmark FnGuide 수소전력ESS인프라 -> None 0
-10:40:32 benchmark Bloomberg Global Equity Market Weighted Index -> None 0
-10:40:32 benchmark iSelect 아시아반도체 제조동맹 (시장가격) -> None 0
-10:40:32 benchmark MSCI USA Index -> None 0
-10:40:35 benchmark 코스닥 150 -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
-10:40:35 benchmark FnGuide 배당성향탑픽 -> None 0
-10:40:35 benchmark NYSE 100 -> None 0
-10:40:35 benchmark FactSet US-China Electric&Autonomous Vehicle Price Return Index -> None 0
-10:40:35 benchmark Akros 미국 고배당주 20 -> None 0
-10:40:40 benchmark S&P500 10% Buffered Index March Series (USD) TR -> TIGER 미국S&P500 구성종목 기준 (지수 대용) 454
-10:40:40 benchmark iSelect 미국로봇피지컬AI -> None 0
-10:40:40 benchmark KRX 기후변화 솔루션 -> None 0
-10:40:40 benchmark Solactive 미국천연가스인프라 PR -> None 0
-10:40:40 benchmark FnGuide 주주가치 -> None 0
-10:40:40 benchmark FnGuide 친환경자동차밸류체인 -> None 0
-10:40:40 benchmark MSCI China Index(USD, Price Return) -> None 0
-10:40:58 benchmark MSCI World -> KODEX MSCI선진국 구성종목 기준 (지수 대용) 1067
-10:41:01 benchmark 코스닥 150 타겟 15% 위클리 커버드콜 -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
-10:41:01 benchmark KEDI 글로벌생성형AI -> None 0
-10:41:01 benchmark MK-iSelect AI ESG (시장가격) -> None 0
-10:41:01 benchmark FnGuide K-주주가치 -> None 0
-10:41:01 benchmark Solactive Japan Tech Top 30 -> None 0
-10:41:04 benchmark 코스피 200 고배당 -> KODEX 200 구성종목 기준 (지수 대용) 193
-10:41:04 benchmark FnGuide 퓨처모빌리티 -> None 0
-10:41:04 benchmark FactSet 브로드컴밸류체인 -> None 0
-10:41:04 benchmark FnGuide K-이노베이션 -> None 0
-10:41:04 benchmark KEDI 글로벌 불로장생바이오 (원화환산) -> None 0
-10:41:04 benchmark iSelect 미국 차세대 파이낸셜 테크 (시장가격) -> None 0
-10:41:04 benchmark FnGuide K-컬처 -> None 0
-10:41:04 benchmark FnGuide 한화 ESG Growth -> None 0
-10:41:04 benchmark FnGuide 플랫폼 -> None 0
-10:41:07 benchmark KRX K-AI 바이오테크코스닥 (시장가격) -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
-10:41:07 benchmark MSCI India IMI Index -> None 0
-10:41:07 benchmark KRX BBIG -> None 0
-10:41:12 benchmark S&P500 10% Buffered Index June Series (USD) TR -> TIGER 미국S&P500 구성종목 기준 (지수 대용) 454
-10:41:12 benchmark Solactive 미국바이오헬스케어 PR -> None 0
-10:41:12 benchmark iSelect K-바이오헬스케어 -> None 0
-10:41:12 benchmark FnGuide 바이오시밀러&CDMO -> None 0
-10:41:12 benchmark FnGuide 피지컬AI TOP2플러스 -> None 0
-10:41:12 benchmark Indxx India Super Consumption Index -> None 0
-10:41:12 benchmark iSelect 반도체&2차전지핵심소재 -> None 0
-10:41:12 benchmark Solactive 뉴에이지컨수머 -> None 0
-10:41:12 benchmark FnGuide 저궤도위성 & 광통신 인프라 -> None 0
-10:41:12 benchmark iSelect 미래전략기술 -> None 0
-10:41:12 benchmark FnGuide 한화 ESG Value -> None 0
-10:41:12 benchmark iSelect K수출핵심산업  (시장가격) -> None 0
-10:41:12 benchmark Indxx India Big 5 Conglomerates Index -> None 0
-10:41:15 benchmark 코스피 중형주 -> KODEX 코스피 구성종목 기준 (지수 대용) 384
-10:41:15 benchmark Solactive-KEDI Xiaomi Focus China Tech Index -> None 0
-10:41:15 benchmark KEDI 미국퀄리티500+월1%프리미엄 -> None 0
-10:41:15 benchmark iSelect 미국AI지적재산 -> None 0
-10:41:15 benchmark FnGuide K-바이오 밸런스드 -> None 0
-10:41:15 benchmark FnGuide 신약포커스바이오 -> None 0
-10:41:18 benchmark 코스피 200 중소형주 -> KODEX 200 구성종목 기준 (지수 대용) 193
-10:41:18 benchmark Solactive China AI Big Tech TOP2+ Index -> None 0
-10:41:18 benchmark iSelect AI -> None 0
-10:41:18 benchmark Solactive 미국뇌질환치료제 PR -> None 0
-10:41:18 benchmark Solactive 차이나바이오헬스케어 PR -> None 0
-10:41:18 benchmark Mirae Asset US Consumer Trend -> None 0
-10:41:18 benchmark Bloomberg BYD Plus Top Supply Chain Select Price Return Index -> None 0
-10:41:18 benchmark iSelect 포스트 IPO -> None 0
-10:47:01 host degraded (fail-fast mode): query2.finance.yahoo.com
-10:48:11 host degraded (fail-fast mode): query2.finance.yahoo.com
-10:53:27 host degraded (fail-fast mode): query2.finance.yahoo.com
-10:55:51 deadline near - skipping remaining weight estimation
-10:55:51 weights estimated for 54 ETFs (tickers cached: 2237, prices cached: 1711, http calls total: 1569)
-10:55:52 previous snapshot: 20260904
-10:55:52 DONE asof=20260907 active=155 holdings_ok=155 fetched=155 stale=0 calls=1569 1850s
+13:29:25 Naver ETF list: 1167
+13:29:25 equity ACTIVE ETFs: 155 | domestic: 86 | global: 69
+13:38:04 holdings fetched today: 155/155  asof=20260907  sources={'wise': 85, 'wise-noweight': 70}
+13:41:33 history ok: 155/155
+13:41:36 benchmark 코스피 200 커버드콜 5% OTM -> KODEX 200 구성종목 기준 (지수 대용) 193
+13:41:59 benchmark NASDAQ 100 -> TIGER 미국나스닥100 구성종목 기준 (지수 대용) 94
+13:41:59 benchmark Solactive Global Artificial Intelligence -> None 0
+13:42:56 benchmark S&P 500 -> TIGER 미국S&P500 구성종목 기준 (지수 대용) 480
+13:42:58 benchmark 코스피 200 -> KODEX 200 구성종목 기준 (지수 대용) 193
+13:42:58 benchmark iSelect K-로봇테마 -> None 0
+13:42:58 benchmark FnGuide 반도체 TOP10 Capped -> None 0
+13:42:58 benchmark Bloomberg EV Supporters Plus Tesla Price Return Index -> None 0
+13:42:58 benchmark CRSP US Large Cap Growth Index -> None 0
+13:42:58 benchmark Mirae Asset AI Infrastructure -> None 0
+13:42:58 benchmark 나스닥 종합주가 -> None 0
+13:42:58 benchmark Indxx Artificial Intelligence and Big Data -> None 0
+13:42:58 benchmark KEDI 메가테크 -> None 0
+13:43:01 benchmark 코스닥 -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
+13:43:04 benchmark 코스피 -> KODEX 코스피 구성종목 기준 (지수 대용) 384
+13:43:04 benchmark FTSE Global All Cap Index -> None 0
+13:43:04 benchmark FnGuide 반도체 밸류체인 -> None 0
+13:43:04 benchmark iSelect 바이오헬스케어 PR -> None 0
+13:43:04 benchmark Solactive China Artificial Intelligence (원화환산) -> None 0
+13:43:04 benchmark FnGuide K-신재생에너지플러스 -> None 0
+13:43:04 benchmark KEDI 글로벌AI반도체 -> None 0
+13:43:07 benchmark KRX 정보기술 -> KODEX IT 구성종목 기준 (지수 대용) 45
+13:43:07 benchmark S&P Global Semiconductor Korea Tilted Index -> None 0
+13:43:07 benchmark iSelect 글로벌AI&로봇PR -> None 0
+13:43:07 benchmark 코리아 밸류업 -> None 0
+13:43:07 benchmark iSelect 비메모리반도체 (시장가격) -> None 0
+13:43:07 benchmark KEDI 글로벌 AI 클라우드 -> None 0
+13:43:07 benchmark Solactive Aerospace and Defense USD Index PR -> None 0
+13:43:07 benchmark iSelect 2차전지  (시장가격) -> None 0
+13:43:10 benchmark KRX 헬스케어 -> KODEX 헬스케어 구성종목 기준 (지수 대용) 67
+13:43:10 benchmark FnGuide 기업가치 (시장가격) -> None 0
+13:43:10 benchmark FnGuide SK하이닉스밸류체인 -> None 0
+13:43:10 benchmark KAP 코리아전략산업 -> None 0
+13:43:10 benchmark FnGuide 미국스페이스테크 (시장가격) -> None 0
+13:43:10 benchmark CRSP US Large Cap Value Index -> None 0
+13:43:10 benchmark KRX-Akros 고배당주 20 위클리 고정 30% 커버드콜 -> None 0
+13:43:10 benchmark KEDI K수출핵심기업TOP30 -> None 0
+13:43:10 benchmark KRX 기술이전바이오 -> None 0
+13:43:10 benchmark Nasdaq CB Insights Metaverse US Index -> None 0
+13:43:10 benchmark Solactive US AI Electricity Infrastructure Index PR -> None 0
+13:43:10 benchmark FnGuide AI반도체&인프라 -> None 0
+13:43:10 benchmark Bloomberg WisdomTree U.S. Quality Dividend & B500 Premium Decrement 50:50 Index -> None 0
+13:43:13 benchmark 코스닥150 위클리고정30% 커버드콜 -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
+13:43:15 benchmark 코스피 200 위클리 고정 30% 커버드콜 -> KODEX 200 구성종목 기준 (지수 대용) 193
+13:43:15 benchmark Indxx Global Metaverse Index -> None 0
+13:43:15 benchmark Bloomberg World Large, Mid & Small cap PR Index -> None 0
+13:43:15 benchmark Akros K제조업 50 -> None 0
+13:43:15 benchmark Solactive US AI Tech Active Index PR -> None 0
+13:43:15 benchmark Solactive Physical AI Index -> None 0
+13:43:15 benchmark MSCI Korea Country ESG Leaders Custom Capped Price return Index -> None 0
+13:43:15 benchmark FnGuide K-메타버스 -> None 0
+13:43:15 benchmark FnGuide K-친환경선박 -> None 0
+13:43:15 benchmark Akros U.S. AI Innovator Price Return Index -> None 0
+13:43:15 benchmark Solactive Global AI Humanoid Robotics (원화환산) -> None 0
+13:43:15 benchmark KRX 바이오 TOP 10 -> None 0
+13:43:15 benchmark KEDI 미국넥스트테크TOP10 -> None 0
+13:43:15 benchmark FnGuide 올라운드 가치주 시장가격 -> None 0
+13:43:15 benchmark FactSet 글로벌양자컴퓨팅 PR -> None 0
+13:43:15 benchmark FnGuide 대장장이 -> None 0
+13:43:15 benchmark Solactive United States Technology 100 Index -> None 0
+13:43:15 benchmark Solactive AI인프라 -> None 0
+13:43:15 benchmark Bloomberg China Media & Tech Index -> None 0
+13:43:15 benchmark FnGuide K-미래차 -> None 0
+13:43:15 benchmark Solactive 글로벌친환경전력인프라 PR -> None 0
+13:43:15 benchmark FnGuide 수소전력ESS인프라 -> None 0
+13:43:15 benchmark iSelect 아시아반도체 제조동맹 (시장가격) -> None 0
+13:43:15 benchmark Bloomberg Global Equity Market Weighted Index -> None 0
+13:43:15 benchmark MSCI USA Index -> None 0
+13:43:18 benchmark 코스닥 150 -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
+13:43:18 benchmark FnGuide 배당성향탑픽 -> None 0
+13:43:18 benchmark NYSE 100 -> None 0
+13:43:18 benchmark FactSet US-China Electric&Autonomous Vehicle Price Return Index -> None 0
+13:43:18 benchmark Akros 미국 고배당주 20 -> None 0
+13:43:24 benchmark S&P500 10% Buffered Index March Series (USD) TR -> TIGER 미국S&P500 구성종목 기준 (지수 대용) 480
+13:43:24 benchmark iSelect 미국로봇피지컬AI -> None 0
+13:43:24 benchmark KRX 기후변화 솔루션 -> None 0
+13:43:24 benchmark Solactive 미국천연가스인프라 PR -> None 0
+13:43:24 benchmark FnGuide 주주가치 -> None 0
+13:43:24 benchmark FnGuide 친환경자동차밸류체인 -> None 0
+13:46:18 benchmark MSCI World -> KODEX MSCI선진국 구성종목 기준 (지수 대용) 1139
+13:46:18 benchmark MSCI China Index(USD, Price Return) -> None 0
+13:46:21 benchmark 코스닥 150 타겟 15% 위클리 커버드콜 -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
+13:46:21 benchmark KEDI 글로벌생성형AI -> None 0
+13:46:21 benchmark MK-iSelect AI ESG (시장가격) -> None 0
+13:46:21 benchmark FnGuide K-주주가치 -> None 0
+13:46:21 benchmark Solactive Japan Tech Top 30 -> None 0
+13:46:25 benchmark 코스피 200 고배당 -> KODEX 200 구성종목 기준 (지수 대용) 193
+13:46:25 benchmark FactSet 브로드컴밸류체인 -> None 0
+13:46:25 benchmark FnGuide 퓨처모빌리티 -> None 0
+13:46:25 benchmark FnGuide K-이노베이션 -> None 0
+13:46:25 benchmark KEDI 글로벌 불로장생바이오 (원화환산) -> None 0
+13:46:25 benchmark iSelect 미국 차세대 파이낸셜 테크 (시장가격) -> None 0
+13:46:25 benchmark FnGuide K-컬처 -> None 0
+13:46:25 benchmark FnGuide 한화 ESG Growth -> None 0
+13:46:25 benchmark FnGuide 플랫폼 -> None 0
+13:46:29 benchmark KRX K-AI 바이오테크코스닥 (시장가격) -> KODEX 코스닥150 구성종목 기준 (지수 대용) 150
+13:46:29 benchmark MSCI India IMI Index -> None 0
+13:46:29 benchmark KRX BBIG -> None 0
+13:46:34 benchmark S&P500 10% Buffered Index June Series (USD) TR -> TIGER 미국S&P500 구성종목 기준 (지수 대용) 480
+13:46:34 benchmark Solactive 미국바이오헬스케어 PR -> None 0
+13:46:34 benchmark iSelect K-바이오헬스케어 -> None 0
+13:46:34 benchmark FnGuide 바이오시밀러&CDMO -> None 0
+13:46:34 benchmark FnGuide 피지컬AI TOP2플러스 -> None 0
+13:46:34 benchmark Indxx India Super Consumption Index -> None 0
+13:46:34 benchmark iSelect 반도체&2차전지핵심소재 -> None 0
+13:46:34 benchmark Solactive 뉴에이지컨수머 -> None 0
+13:46:34 benchmark FnGuide 저궤도위성 & 광통신 인프라 -> None 0
+13:46:34 benchmark FnGuide 한화 ESG Value -> None 0
+13:46:34 benchmark iSelect 미래전략기술 -> None 0
+13:46:34 benchmark iSelect K수출핵심산업  (시장가격) -> None 0
+13:46:37 benchmark 코스피 중형주 -> KODEX 코스피 구성종목 기준 (지수 대용) 384
+13:46:37 benchmark Indxx India Big 5 Conglomerates Index -> None 0
+13:46:37 benchmark KEDI 미국퀄리티500+월1%프리미엄 -> None 0
+13:46:37 benchmark Solactive-KEDI Xiaomi Focus China Tech Index -> None 0
+13:46:37 benchmark iSelect 미국AI지적재산 -> None 0
+13:46:37 benchmark FnGuide K-바이오 밸런스드 -> None 0
+13:46:37 benchmark FnGuide 신약포커스바이오 -> None 0
+13:46:41 benchmark 코스피 200 중소형주 -> KODEX 200 구성종목 기준 (지수 대용) 193
+13:46:41 benchmark Solactive China AI Big Tech TOP2+ Index -> None 0
+13:46:41 benchmark iSelect AI -> None 0
+13:46:41 benchmark Solactive 미국뇌질환치료제 PR -> None 0
+13:46:41 benchmark Solactive 차이나바이오헬스케어 PR -> None 0
+13:46:41 benchmark Mirae Asset US Consumer Trend -> None 0
+13:46:41 benchmark Bloomberg BYD Plus Top Supply Chain Select Price Return Index -> None 0
+13:46:41 benchmark iSelect 포스트 IPO -> None 0
+13:52:32 host degraded (fail-fast mode): query2.finance.yahoo.com
+13:53:38 host degraded (fail-fast mode): query2.finance.yahoo.com
+13:54:09 host degraded (fail-fast mode): query2.finance.yahoo.com
+13:56:09 host degraded (fail-fast mode): query2.finance.yahoo.com
+13:57:54 host degraded (fail-fast mode): query2.finance.yahoo.com
+13:58:50 host degraded (fail-fast mode): query2.finance.yahoo.com
+14:00:02 host degraded (fail-fast mode): query2.finance.yahoo.com
+14:00:20 deadline near - skipping remaining weight estimation
+14:00:20 weights estimated for 36 ETFs (tickers cached: 2237, prices cached: 1862, http calls total: 1544)
+14:00:20 previous snapshot: 20260904
+14:00:20 DONE asof=20260907 active=155 holdings_ok=155 fetched=155 stale=0 calls=1544 1857s
