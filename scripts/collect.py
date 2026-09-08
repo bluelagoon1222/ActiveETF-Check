@@ -327,6 +327,7 @@ def fx_to_usd(h, cur):
 
 
 PRICE_MAX_AGE_DAYS = 3
+SEARCH_BUDGET = [160]      # new ticker look-ups per run (Yahoo search is rate-limited; the rest wait for the next run)
 
 
 def _price_fresh(pr, today):
@@ -355,6 +356,9 @@ def estimate_weights(h, rows, tickers, prices, budget_sec=None, aum_krw=None):
             continue
         if t and not t.get("symbol") and (t.get("miss", 0) >= 3 or t.get("last") == today):
             continue
+        if SEARCH_BUDGET[0] <= 0 or h.fails.get("query2.finance.yahoo.com", 0) >= 12:
+            continue
+        SEARCH_BUDGET[0] -= 1
         status, info = yahoo_search(h, r[1])
         if status == "err":
             continue
@@ -409,9 +413,11 @@ def estimate_weights(h, rows, tickers, prices, budget_sec=None, aum_krw=None):
                 if r[0] in vals:
                     r[2] = round(vals[r[0]] * usdkrw / aum_krw * 100, 4)
     if method == "norm" and tot > 0:
+        kept = sum((r[2] or 0) for r in secs if r[0] not in vals and (r[2] or 0) > 0)   # seeded weights of unresolved names
+        target = max(0.0, 100.0 - min(kept, 60.0))
         for r in rows:
             if r[0] in vals:
-                r[2] = round(vals[r[0]] / tot * 100, 4)
+                r[2] = round(vals[r[0]] / tot * target, 4)
     return len(vals), len(secs), method
 
 
@@ -755,16 +761,56 @@ def main():
     save_json(BM_CACHE, bm_cache)
     flush_log()
 
-    # 6. weight estimation for overseas ETFs (whatever time is left; cache makes later runs fast) ----
+    # 6. weight estimation for overseas ETFs ---------------------------------------------------------
+    # 6a. seed: yesterday's (or an earlier run today's) estimated weights, scaled by the change in share count,
+    #     so an ETF never falls back to "no weights" just because today's Yahoo pass ran out of time.
+    def _prev_rows_for(code):
+        ex = existing.get(code) or []
+        if any((r[2] or 0) > 0 for r in ex if len(r) >= 3 and is_security(r[1])):
+            return ex
+        snaps_ = sorted(f[:-5] for f in os.listdir(PDF_DIR) if re.fullmatch(r"\d{8}\.json", f) and f[:-5] < asof)
+        for d_ in reversed(snaps_[-3:]):
+            rows_ = (load_json(os.path.join(PDF_DIR, d_ + ".json"), {}) or {}).get(code) or []
+            if any((r[2] or 0) > 0 for r in rows_ if len(r) >= 3 and is_security(r[1])):
+                return rows_
+        return []
+
+    seeded = {}
     for code, e in active.items():
         rows = pdf_today.get(code) or []
-        if not rows or any(r[2] > 0 for r in rows if is_security(r[1])):
+        if e["region"] != "global" or not rows or any(r[2] > 0 for r in rows if is_security(r[1])):
             continue
+        prev_rows = _prev_rows_for(code)
+        if not prev_rows:
+            continue
+        pm = {norm_stock_name(r[1]): r for r in prev_rows if len(r) >= 4}
+        n_seed = 0
+        for r in rows:
+            q = pm.get(r[0])
+            if q and (q[2] or 0) > 0 and is_security(r[1]):
+                ratio = (r[3] / q[3]) if (r[3] and q[3]) else 1.0
+                r[2] = round(q[2] * ratio, 4)
+                n_seed += 1
+        if n_seed:
+            seeded[code] = n_seed
+            fl = dict(est_cache.get(code) or {"estimated": True, "resolved": n_seed, "total": n_seed})
+            fl["carried"] = True
+            est_flags[code] = fl
+    if seeded:
+        log("weights seeded from previous snapshot for %d ETFs" % len(seeded))
+
+    # 6b. fresh estimation: ETFs with no weights at all first, then refresh the seeded ones while time remains
+    order = [c for c, e in active.items() if e["region"] == "global" and (pdf_today.get(c) or []) and c not in seeded and not any(r[2] > 0 for r in pdf_today[c] if is_security(r[1]))]
+    order += [c for c in seeded]
+    for code in order:
+        e = active[code]
+        rows = pdf_today.get(code) or []
         if time_left() < 150:
-            log("deadline near - skipping remaining weight estimation")
+            log("deadline near - skipping remaining weight estimation (%d ETFs left)" % (len(order) - n_est))
             break
-        ok, tot, method = estimate_weights(h, rows, tickers, prices, budget_sec=120, aum_krw=e.get("aum"))
-        est_flags[code] = {"estimated": True, "resolved": ok, "total": tot, "method": method}
+        ok, tot, method = estimate_weights(h, rows, tickers, prices, budget_sec=120, aum_krw=None)
+        if ok:
+            est_flags[code] = {"estimated": True, "resolved": ok, "total": tot, "method": method}
         n_est += 1
         if n_est % 10 == 0:
             save_json(TICKER_CACHE, tickers); save_json(PRICE_CACHE, prices); flush_log()
