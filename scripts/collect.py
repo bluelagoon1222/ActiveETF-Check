@@ -134,20 +134,28 @@ def krw_text_to_won(t):
 
 
 class Http:
-    """requests wrapper with per-host fail-fast: after 4 consecutive failures on a host (slow/blocking server)
-    later calls to that host use 1 try x 12s so the run can still finish and fall back to cached data."""
+    """requests wrapper with per-host fail-fast. A host is treated as degraded when 4 consecutive calls failed OR the
+    last 5 calls averaged more than 12 s; degraded hosts get 1 try x 12 s so the run finishes and cached data is used."""
 
     def __init__(self):
         self.calls = 0
         self.fails = {}
+        self.lat = {}
+
+    def degraded(self, host):
+        if self.fails.get(host, 0) >= 4:
+            return True
+        lat = self.lat.get(host) or []
+        return len(lat) >= 5 and sum(lat[-5:]) / 5 > 12
 
     def get(self, url, headers, params=None, tries=3, as_json=True, timeout=25):
         host = url.split("/")[2] if "//" in url else url
         streak = self.fails.get(host, 0)
-        if streak >= 4 and streak % 8 != 0:      # degraded host: fail fast (every 8th call probes with full timeout)
+        if self.degraded(host) and self.calls % 8 != 0:      # every 8th call probes with the full timeout
             tries, timeout = 1, 12
         last = None
         for i in range(tries):
+            t0 = time.time()
             try:
                 self.calls += 1
                 r = requests.get(url, headers=headers, params=params, timeout=timeout)
@@ -155,10 +163,12 @@ class Http:
                     raise RuntimeError("HTTP %s" % r.status_code)
                 out = r.json() if as_json else r.text
                 self.fails[host] = 0
+                self.lat.setdefault(host, []).append(time.time() - t0)
                 time.sleep(SLEEP)
                 return out
             except Exception as e:  # noqa
                 last = e
+                self.lat.setdefault(host, []).append(time.time() - t0)
                 time.sleep(2 * (i + 1))
         self.fails[host] = streak + 1
         if self.fails[host] == 4:
@@ -675,10 +685,14 @@ def main():
     os.makedirs(PDF_DIR, exist_ok=True)
     os.makedirs(CACHE_DIR, exist_ok=True)
     pdf_today, pdf_dates, src_count = {}, defaultdict(int), defaultdict(int)
+    have_fallback = bool(prev_etfs)
+    slow_logged = False
     for code, e in active.items():
-        if time_left() < 300:
-            log("deadline near - skipping remaining holdings")
+        if time_left() < 300 or (have_fallback and time_left() < DEADLINE_SEC * 0.45):
+            log("holdings phase budget used - remaining ETFs keep the previous snapshot")
             break
+        if h.degraded("navercomp.wisereport.co.kr") and not slow_logged:
+            log("WiseReport responding slowly - fail-fast mode"); slow_logged = True
         try:
             rows, d, src = fetch_holdings(h, code)
             pdf_today[code] = rows
