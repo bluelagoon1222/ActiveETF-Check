@@ -238,7 +238,7 @@ function renderPerf(){
   for(const e of es){
     const s=e.summary;
     const chg=(s.new||s.out||s.up||s.down)?`${s.new?`<span class="pill new">N${s.new}</span>`:''}${s.out?`<span class="pill out">O${s.out}</span>`:''}${s.up?`<span class="pill up">▲${s.up}</span>`:''}${s.down?`<span class="pill dn">▼${s.down}</span>`:''}`:'<span class="meta">–</span>';
-    h+=`<tr><td class="l name"><div class="etfname" data-c="${e.code}">${e.name}${e.weights_estimated?'<span class="pill est" title="해외 ETF는 공시 비중이 없어 주식수×가격으로 추정한 비중입니다">추정</span>':''}</div><div class="meta">${e.manager} · ${e.code} · ${e.index||''}${e.premium!=null?` · 괴리 ${e.premium>0?'+':''}${e.premium}%`:''}</div></td>`+
+    h+=`<tr><td class="l name"><div class="etfname" data-c="${e.code}">${e.name}${e.weights_estimated?`<span class="pill est" title="해외 ETF는 공시 비중이 없어 주식수×가격으로 추정한 비중입니다 (가격 확인 ${e.weights_estimated.resolved}/${e.weights_estimated.total}종목${e.weights_estimated.method==='aum'?', 순자산 기준':', 확인종목 합계=100 기준'})">추정 ${e.weights_estimated.resolved}/${e.weights_estimated.total}</span>`:''}</div><div class="meta">${e.manager} · ${e.code} · ${e.index||''}${e.premium!=null?` · 괴리 ${e.premium>0?'+':''}${e.premium}%`:''}</div></td>`+
        `<td>${fmtAum(e.aum)}</td><td>${e.fee!=null?e.fee.toFixed(2)+'%':'–'}${e.total_cost!=null?`<span class="ex">실부담 ${e.total_cost.toFixed(2)}%</span>`:''}</td>`+
        PER.map(p=>`<td><span class="ret">${fmtPct(pv(e,p))}</span><span class="ex">${excess(e,p)==null?'':(excess(e,p)>0?'+':'')+excess(e,p).toFixed(2)+'p vs 지수'}</span></td>`).join('')+
        `<td>${s.n_holdings}</td><td>${s.top10}%</td><td class="l">${chg}</td></tr>`;
@@ -329,6 +329,7 @@ function renderMatrix(){
       else if(!c.cash && c.status!=='out' && es.length>1){ const dv=c.w-r.gavg; act=`<span class="a ${dv>0?'pos':dv<0?'neg':''}">${dv>0?'+':''}${dv.toFixed(2)} vs 그룹평균 ${r.gavg.toFixed(2)}</span>`; }
       const chg=(c.chg==null)?'':`<span class="c ${c.chg>0?'pos':c.chg<0?'neg':''}" >${c.chg>0?'+':''}${c.chg.toFixed(2)}p 전일</span>`;
       if(noWeights(e)){ h+=`<td class="cell" title="비중 미공시 — 다음 수집에서 주식수×가격으로 추정"><span class="w" style="color:var(--muted)">보유</span>${badge}<span class="a">${c.shares!=null?c.shares.toLocaleString('ko-KR')+'주':'비중 추정 대기'}</span></td>`; continue; }
+      if(!c.w && c.status!=='out' && c.shares){ h+=`<td class="cell" title="이 종목은 가격을 확인하지 못해 비중을 추정하지 못했습니다 (다음 수집에서 재시도)"><span class="w" style="color:var(--muted)">보유</span>${badge}<span class="a">${c.shares.toLocaleString('ko-KR')}주 · 가격 미확인</span></td>`; continue; }
       const style=c.status==='out'?'':heat(c.w);
       h+=`<td class="cell ${c.status!=='out'&&isDark(c.w)?'dark':''}" style="${style}"><span class="w">${c.status==='out'?`<s>${c.pw.toFixed(2)}</s>`:c.w.toFixed(2)}</span>${badge}${act}${chg}</td>`;
     }
