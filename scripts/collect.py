@@ -246,22 +246,34 @@ YH = {"User-Agent": UA, "Accept": "application/json"}
 _FX = {}
 
 
-def yahoo_search(h, name):
+def _yq(name):
     q = re.sub(r"\s*-\s*(CL|CLASS)\s*([A-C])\b", " CLASS \\2", name, flags=re.I)
-    q = re.sub(r"\bADR\b|\bADS\b|\bSPONSORED\b|\bREG\b|\bSHS\b|\bNPV\b|\bORD\b", " ", q, flags=re.I)
-    q = re.sub(r"\s+", " ", q).strip()
-    try:
-        js = h.get("https://query2.finance.yahoo.com/v1/finance/search", YH,
-                   params={"q": q, "quotesCount": 6, "newsCount": 0, "listsCount": 0}, tries=2)
-    except Exception:  # noqa
-        return None
-    quotes = [x for x in js.get("quotes", []) if x.get("quoteType") in ("EQUITY", "ETF")]
-    if not quotes:
-        return None
-    # prefer US listings for names without an exchange hint, otherwise first hit
-    quotes.sort(key=lambda x: 0 if x.get("exchange") in ("NMS", "NYQ", "NGM", "NCM", "ASE", "PCX") else 1)
-    x = quotes[0]
-    return {"symbol": x.get("symbol"), "exch": x.get("exchange"), "yname": x.get("shortname") or x.get("longname")}
+    q = re.sub(r"\bADR\b|\bADS\b|\bSPONSORED\b|\bREG\b|\bSHS\b|\bNPV\b|\bORD\b|\bLTD\b|\bPLC\b|\bSA\b|\bNV\b|\bAG\b|\bSE\b", " ", q, flags=re.I)
+    return re.sub(r"\s+", " ", q).strip()
+
+
+def yahoo_search(h, name):
+    """-> ("ok", info|None) when Yahoo answered, ("err", None) when the request failed (never cached as a miss)."""
+    q = _yq(name)
+    tries = [q]
+    words = re.sub(r"\bCLASS [A-C]\b", "", q).split()
+    if len(words) > 2:
+        tries.append(" ".join(words[:2]))
+    err = False
+    for qq in tries:
+        try:
+            js = h.get("https://query2.finance.yahoo.com/v1/finance/search", YH,
+                       params={"q": qq, "quotesCount": 6, "newsCount": 0, "listsCount": 0}, tries=2)
+        except Exception:  # noqa
+            err = True
+            continue
+        quotes = [x for x in js.get("quotes", []) if x.get("quoteType") in ("EQUITY", "ETF")]
+        if not quotes:
+            continue
+        quotes.sort(key=lambda x: 0 if x.get("exchange") in ("NMS", "NYQ", "NGM", "NCM", "ASE", "PCX") else 1)
+        x = quotes[0]
+        return "ok", {"symbol": x.get("symbol"), "exch": x.get("exchange"), "yname": x.get("shortname") or x.get("longname")}
+    return ("err", None) if err else ("ok", None)
 
 
 def yahoo_price(h, symbol):
@@ -272,12 +284,39 @@ def yahoo_price(h, symbol):
     return (float(px) if px else None), (meta.get("currency") or "USD").upper()
 
 
+def yahoo_prices_batch(h, symbols):
+    """spark endpoint: many symbols per call. Returns {sym: (px, cur)}; {} on failure (caller falls back to per-symbol)."""
+    out = {}
+    try:
+        js = h.get("https://query1.finance.yahoo.com/v8/finance/spark", YH,
+                   params={"symbols": ",".join(symbols), "range": "5d", "interval": "1d"}, tries=1)
+    except Exception:  # noqa
+        return out
+    if not isinstance(js, dict):
+        return out
+    items = []
+    if isinstance(js.get("spark"), dict):
+        items = [(r.get("symbol"), (r.get("response") or [{}])[0]) for r in js["spark"].get("result") or []]
+    else:
+        items = [(k, v) for k, v in js.items() if isinstance(v, dict)]
+    for sym, resp in items:
+        try:
+            meta = resp.get("meta", {})
+            px = meta.get("regularMarketPrice") or meta.get("previousClose")
+            if not px:
+                closes = [c for c in ((resp.get("indicators", {}).get("quote") or [{}])[0].get("close") or []) if c]
+                px = closes[-1] if closes else None
+            if sym and px:
+                out[sym] = (float(px), (meta.get("currency") or "USD").upper())
+        except Exception:  # noqa
+            pass
+    return out
+
+
 def fx_to_usd(h, cur):
     """multiplier converting 1 unit of `cur` into USD (cached per run)."""
     if cur in ("USD", None, ""):
         return 1.0
-    if cur == "GBP" or cur == "GBp":
-        pass
     if cur not in _FX:
         try:
             px, _ = yahoo_price(h, "%s=X" % cur)   # e.g. JPY=X = JPY per USD
@@ -287,45 +326,93 @@ def fx_to_usd(h, cur):
     return _FX.get(cur)
 
 
-def estimate_weights(h, rows, tickers, prices, budget_sec=None):
-    """Fill missing weights for overseas holdings from shares x Yahoo price. Mutates rows; returns (n_ok, n_total)."""
+PRICE_MAX_AGE_DAYS = 3
+
+
+def _price_fresh(pr, today):
+    if not pr or not pr.get("px") or not pr.get("date"):
+        return False
+    try:
+        d0 = dt.datetime.strptime(pr["date"], "%Y%m%d").date()
+        d1 = dt.datetime.strptime(today, "%Y%m%d").date()
+        return (d1 - d0).days <= PRICE_MAX_AGE_DAYS
+    except ValueError:
+        return False
+
+
+def estimate_weights(h, rows, tickers, prices, budget_sec=None, aum_krw=None):
+    """Fill missing weights for overseas holdings from shares x Yahoo price. Mutates rows.
+    Weights are shares x price / fund AUM when AUM is known (unresolved names simply stay blank);
+    otherwise the resolved names are normalised to 100. Returns (n_ok, n_total, method)."""
     today = dt.datetime.now(KST).strftime("%Y%m%d")
-    vals = {}
     secs = [r for r in rows if is_security(r[1]) and (r[3] or 0) > 0]
+    # 1) tickers (search) - misses are retried on later runs up to 3 times
     for r in secs:
         if budget_sec is not None and time_left() < budget_sec:
             break
-        key = r[0]
-        t = tickers.get(key)
-        if t is None:
-            t = yahoo_search(h, r[1]) or {"symbol": None}
-            tickers[key] = t
-        sym = t.get("symbol")
-        if not sym:
+        t = tickers.get(r[0])
+        if t and t.get("symbol"):
             continue
-        pr = prices.get(sym)
-        if not pr or pr.get("date") != today:
+        if t and not t.get("symbol") and (t.get("miss", 0) >= 3 or t.get("last") == today):
+            continue
+        status, info = yahoo_search(h, r[1])
+        if status == "err":
+            continue
+        tickers[r[0]] = info or {"symbol": None, "miss": (t or {}).get("miss", 0) + 1, "last": today}
+    # 2) prices - batch first, per-symbol fallback
+    need = []
+    for r in secs:
+        sym = (tickers.get(r[0]) or {}).get("symbol")
+        if sym and not _price_fresh(prices.get(sym), today) and sym not in need:
+            need.append(sym)
+    for i in range(0, len(need), 20):
+        if budget_sec is not None and time_left() < budget_sec:
+            break
+        chunk = need[i:i + 20]
+        got = yahoo_prices_batch(h, chunk)
+        for sym, (px, cur) in got.items():
+            prices[sym] = {"px": px, "cur": cur, "date": today}
+        for sym in chunk:
+            if sym in got:
+                continue
+            if budget_sec is not None and time_left() < budget_sec:
+                break
             try:
                 px, cur = yahoo_price(h, sym)
                 if px:
-                    pr = {"px": px, "cur": cur, "date": today}
-                    prices[sym] = pr
+                    prices[sym] = {"px": px, "cur": cur, "date": today}
             except Exception:  # noqa
                 pass
+    # 3) values
+    vals = {}
+    for r in secs:
+        sym = (tickers.get(r[0]) or {}).get("symbol")
+        pr = prices.get(sym) if sym else None
         if not pr or not pr.get("px"):
             continue
         cur = pr.get("cur", "USD")
         mult = fx_to_usd(h, "GBP" if cur == "GBp" else cur)
         if mult is None:
             continue
-        px_usd = pr["px"] * mult * (0.01 if cur == "GBp" else 1.0)
-        vals[key] = (r[3] or 0) * px_usd
+        vals[r[0]] = (r[3] or 0) * pr["px"] * mult * (0.01 if cur == "GBp" else 1.0)
     tot = sum(vals.values())
-    if tot > 0:
+    method = "norm"
+    usdkrw = None
+    if aum_krw and tot > 0:
+        m = fx_to_usd(h, "KRW")
+        usdkrw = (1.0 / m) if m else None
+    if usdkrw and aum_krw:
+        cover = tot * usdkrw / aum_krw * 100
+        if 50 <= cover <= 115:                 # plausible: use AUM as denominator (unresolved names stay blank)
+            method = "aum"
+            for r in rows:
+                if r[0] in vals:
+                    r[2] = round(vals[r[0]] * usdkrw / aum_krw * 100, 4)
+    if method == "norm" and tot > 0:
         for r in rows:
             if r[0] in vals:
                 r[2] = round(vals[r[0]] / tot * 100, 4)
-    return len(vals), len(secs)
+    return len(vals), len(secs), method
 
 
 def fetch_holdings(h, code):
@@ -640,8 +727,10 @@ def main():
         if proxy and time_left() > 200:
             try:
                 rows, _, _src = fetch_holdings(h, proxy)
+                _pa = to_num((naver_list.get(proxy) or {}).get("marketSum"))
+                _proxy_aum = _pa * 1e8 if _pa else None
                 if rows and not any(r[2] > 0 for r in rows if is_security(r[1])) and time_left() > 240:
-                    estimate_weights(h, rows, tickers, prices, budget_sec=200)
+                    estimate_weights(h, rows, tickers, prices, budget_sec=200, aum_krw=_proxy_aum)
                     save_json(TICKER_CACHE, tickers); save_json(PRICE_CACHE, prices)
                 stock_rows = [r for r in rows if is_security(r[1]) and r[2] > 0]
                 tot = sum(r[2] for r in stock_rows)
@@ -674,11 +763,14 @@ def main():
         if time_left() < 150:
             log("deadline near - skipping remaining weight estimation")
             break
-        ok, tot = estimate_weights(h, rows, tickers, prices, budget_sec=120)
-        est_flags[code] = {"estimated": True, "resolved": ok, "total": tot}
+        ok, tot, method = estimate_weights(h, rows, tickers, prices, budget_sec=120, aum_krw=e.get("aum"))
+        est_flags[code] = {"estimated": True, "resolved": ok, "total": tot, "method": method}
         n_est += 1
         if n_est % 10 == 0:
             save_json(TICKER_CACHE, tickers); save_json(PRICE_CACHE, prices); flush_log()
+    for code, e in active.items():   # weights reused from an earlier snapshot today keep their "estimated" flag
+        if code not in est_flags and code in est_cache and (pdf_today.get(code) or []) and e["region"] == "global":
+            est_flags[code] = est_cache[code]
     save_json(TICKER_CACHE, tickers)
     save_json(PRICE_CACHE, prices)
     log("weights estimated for %d ETFs (tickers cached: %d, prices cached: %d, http calls total: %d)" % (n_est, len(tickers), len(prices), h.calls))
