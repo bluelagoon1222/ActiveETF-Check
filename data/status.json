@@ -1,9 +1,9 @@
 {
  "ok": true,
  "asof": "20260923",
- "generated_at": "2026-09-24 23:39 KST",
+ "generated_at": "2026-09-25 02:35 KST",
  "n_active": 156,
  "n_pdf_ok": 156,
- "n_fetched": 156,
+ "n_fetched": 11,
  "n_stale": 0
 }
